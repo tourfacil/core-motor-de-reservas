@@ -15,8 +15,12 @@ abstract class TipoHomeDestinoEnum {
     // Ultimos servicos cadastrados
     const ULTIMOS_CADASTRADOS = "ULTIMOS_CADASTRADOS";
 
+    // Servicos que ficam na home do site
+    const DESTAQUES = "DESTAQUES";
+
     const TIPOS_HOME_DESTINO = [
         self::MANUAL => "Manual",
+        self::DESTAQUES => "Destaques home",
         self::MAIS_VENDIDOS => "Mais vendidos",
         self::ULTIMOS_CADASTRADOS => "Últimos cadastrados",
     ];
