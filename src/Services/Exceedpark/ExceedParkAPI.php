@@ -13,14 +13,14 @@ class ExceedParkAPI
      *
      * @var string
      */
-    protected $login = "portal.gramado.integracao";
+    protected $login = "";
 
     /**
      * Senha do usuario na API
      *
      * @var string
      */
-    protected $password = "pgi201";
+    protected $password = "";
 
     /**
      * TOKEN de acesso para API

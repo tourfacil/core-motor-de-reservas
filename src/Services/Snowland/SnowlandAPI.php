@@ -13,21 +13,21 @@ class SnowlandAPI
      *
      * @var string
      */
-    protected $login = "portalgramado";
+    protected $login = "";
 
     /**
      * Senha do usuario na API
      *
      * @var string
      */
-    protected $password = "pr123456";
+    protected $password = "";
 
     /**
      * TOKEN de acesso para API
      *
      * @var string
      */
-    protected $token = "C55D84C3933F2ED89133B539F81C35BAEFAD4CBA";
+    protected $token = "";
 
     /**
      * URL base da API do snowland usada tbm para impressao do voucher

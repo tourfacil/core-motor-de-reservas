@@ -29,7 +29,7 @@ class Authentication
      *
      * @var string
      */
-    const TOKEN_CACHE = 'token_portalgramado_payment';
+    const TOKEN_CACHE = 'token_brockerturismo_payment';
 
     /**
      * Path da URL de requisição

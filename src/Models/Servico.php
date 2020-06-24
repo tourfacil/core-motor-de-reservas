@@ -3,7 +3,6 @@
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use Laravel\Scout\Searchable;
 use TourFacil\Core\Enum\CanaisVendaEnum;
 use TourFacil\Core\Enum\CategoriasEnum;
 use TourFacil\Core\Enum\FotoServicoEnum;
