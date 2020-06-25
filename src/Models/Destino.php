@@ -90,6 +90,15 @@ class Destino extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    public function homeDestinoDestaque()
+    {
+        return $this->hasMany(HomeDestino::class)
+            ->orderBy('tipo', 'desc');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function servicosAtivos()
     {
         return $this->hasMany(Servico::class)
