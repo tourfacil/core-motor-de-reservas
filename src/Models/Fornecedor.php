@@ -54,6 +54,14 @@ class Fornecedor extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function usuarios()
+    {
+        return $this->hasMany(UsuarioFornecedor::class);
+    }
+
+    /**
      * Retorna se o fornecedor está ativo ou não
      *
      * @return bool
