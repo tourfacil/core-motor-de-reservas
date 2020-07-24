@@ -5,6 +5,7 @@ use DB;
 use TourFacil\Core\Enum\CategoriasEnum;
 use TourFacil\Core\Enum\ServicoEnum;
 use TourFacil\Core\Enum\StatusReservaEnum;
+use TourFacil\Core\Enum\TipoHomeDestinoEnum;
 use TourFacil\Core\Models\Destino;
 use TourFacil\Core\Models\Servico;
 
@@ -92,6 +93,39 @@ class DestinoCacheService extends DefaultCacheService
             return Destino::whereHas('servicosAtivos')->whereHas('homeDestino')->where([
                 'canal_venda_id' => $canal_id
             ])->oldest()->get();
+        });
+    }
+
+    /**
+     * Detalhes do destino para home do site com servicos
+     *
+     * @param $destino_slug
+     * @param bool $cache
+     * @return mixed
+     * @throws \Exception
+     */
+    public static function detalhesDestinoHome($destino_slug, $cache = true)
+    {
+        // Recupera o canal id no env
+        $canal_id = self::getCanalVenda();
+
+        return self::run($cache, __FUNCTION__ . $destino_slug, function () use ($destino_slug, $canal_id) {
+            return Destino::with([
+                'homeDestinoDestaque' => function($q) {
+                    return $q->where(function ($w) {
+                        return $w->where('tipo', TipoHomeDestinoEnum::DESTAQUES)
+                            ->orWhereIn('tipo', [TipoHomeDestinoEnum::MANUAL, TipoHomeDestinoEnum::ULTIMOS_CADASTRADOS]);
+                    })->with([
+                        'servicosAtivos' => function($f) {
+                            $f->with('fotoPrincipal', 'categoria')
+                                ->select(['servicos.id', 'slug', 'uuid', 'servicos.nome', 'valor_venda', 'cidade']);
+                        }
+                    ])->limit(1);
+                },
+            ])->where([
+                'canal_venda_id' => $canal_id,
+                'slug' => $destino_slug
+            ])->first();
         });
     }
 

@@ -177,14 +177,19 @@ class ServicoCacheService extends DefaultCacheService
 
         return self::run($cache, __FUNCTION__ . $key, function () use ($ids, $canal_id) {
             return Servico::with([
-                'fotoPrincipal', 'categoria'
+                'fotoPrincipal',
+                'categoria' => function($q) {
+                    return $q->select(['id', 'slug']);
+                },
+                'destino' => function($f) {
+                    return $f->select(['id', 'slug']);
+                }
             ])->where([
                 'canal_venda_id' => $canal_id,
                 'status' => ServicoEnum::ATIVO
-            ])->whereIn('id', $ids)
-                ->orderBy('valor_venda', 'DESC')->get([
-                    'id', 'slug', 'uuid', 'nome', 'valor_venda', 'cidade'
-                ]);
+            ])->whereIn('id', $ids)->get([
+                'id', 'destino_id', 'slug', 'uuid', 'nome', 'valor_venda', 'cidade'
+            ]);
         });
     }
 
