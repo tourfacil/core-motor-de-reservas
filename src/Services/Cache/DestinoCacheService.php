@@ -66,9 +66,13 @@ class DestinoCacheService extends DefaultCacheService
 
         return self::run($cache, __FUNCTION__ . $destino_slug, function () use ($destino_slug, $canal_id) {
             return Destino::with([
-                'homeDestino.servicosAtivos' => function($q) {
-                    return $q->with('fotoPrincipal', 'categoria')
-                        ->select(['servicos.id', 'slug', 'uuid', 'servicos.nome', 'valor_venda', 'cidade']);
+                'homeDestino' => function($f) {
+                    return $f->where('tipo', "<>", TipoHomeDestinoEnum::DESTAQUES)->with([
+                        'servicosAtivos' => function($q) {
+                            return $q->with('fotoPrincipal', 'categoria')
+                                ->select(['servicos.id', 'slug', 'uuid', 'servicos.nome', 'valor_venda', 'cidade']);
+                        }
+                    ]);
                 }
             ])->where([
                 'canal_venda_id' => $canal_id,

@@ -26,13 +26,16 @@ class BannerCacheService extends DefaultCacheService
      * Retorna os banners do destino
      *
      * @param $destino_id
+     * @param bool $first
      * @param bool $cache
      * @return mixed
      */
-    public static function bannersDestino($destino_id, $cache = true)
+    public static function bannersDestino($destino_id, $first = false, $cache = true)
     {
-        return self::run($cache, __FUNCTION__ . $destino_id, function () use ($destino_id) {
-            return BannerDestino::with([
+        $fix = ($first) ? "first" : "all";
+
+        return self::run($cache, __FUNCTION__ . $destino_id . $fix, function () use ($destino_id, $first) {
+            $query = BannerDestino::with([
                 'servicoAtivo.categoria' => function ($q) {
                     return $q->select(['id', 'uuid', 'nome', 'slug']);
                 },
@@ -41,7 +44,13 @@ class BannerCacheService extends DefaultCacheService
                 }
             ])->whereHas('servicoAtivo')
                 ->where('destino_id', $destino_id)
-                ->orderBy('ordem')->get();
+                ->orderBy('ordem');
+
+            if($first) {
+                return $query->first();
+            }
+
+            return $query->get();
         });
     }
 }
