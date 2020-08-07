@@ -6,5 +6,5 @@
  */
 abstract class ParcelamentoEnum
 {
-    const VALOR_MINIMO_PARCELA = 50;
+    const VALOR_MINIMO_PARCELA = 5;
 }
