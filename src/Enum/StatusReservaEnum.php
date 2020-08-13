@@ -26,11 +26,11 @@ abstract class StatusReservaEnum
     ];
 
     const STATUS = [
-        self::ATIVA => "À utilizar",
+        self::ATIVA => "Ativo",
         self::UTILIZADO => "Utilizado",
         self::CANCELADO => "Cancelado",
         self::AGUARDANDO => "Aguardando",
-        self::FINALIZAR => "À finalizar"
+        self::FINALIZAR => "Em andamento"
     ];
 
     const CORES_STATUS = [
