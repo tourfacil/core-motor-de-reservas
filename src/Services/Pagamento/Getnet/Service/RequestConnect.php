@@ -136,7 +136,7 @@ class RequestConnect
      */
     private function getUrlBase()
     {
-        return (env('APP_ENV') == 'local') ?
-             self::URL_BASE_API_SANDBOX : self::URL_BASE_API;
+        return (env('APP_ENV') == 'local' || env('APP_ENV') == 'development')
+            ? self::URL_BASE_API_SANDBOX : self::URL_BASE_API;
     }
 }
