@@ -13,14 +13,14 @@ class SnowlandAPI
      *
      * @var string
      */
-    protected $login = "";
+    protected $login = "tour.facil";
 
     /**
      * Senha do usuario na API
      *
      * @var string
      */
-    protected $password = "";
+    protected $password = "abc123";
 
     /**
      * TOKEN de acesso para API
