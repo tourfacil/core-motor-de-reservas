@@ -9,6 +9,9 @@ abstract class ServicoEnum
     // Dias de antecedencia default dos serviços
     const ANTECEDENCIA_DEFAULT = 1;
 
+    // Limite de tags no layout do site
+    const LIMITE_TAGS = 2;
+
     // Solicita os dados dos clientes
     const SOLICITA_INFO_CLIENTES = "SOLICITA_INFO_CLIENTES";
 

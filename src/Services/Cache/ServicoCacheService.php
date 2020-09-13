@@ -183,7 +183,8 @@ class ServicoCacheService extends DefaultCacheService
                 },
                 'destino' => function($f) {
                     return $f->select(['id', 'slug']);
-                }
+                },
+                'tags:servico_id,icone,descricao'
             ])->where([
                 'canal_venda_id' => $canal_id,
                 'status' => ServicoEnum::ATIVO

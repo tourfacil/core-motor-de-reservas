@@ -121,7 +121,7 @@ class DestinoCacheService extends DefaultCacheService
                             ->orWhereIn('tipo', [TipoHomeDestinoEnum::MANUAL, TipoHomeDestinoEnum::ULTIMOS_CADASTRADOS]);
                     })->with([
                         'servicosAtivos' => function($f) {
-                            $f->with('fotoPrincipal', 'categoria')
+                            $f->with('fotoPrincipal', 'categoria', 'tags:servico_id,icone,descricao')
                                 ->select(['servicos.id', 'slug', 'uuid', 'servicos.nome', 'valor_venda', 'cidade']);
                         }
                     ])->limit(1);
