@@ -9,7 +9,7 @@ class RequestConnect
     /**
      * Url base da API de pagamentos
      */
-    const URL_BASE_API = 'https://api.getnet.com.br';
+    const URL_BASE_API = 'https://api-homologacao.getnet.com.br';
 
     /**
      * Url base da API de pagamentos - sandbox
