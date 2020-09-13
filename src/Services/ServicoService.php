@@ -52,6 +52,11 @@ class ServicoService extends DefaultCacheService
             $retorno['alertas'][] = "O serviço não possui nenhuma categoria.";
         }
 
+        // Caso nao possua nenhuma tag servico
+        if($servico->tags->count() == 0) {
+            $retorno['alertas'][] = "O serviço não possui nenhuma tag.";
+        }
+
         // Caso nao possua fotos
         if($servico->fotos->count() == 0) {
             $retorno['alertas'][] = "O serviço não possui nenhuma foto.";
