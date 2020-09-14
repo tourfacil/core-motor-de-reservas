@@ -92,6 +92,7 @@ class ServicoCacheService extends DefaultCacheService
         return self::run($cache, __FUNCTION__ . $categoria_id, function () use ($categoria_id, $canal_id) {
             return Servico::with([
                 'fotoPrincipal',
+                'tags:servico_id,icone,descricao',
                 'ranking' => function($q) {
                     return $q->select(['servico_id', 'ranking']);
                 },
@@ -210,7 +211,7 @@ class ServicoCacheService extends DefaultCacheService
         $canal_id = self::getCanalVenda();
 
         return self::run($cache, __FUNCTION__ . $servico_id . "cat" . $categoria_id, function () use ($servico_id, $categoria_id, $canal_id, $limit) {
-            return Servico::with('fotoPrincipal')->whereHas('categorias', function ($query) use ($categoria_id) {
+            return Servico::with('fotoPrincipal', 'tags:servico_id,icone,descricao')->whereHas('categorias', function ($query) use ($categoria_id) {
                 return $query->where('categorias.id', $categoria_id);
             })->where('servicos.id', '<>', $servico_id)
                 ->where(['status'=> ServicoEnum::ATIVO, 'canal_venda_id' => $canal_id])

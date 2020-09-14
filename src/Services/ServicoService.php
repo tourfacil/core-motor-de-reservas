@@ -145,6 +145,7 @@ class ServicoService extends DefaultCacheService
             'fotoPrincipal',
             'secoesCategoria',
             'categoria',
+            'tags:servico_id,icone,descricao',
             'ranking' => function($q) {
                 return $q->select(['servico_id', 'ranking']);
             },

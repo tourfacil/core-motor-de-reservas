@@ -69,7 +69,7 @@ class DestinoCacheService extends DefaultCacheService
                 'homeDestino' => function($f) {
                     return $f->where('tipo', "<>", TipoHomeDestinoEnum::DESTAQUES)->with([
                         'servicosAtivos' => function($q) {
-                            return $q->with('fotoPrincipal', 'categoria')
+                            return $q->with('fotoPrincipal', 'categoria', 'tags:servico_id,icone,descricao')
                                 ->select(['servicos.id', 'slug', 'uuid', 'servicos.nome', 'valor_venda', 'cidade']);
                         }
                     ]);
