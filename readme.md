@@ -1,4 +1,4 @@
-# Pacote Core - Brocker Turismo 
+# Pacote Core - TourFácil
 
 Pacote contendo Models e Services para integrar com os canais de venda
 
