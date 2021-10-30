@@ -90,6 +90,24 @@ class ServicoService extends DefaultCacheService
     /**
      * Servicos mais vendidos do canal de venda
      *
+     * @param $fornecedor_id
+     * @param int $limit
+     * @return mixed
+     */
+    public static function servicosMaisVendidosFornecedor($fornecedor_id, $limit = 20)
+    {
+        return Cache::remember("mais_vendidos_{$fornecedor_id}_{$limit}", now()->addMinutes(30), function () use ($fornecedor_id, $limit) {
+            return Servico::select("nome", DB::raw("SUM(reserva_pedidos.quantidade) AS `vendas`"))
+                ->leftJoin('reserva_pedidos', 'reserva_pedidos.servico_id', '=', 'servicos.id')
+                ->groupBy('servicos.nome')->where(['servicos.fornecedor_id' => $fornecedor_id, 'servicos.status' => ServicoEnum::ATIVO])
+                ->whereIn('reserva_pedidos.status', [StatusReservaEnum::ATIVA, StatusReservaEnum::FINALIZAR, StatusReservaEnum::UTILIZADO])
+                ->orderBy('vendas', 'DESC')->limit($limit)->get();
+        });
+    }
+
+    /**
+     * Servicos mais vendidos do canal de venda
+     *
      * @param $canal_venda_id
      * @param int $limit
      * @return mixed
