@@ -1,6 +1,9 @@
-<?php namespace TourFacil\Core\Services\Pagamento;
+<?php
+
+namespace TourFacil\Core\Services\Pagamento;
 
 use TourFacil\Core\Enum\MetodoPagamentoEnum;
+use TourFacil\Core\Enum\CartaoCreditoLivreEnum;
 
 /**
  * Class CartaoService
@@ -23,7 +26,7 @@ class CartaoService
         $payment = GetnetCheckout::pay($array_pedido, $cliente, $dados_pagamento, $parcelamento);
 
         // Caso seja aprovado
-        if($payment['approved']) {
+        if ($payment['approved']) {
             return [
                 "approved" => true,
                 "payment_id" => $payment['payment_id'],
@@ -68,7 +71,7 @@ class CartaoService
         $payment = MercadoPagoCheckout::pay($array_pedido, $cliente, $dados_pagamento, $parcelamento, $response_mp);
 
         // Caso seja aprovado
-        if($payment['approved']) {
+        if ($payment['approved']) {
             return [
                 "approved" => true,
                 "payment_id" => $payment['payment_id'],
@@ -109,11 +112,20 @@ class CartaoService
      */
     public static function payCreditCardCielo($array_pedido, $cliente, $dados_pagamento, $parcelamento)
     {
-        // API Ecommerce da Cielo
-        $payment = CieloCheckout::pay($array_pedido, $cliente, $dados_pagamento, $parcelamento);
+        //Inicializa variavel
+        $payment = [];
+
+        // Verifica se cartão selecionado é de geração de pedido manual livre
+        if ($dados_pagamento['numero_cartao'] != CartaoCreditoLivreEnum::NUMERO_CARTAO_LIVRE) {
+            // API Ecommerce da Cielo
+            $payment = CieloCheckout::pay($array_pedido, $cliente, $dados_pagamento, $parcelamento);
+        } else {
+            $payment['approved'] = true;
+            $payment['payment_id'] = uniqid();
+        }
 
         // Caso seja aprovado
-        if($payment['approved']) {
+        if ($payment['approved']) {
             return [
                 "approved" => true,
                 "payment_id" => $payment['payment_id'],
@@ -158,7 +170,7 @@ class CartaoService
         $payment = WireCardCheckout::pay($array_pedido, $cliente, $dados_pagamento, $parcelamento, $hash_wirecard);
 
         // Caso seja aprovado
-        if($payment['approved']) {
+        if ($payment['approved']) {
 
             return [
                 "approved" => true,
