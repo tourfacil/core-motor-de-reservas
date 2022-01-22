@@ -1,4 +1,6 @@
-<?php namespace TourFacil\Core\Services\Relatorios;
+<?php
+
+namespace TourFacil\Core\Services\Relatorios;
 
 use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Models\ReservaPedido;
@@ -27,17 +29,18 @@ class ReservasAutenticadaService
 
         // Pesquisa das reservas autenticadas
         $query = ReservaPedido::with($relacoes)
-            ->whereHas('validacao', function ($q) use ($inicio, $final) {
-            return $q->whereBetween('validado', [$inicio, $final]);
-        })->whereHas('pedido', function ($q) use ($canal_venda_id) {
-            return $q->where('canal_venda_id', $canal_venda_id);
-        })->where([
-            'fornecedor_id' => $fornecedor_id,
-            'status' => StatusReservaEnum::UTILIZADO
-        ]);
+            //     ->whereHas('validacao', function ($q) use ($inicio, $final) {
+            //     return $q->whereBetween('validado', [$inicio, $final]);
+            // })
+            ->whereHas('pedido', function ($q) use ($canal_venda_id) {
+                return $q->where('canal_venda_id', $canal_venda_id);
+            })->where([
+                'fornecedor_id' => $fornecedor_id
+                // 'status' => StatusReservaEnum::UTILIZADO
+            ]);
 
         // Filtra por servicos
-        if(is_array($servicos)) {
+        if (is_array($servicos)) {
             $query->whereIn('servico_id', $servicos);
         }
 
