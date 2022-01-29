@@ -29,14 +29,15 @@ class ReservasAutenticadaService
 
         // Pesquisa das reservas autenticadas
         $query = ReservaPedido::with($relacoes)
-            //     ->whereHas('validacao', function ($q) use ($inicio, $final) {
-            //     return $q->whereBetween('validado', [$inicio, $final]);
-            // })
+            ->whereHas('agendaDataServico', function ($q) use ($inicio, $final) {
+                return $q->whereBetween('data', [$inicio, $final]);
+            })
             ->whereHas('pedido', function ($q) use ($canal_venda_id) {
                 return $q->where('canal_venda_id', $canal_venda_id);
-            })->where([
-                'fornecedor_id' => $fornecedor_id
-                // 'status' => StatusReservaEnum::UTILIZADO
+            })
+            ->where([
+                'fornecedor_id' => $fornecedor_id,
+                'fornecedor_id' => $fornecedor_id,
             ]);
 
         // Filtra por servicos
