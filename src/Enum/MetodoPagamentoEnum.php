@@ -1,4 +1,6 @@
-<?php namespace TourFacil\Core\Enum;
+<?php
+
+namespace TourFacil\Core\Enum;
 
 /**
  * Class MetodoPagamentoEnum
@@ -11,6 +13,8 @@ abstract class MetodoPagamentoEnum
     const CARTAO_DEBITO = "DEBITO";
 
     const BOLETO = "BOLETO";
+
+    const PIX = "PIX";
 
     const METHODS = [
         self::CARTAO_CREDITO => "Cartão de crédito",
