@@ -4,6 +4,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Traits\HasVoucher;
+use TourFacil\Core\Models\Afiliado;
 
 /**
  * Class ReservaPedido
@@ -139,5 +140,9 @@ class ReservaPedido extends Model
     public function getCorStatusAttribute()
     {
         return StatusReservaEnum::CORES_STATUS[$this->attributes['status']];
+    }
+
+    public function afiliado() {
+        return $this->belongsTo(Afiliado::class);
     }
 }
