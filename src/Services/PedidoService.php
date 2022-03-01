@@ -274,6 +274,16 @@ class PedidoService
         // Percorre cada servico para criar uma reserva
         foreach ($pedido_array["reservas"] as $reserva_carrinho) {
 
+            // Verifica que se tem algum afiliado na venda
+            $afiliado_session = session()->get('afiliado');
+            $afiliado_reserva = null;
+
+            if($afiliado_session != null) {
+                $afiliado_reserva = $afiliado_session->id;
+            }
+
+
+
             // Cria uma reserva para o servico selecionado
             $reserva = $pedido->reservas()->create([
                 "servico_id" => $reserva_carrinho["servico_id"],
@@ -283,7 +293,8 @@ class PedidoService
                 "valor_net" => $reserva_carrinho["valor_net"],
                 "quantidade" => $reserva_carrinho["quantidade"],
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
-                "status" => StatusReservaEnum::ATIVA
+                "status" => StatusReservaEnum::ATIVA,
+                "afiliado_id" => $afiliado_reserva,
             ]);
 
             // Percorre as variacoes compradas
