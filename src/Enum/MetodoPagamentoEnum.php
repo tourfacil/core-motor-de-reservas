@@ -16,6 +16,8 @@ abstract class MetodoPagamentoEnum
 
     const PIX = "PIX";
 
+    const INTERNO = "INTERNO";
+
     const METHODS = [
         self::CARTAO_CREDITO => "Cartão de crédito",
         self::CARTAO_DEBITO => "Cartão de débito",
