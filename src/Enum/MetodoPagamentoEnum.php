@@ -21,7 +21,8 @@ abstract class MetodoPagamentoEnum
     const METHODS = [
         self::CARTAO_CREDITO => "Cartão de crédito",
         self::CARTAO_DEBITO => "Cartão de débito",
-        self::BOLETO => "Boleto bancário"
+        self::BOLETO => "Boleto bancário",
+        self::INTERNO => "Pagamento interno",
     ];
 
     const CIELO = "CIELO";
