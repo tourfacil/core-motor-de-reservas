@@ -23,6 +23,7 @@ abstract class MetodoPagamentoEnum
         self::CARTAO_DEBITO => "Cartão de débito",
         self::BOLETO => "Boleto bancário",
         self::INTERNO => "Pagamento interno",
+        self::PIX => "Pix",
     ];
 
     const CIELO = "CIELO";
