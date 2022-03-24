@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
-### *v1.0.0 (21 de Março de 2021)*
+### *v1.0.1 (24 de Março de 2022)*
+- Adicionado FinalizacaoService, que serve para garantir que os fornecedores só recebam o e-mail depois que a reserva esteja finalizada.
+
+### *v1.0.0 (21 de Março de 2022)*
 - Adicionado sistema de geração de links para as vendedoras montarem o carrinho dos clientes
 - Adicionado sistema de vendas internos, para que o operacional possa adicionar reservas
