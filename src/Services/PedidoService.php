@@ -11,7 +11,6 @@ use TourFacil\Core\Enum\StatusPedidoEnum;
 use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Enum\TerminaisEnum;
 use TourFacil\Core\Models\AgendaDataServico;
-use TourFacil\Core\Models\Desconto;
 use TourFacil\Core\Models\Pedido;
 use TourFacil\Core\Models\Servico;
 
@@ -177,6 +176,7 @@ class PedidoService
                 "variacoes_reserva" => $variacoes,
                 "acompanhantes" => $servico_carrinho['acompanhantes'] ?? null,
                 "adicionais" => $servico_carrinho['adicionais'] ?? null,
+                "desconto_id" => $desconto->id ?? null,
             ];
 
             // Salva os dados para split de pagamento
@@ -303,6 +303,7 @@ class PedidoService
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
                 "status" => StatusReservaEnum::ATIVA,
                 "afiliado_id" => $afiliado_reserva,
+                "desconto_id" => $reserva_carrinho["desconto_id"],
             ]);
 
             // Percorre as variacoes compradas
