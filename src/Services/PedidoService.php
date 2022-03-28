@@ -11,6 +11,7 @@ use TourFacil\Core\Enum\StatusPedidoEnum;
 use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Enum\TerminaisEnum;
 use TourFacil\Core\Models\AgendaDataServico;
+use TourFacil\Core\Models\Desconto;
 use TourFacil\Core\Models\Pedido;
 use TourFacil\Core\Models\Servico;
 
@@ -149,8 +150,15 @@ class PedidoService
                 ];
             }
 
+            // Verifica se o serviço esta com um desconto ativo
+            $desconto = $servico->descontoAtivo;
+
             // Soma ao valor total do pedido
             self::$pedido['valor_total'] += (float) number_format($total_reserva, 2, ".", "");
+            self::$pedido['valor_total'] = DescontoService::aplicarDescontoValor($desconto, self::$pedido['valor_total']);
+
+            $total_reserva = DescontoService::aplicarDescontoValor($desconto, $total_reserva);
+            $total_net_reserva = DescontoService::aplicarDescontoValorNet($desconto, $total_net_reserva);
 
             // Dados da reserva
             self::$pedido['reservas'][] = [

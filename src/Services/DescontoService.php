@@ -2,6 +2,7 @@
 
 namespace TourFacil\Core\Services;
 
+use TourFacil\Core\Enum\Descontos\TipoDesconto;
 use TourFacil\Core\Enum\Descontos\TipoDescontoValor;
 
 abstract class DescontoService
@@ -39,6 +40,25 @@ abstract class DescontoService
                 // Para evitar BUGS, caso o valor do TipoDescontoValor for inválido... Ele retorna o valor original
                 return $valor_original;
             }
+        }
+    }
+
+    /**
+     * @param $desconto
+     * @param $valor
+     * @return float|int|mixed|void
+     */
+    public static function aplicarDescontoValorNet($desconto, $valor) {
+
+        // Caso o desconto seja também para o fornecedor ele calcula o desconto e retorna
+        if($desconto->tipo_desconto_fornecedor == TipoDesconto::NET) {
+
+            return self::aplicarDescontoValor($desconto, $valor);
+
+        // Caso o desconto seja somente no venda ele retorna o net original
+        } else if($desconto->tipo_desconto_fornecedor == TipoDesconto::VENDA) {
+
+            return $valor;
         }
     }
 }
