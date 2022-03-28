@@ -1,6 +1,6 @@
 <?php
 
-namespace TourFacil\Core\Enum;
+namespace TourFacil\Core\Enum\Descontos;
 
 abstract class TipoDesconto
 {

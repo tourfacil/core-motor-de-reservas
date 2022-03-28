@@ -1,10 +1,12 @@
 <?php namespace TourFacil\Core\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use TourFacil\Core\Enum\CanaisVendaEnum;
 use TourFacil\Core\Enum\CategoriasEnum;
+use TourFacil\Core\Enum\Descontos\StatusDesconto;
 use TourFacil\Core\Enum\FotoServicoEnum;
 use TourFacil\Core\Enum\ServicoEnum;
 use TourFacil\Core\Traits\HasSlug;
@@ -287,5 +289,49 @@ class Servico extends Model
         }
 
         return $this->attributes['corretagem'] = $corretagem;
+    }
+
+    /**
+     * Relação que retorna todos os descontos daquele produto
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function descontos() {
+        return $this->hasMany(Desconto::class);
+    }
+
+    /**
+     * Retorna o desconto ativo do produto
+     * Caso tenha mais de um desconto ativo para a data, ele irá retornar o último
+     *
+     * @return mixed|null
+     */
+    public function getDescontoAtivoAttribute() {
+
+        // Busca o dia de hoje
+        $hoje = Carbon::now();
+
+        // Busca todos os descontos ativos do serviço
+        $descontos = $this->descontos()
+                          ->where('status', StatusDesconto::ATIVO)
+                          ->get();
+
+        // Lista para guardar todos os descontos ativos para hoje
+        $descontos_validos = [];
+
+        // Percorre todos os descontos do produto
+        foreach ($descontos as $desconto) {
+            if($hoje->between(Carbon::parse($desconto->inicio), Carbon::parse($desconto->final))) {
+                $descontos_validos[] = $desconto;
+            }
+        }
+
+        // Caso não haja desconto ativado, retorna NULL
+        if(count($descontos_validos) == 0) {
+            return null;
+        }
+
+        // Caso tenha desconto ativado, retorna o último
+        return $descontos_validos[count($descontos_validos) - 1];
     }
 }
