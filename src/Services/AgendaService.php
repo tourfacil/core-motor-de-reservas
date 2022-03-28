@@ -272,6 +272,9 @@ class AgendaService
                             $venda_variacao = 1;
                         }
 
+                        // Guarda o valor sem desconto
+                        $valor_original = $venda_variacao;
+
                         // Aplica o desconto caso tenha
                         $venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
 
@@ -282,10 +285,14 @@ class AgendaService
                             'descricao' => $variacao->descricao,
                             'bloqueio' => $variacao->consome_bloqueio,
                             'valor_venda' => (float) number_format($venda_variacao, 2, ".", ""),
+                            'valor_venda_original' => (float) number_format($valor_original, 2, ".", ""),
                             'valor_venda_brl' => formataValor($venda_variacao),
+                            'valor_venda_brl_original' => formataValor($valor_original),
                         ];
                     }
 
+                    $data_agenda_valor_venda_original = $data_agenda->valor_venda;
+                    $valor_venda_data_original = $valor_venda_data;
                     $data_agenda_valor_venda = DescontoService::aplicarDescontoValor($desconto, $data_agenda->valor_venda);
                     $valor_venda_data = DescontoService::aplicarDescontoValor($desconto, $valor_venda_data);
 
@@ -294,7 +301,9 @@ class AgendaService
                         'data_servico_id' => $data_agenda->id,
                         'data' => $data_agenda->data->format('Y-m-d'),
                         'valor_venda' => (float) number_format($data_agenda_valor_venda, 2, ".", ""),
+                        'valor_venda_original' => (float) number_format($data_agenda_valor_venda_original, 2, ".", ""),
                         'valor_venda_brl' => formataValor($valor_venda_data),
+                        'valor_venda_brl_original' => formataValor($valor_venda_data_original),
                         'variacoes' => $variacaoes,
                         'disponibilidade' => $data_agenda->disponivel
                     ];
@@ -303,6 +312,7 @@ class AgendaService
                     $retorno['events'][] = [
                         'date' => $data_agenda->data->format('Y-m-d') . " 00:00:00",
                         'text' => "R$ " . formataValor($valor_venda_data),
+                        'text_original' => "R$ " . formataValor($valor_venda_data_original),
                     ];
                 }
             }
