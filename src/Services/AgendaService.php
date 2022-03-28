@@ -187,6 +187,9 @@ class AgendaService
 
         if (is_object($servico)) {
 
+            // Pega o desconto caso tenha
+            $desconto = $servico->descontoAtivo;
+
             // Adiciona a antecedencia de venda para buscar a agenda
             $today->addDays($servico->antecedencia_venda)->startOfDay();
 
@@ -269,6 +272,9 @@ class AgendaService
                             $venda_variacao = 1;
                         }
 
+                        // Aplica o desconto caso tenha
+                        $venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
+
                         // Dados para o array
                         $variacaoes[] = [
                             'variacao_id' => $variacao->id,
@@ -280,11 +286,14 @@ class AgendaService
                         ];
                     }
 
+                    $data_agenda_valor_venda = DescontoService::aplicarDescontoValor($desconto, $data_agenda->valor_venda);
+                    $valor_venda_data = DescontoService::aplicarDescontoValor($desconto, $valor_venda_data);
+
                     // Dados da agenda
                     $retorno['disponibilidade'][] = [
                         'data_servico_id' => $data_agenda->id,
                         'data' => $data_agenda->data->format('Y-m-d'),
-                        'valor_venda' => (float) number_format($data_agenda->valor_venda, 2, ".", ""),
+                        'valor_venda' => (float) number_format($data_agenda_valor_venda, 2, ".", ""),
                         'valor_venda_brl' => formataValor($valor_venda_data),
                         'variacoes' => $variacaoes,
                         'disponibilidade' => $data_agenda->disponivel
