@@ -75,4 +75,28 @@ abstract class CupomDescontoService
 
         return false;
     }
+
+    public static function aplicarCupomNaSessao($cupom) {
+        session(['cupom_desconto' => $cupom]);
+    }
+
+    public static function aplicarCupomNoServico($cupom) {
+
+        // Pega os servicos do carrinho
+        $servicos_carrinho = carrinho()->all();
+        $servicos_carrinho = $servicos_carrinho->toArray();
+
+        // Roda todos os serviços do carrinho
+        foreach($servicos_carrinho as $key => $servico_carrinho) {
+
+            // Caso ele encontre o servico do cupom no carrinho... Retorna true
+            if($servico_carrinho['gtin'] == $cupom->servico_id) {
+                $servicos_carrinho[$key]['valor_total_cupom'] = "22,90";
+            }
+        }
+
+        session(['carrinho' => $servicos_carrinho]);
+
+        CupomDescontoService::aplicarCupomNaSessao($cupom);
+    }
 }
