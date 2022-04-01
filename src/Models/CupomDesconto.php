@@ -12,8 +12,9 @@ class CupomDesconto extends Model
         'nome_interno',
         'codigo',
         'desconto',
-        'numero_utilizacoes',
+        'maximo_utilizacoes',
         'tipo_desconto_fornecedor',
+        'tipo_desconto_valor',
         'total_vendido_venda',
         'total_vendido_net',
         'total_descontado_venda',
@@ -21,6 +22,10 @@ class CupomDesconto extends Model
         'status',
         'servico_id',
     ];
+
+    public function servico() {
+        return $this->belongsTo(Servico::class);
+    }
 
 
 
