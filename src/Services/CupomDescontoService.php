@@ -66,6 +66,13 @@ abstract class CupomDescontoService
         return $ids_servicos;
     }
 
+    /**
+     * Aplica o desconto na sessão do cliente
+     * Caso o cupom for de serviço especifico, também seta o valor dentro do serviço
+     *
+     * @param $cupom
+     * @return void
+     */
     public static function aplicarCupomNaSessao($cupom) {
 
         // Garante que ja não tenha um outro serviço em promoção devido a cupom
@@ -80,6 +87,12 @@ abstract class CupomDescontoService
         session(['cupom_desconto' => $cupom]);
     }
 
+    /**
+     * Aplica o desconto dentro do serviço
+     *
+     * @param $cupom
+     * @return void
+     */
     private static function aplicarCupomNoServico($cupom) {
 
         // Pega os servicos do carrinho
@@ -98,6 +111,11 @@ abstract class CupomDescontoService
         session(['carrinho' => $servicos_carrinho]);
     }
 
+    /**
+     * Remove o cupom de dentro de todos os serviços
+     *
+     * @return void
+     */
     private static function removerCupomServico() {
 
         // Pega os servicos do carrinho
