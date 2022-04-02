@@ -68,6 +68,9 @@ abstract class CupomDescontoService
 
     public static function aplicarCupomNaSessao($cupom) {
 
+        // Garante que ja não tenha um outro serviço em promoção devido a cupom
+        self::removerCupomServico();
+
         // Caso o cupom seja de serviço especifico, coloca o novo valor dentro do carrinho
         if($cupom->servico_id != null) {
             self::aplicarCupomNoServico($cupom);
@@ -89,6 +92,24 @@ abstract class CupomDescontoService
             // Caso ele encontre o servico do cupom no carrinho... Retorna true
             if($servico_carrinho['gtin'] == $cupom->servico_id) {
                 $servicos_carrinho[$key]['valor_total_cupom'] = "22,90";
+            }
+        }
+
+        session(['carrinho' => $servicos_carrinho]);
+    }
+
+    private static function removerCupomServico() {
+
+        // Pega os servicos do carrinho
+        $servicos_carrinho = carrinho()->all();
+        $servicos_carrinho = $servicos_carrinho->toArray();
+
+        // Roda todos os serviços do carrinho
+        foreach($servicos_carrinho as $key => $servico_carrinho) {
+
+            // Remove a variavel valor_total_cupom. Que indica que aquele serviço esta tendo preço reduzido por cupom
+            if(array_key_exists('valor_total_cupom', $servico_carrinho)) {
+                unset($servicos_carrinho[$key]['valor_total_cupom']);
             }
         }
 
