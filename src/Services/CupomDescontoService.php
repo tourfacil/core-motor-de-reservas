@@ -67,10 +67,17 @@ abstract class CupomDescontoService
     }
 
     public static function aplicarCupomNaSessao($cupom) {
+
+        // Caso o cupom seja de serviço especifico, coloca o novo valor dentro do carrinho
+        if($cupom->servico_id != null) {
+            self::aplicarCupomNoServico($cupom);
+        }
+
+        // Coloca o cupom de desconto na sessão
         session(['cupom_desconto' => $cupom]);
     }
 
-    public static function aplicarCupomNoServico($cupom) {
+    private static function aplicarCupomNoServico($cupom) {
 
         // Pega os servicos do carrinho
         $servicos_carrinho = carrinho()->all();
@@ -86,7 +93,5 @@ abstract class CupomDescontoService
         }
 
         session(['carrinho' => $servicos_carrinho]);
-
-        CupomDescontoService::aplicarCupomNaSessao($cupom);
     }
 }
