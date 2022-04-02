@@ -3,6 +3,7 @@
 namespace TourFacil\Core\Services;
 
 use TourFacil\Core\Enum\Descontos\StatusDesconto;
+use TourFacil\Core\Enum\Descontos\TipoDescontoValor;
 use TourFacil\Core\Models\CupomDesconto;
 
 abstract class CupomDescontoService
@@ -104,7 +105,7 @@ abstract class CupomDescontoService
 
             // Caso ele encontre o servico do cupom no carrinho... Retorna true
             if($servico_carrinho['gtin'] == $cupom->servico_id) {
-                $servicos_carrinho[$key]['valor_total_cupom'] = "22,90";
+                $servicos_carrinho[$key]['valor_total_cupom'] = self::aplicarDescontoValor($cupom, $servico_carrinho['valor_total']);
             }
         }
 
@@ -132,5 +133,59 @@ abstract class CupomDescontoService
         }
 
         session(['carrinho' => $servicos_carrinho]);
+    }
+
+    /**
+     * Pega um valor e um cupom e retorna o valor ja com o desconto
+     * Pode ser usado para ambos os tipos de cupons
+     * Não faz alterações no banco de dados, apenas calcula
+     * Caso o cupom informado seja nullo, ele retorna o valor original
+     * Por segurança, não permite que o valor baixe de RS 1,00
+     *
+     * @param $cupom
+     * @param $valor_original
+     * @return int|mixed
+     */
+    public static function aplicarDescontoValor($cupom, $valor_original) {
+
+        // Caso o cupom seja null. Retorna o valor original
+        if($cupom == null) {
+            return $valor_original;
+        }
+
+        // Caso o cupom for um desconto percentual
+        if($cupom->tipo_desconto_valor == TipoDescontoValor::PERCENTUAL) {
+
+            // Retorna o novo valor já com o desconto percentual aplicado
+            $valor_desconto =  ($valor_original * $cupom->desconto) / 100;
+
+            // Retorna o valor final
+            return self::evitarValorMenorQueUm($valor_original - $valor_desconto);
+
+        // Caso o desconto seja aplciado de forma fixa. Exemplo (Desconto de R$10,00)
+        } else if($cupom->tipo_desconto_valor == TipoDescontoValor::FIXO) {
+
+            return self::evitarValorMenorQueUm($valor_original - $cupom->desconto);
+
+        } else {
+            // Para evitar BUGS, caso o valor do TipoDescontoValor for inválido... Ele retorna o valor original
+            return $valor_original;
+        }
+
+    }
+
+    /**
+     * Função para garantir que o valor inserido não baixe de R$ 1,00
+     *
+     * @param $valor
+     * @return int|mixed
+     */
+    private static function evitarValorMenorQueUm($valor) {
+
+        if($valor >= 1) {
+            return $valor;
+        } else {
+            return 1;
+        }
     }
 }
