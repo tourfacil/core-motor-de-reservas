@@ -44,15 +44,25 @@ abstract class CupomDescontoService
         return $cupom;
     }
 
+    /**
+     * Roda os serviços que estão no carrinho do cliente e retorna todos os ids dos mesmos
+     *
+     * @return array
+     */
     private static function getIDSProdutosCarrinho() {
 
+        // Pega os servicos do carrinho
         $servicos_carrinho = carrinho()->all();
+
+        // Variavel para guadar os ids
         $ids_servicos = [];
 
+        // Roda todos os servicos do carrinho e guarda os ids
         foreach($servicos_carrinho as $servico_carrinho) {
-            $ids_servicos[] = $servicos_carrinho['gtin'];
+            $ids_servicos[] = $servico_carrinho['gtin'];
         }
 
+        // Retorna o array de IDs
         return $ids_servicos;
     }
 
