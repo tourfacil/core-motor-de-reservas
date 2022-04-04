@@ -167,10 +167,14 @@ class PedidoService
 
                 // Caso o cupom seja diferente de NULL, aplica o desconto
                 if($cupom != null) {
-                    $total_reserva = CupomDescontoService::aplicarDescontoValor($cupom, $total_reserva);
-                    $total_net_reserva = CupomDescontoService::aplicarDescontoValorNet($cupom, $total_net_reserva);
-                    self::$pedido['cupom_desconto_id'] = $cupom->id ?? null;
-                    self::$pedido['cupom'] = $cupom;
+
+                    // Caso seja cupom de serviço especifico. Verifica se é o serviço de fato
+                    if($cupom->servico_id == null || $cupom->servico_id == $servico->id) {
+                        $total_reserva = CupomDescontoService::aplicarDescontoValor($cupom, $total_reserva);
+                        $total_net_reserva = CupomDescontoService::aplicarDescontoValorNet($cupom, $total_net_reserva);
+                        self::$pedido['cupom_desconto_id'] = $cupom->id ?? null;
+                        self::$pedido['cupom'] = $cupom;
+                    }
                 }
             }
 
