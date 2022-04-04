@@ -175,6 +175,67 @@ abstract class CupomDescontoService
     }
 
     /**
+     * Retorna o valor total do carrinho com o cupom de desconto aplicado
+     *
+     * @param $valor_sem_cupom
+     * @return int|mixed
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public static function getValorTotalCarrinhoComCupom($valor_sem_cupom) {
+
+        // Recupera o cupom que esta na sessão
+        $cupom = session()->get('cupom_desconto');
+
+        // Caso não tenha cupom na sessão, retorna o valor original
+        if($cupom == null) {
+            return $valor_sem_cupom;
+        }
+
+        // Caso o cupom seja para todos os serviços
+        if($cupom->servico_id == null) {
+
+            return self::aplicarDescontoValor($cupom, $valor_sem_cupom);
+        } else {
+
+            //Busca os serviços do carrinho
+            $servicos_carrinho = carrinho()->all();
+
+            // Diferença de valor
+            $diferenca = 0;
+
+            // Roda os serviços do carrinho
+            foreach($servicos_carrinho as $servico_carrinho) {
+
+                // Caso o desconto existir no serviço
+                if(array_key_exists('valor_total_cupom', $servico_carrinho)) {
+
+                    //dd($servico_carrinho);
+
+                    // Vai subtraindo e obtendo a diferença para calcular o valor do cupom
+                    $diferenca += $servico_carrinho['valor_total'] - $servico_carrinho['valor_total_cupom'];
+                }
+            }
+
+            return $valor_sem_cupom - $diferenca;
+        }
+    }
+
+    /**
+     * Remove o cupom da sessão e caso tenha em serviço especifico, remove também
+     *
+     * @return void
+     */
+    public static function removerCupomSessao() {
+
+        // Remove o desconto do serviço caso haja
+        self::removerCupomServico();
+
+        // Remove o cupom de desconto da sessão caso haja
+        session()->forget('cupom_desconto');
+    }
+
+    /**
      * Função para garantir que o valor inserido não baixe de R$ 1,00
      *
      * @param $valor
