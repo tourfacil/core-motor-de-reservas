@@ -11,6 +11,7 @@ use TourFacil\Core\Enum\StatusPedidoEnum;
 use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Enum\TerminaisEnum;
 use TourFacil\Core\Models\AgendaDataServico;
+use TourFacil\Core\Models\CupomDesconto;
 use TourFacil\Core\Models\Pedido;
 use TourFacil\Core\Models\Servico;
 
@@ -156,8 +157,25 @@ class PedidoService
             self::$pedido['valor_total'] += (float) number_format($total_reserva, 2, ".", "");
             self::$pedido['valor_total'] = DescontoService::aplicarDescontoValor($desconto, self::$pedido['valor_total']);
 
+            // Caso o serviço tenha um desconto ativo aplica
             $total_reserva = DescontoService::aplicarDescontoValor($desconto, $total_reserva);
             $total_net_reserva = DescontoService::aplicarDescontoValorNet($desconto, $total_net_reserva);
+
+            $cupom = null;
+
+            // Caso tenha um cupom ativo. Aplica-o
+            if(session()->exists('cupom_desconto')) {
+
+                // Busca o cupom atualizado pelo banco de dados
+                $cupom = CupomDesconto::find(session()->get('cupom_desconto')->id);
+
+                // Caso o cupom seja diferente de NULL, aplica o desconto
+                if($cupom != null) {
+                    $total_reserva = CupomDescontoService::aplicarDescontoValor($cupom, $total_reserva);
+                    $total_net_reserva = CupomDescontoService::aplicarDescontoValorNet($cupom, $total_net_reserva);
+                    self::$pedido['valor_total'] = CupomDescontoService::aplicarDescontoValor($cupom, self::$pedido['valor_total']);
+                }
+            }
 
             // Dados da reserva
             self::$pedido['reservas'][] = [
@@ -177,6 +195,7 @@ class PedidoService
                 "acompanhantes" => $servico_carrinho['acompanhantes'] ?? null,
                 "adicionais" => $servico_carrinho['adicionais'] ?? null,
                 "desconto_id" => $desconto->id ?? null,
+                "cupom_desconto_id" => $cupon->id ?? null,
             ];
 
             // Salva os dados para split de pagamento
