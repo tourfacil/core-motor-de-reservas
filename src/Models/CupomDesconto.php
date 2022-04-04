@@ -15,10 +15,6 @@ class CupomDesconto extends Model
         'maximo_utilizacoes',
         'tipo_desconto_fornecedor',
         'tipo_desconto_valor',
-        'total_vendido_venda',
-        'total_vendido_net',
-        'total_descontado_venda',
-        'total_descontado_net',
         'status',
         'servico_id',
     ];
