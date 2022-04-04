@@ -3,6 +3,7 @@
 namespace TourFacil\Core\Services;
 
 use TourFacil\Core\Enum\Descontos\StatusDesconto;
+use TourFacil\Core\Enum\Descontos\TipoDesconto;
 use TourFacil\Core\Enum\Descontos\TipoDescontoValor;
 use TourFacil\Core\Models\CupomDesconto;
 
@@ -172,6 +173,31 @@ abstract class CupomDescontoService
             return $valor_original;
         }
 
+    }
+
+    /**
+     * Pega um valor NET e um cupom e retorna o valor ja com o desconto
+     * Caso o cupom não seja para NET. Irá retornar o valor original
+     * Pode ser usado para ambos os tipos de cupons
+     * Não faz alterações no banco de dados, apenas calcula
+     * Caso o cupom informado seja nullo, ele retorna o valor original
+     * Por segurança, não permite que o valor baixe de RS 1,00
+     *
+     * @param $cupom
+     * @param $valor_original
+     * @return int|mixed
+     */
+    public static function aplicarDescontoValorNet($cupom, $valor_original) {
+
+        // Verifica se o cupom aplica no venda ou venda e net
+        // Caso aplique no NET ele calcula, se não, retorna o valor original
+        if($cupom->tipo_desconto_fornecedor == TipoDesconto::NET) {
+
+            return self::aplicarDescontoValor($cupom, $valor_original);
+
+        } else if($cupom->tipo_desconto_fornecedor == TipoDesconto::VENDA) {
+            return $valor_original;
+        }
     }
 
     /**
