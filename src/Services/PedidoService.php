@@ -153,10 +153,6 @@ class PedidoService
             // Verifica se o serviço esta com um desconto ativo
             $desconto = $servico->descontoAtivo;
 
-            // Soma ao valor total do pedido
-            self::$pedido['valor_total'] += (float) number_format($total_reserva, 2, ".", "");
-            self::$pedido['valor_total'] = DescontoService::aplicarDescontoValor($desconto, self::$pedido['valor_total']);
-
             // Caso o serviço tenha um desconto ativo aplica
             $total_reserva = DescontoService::aplicarDescontoValor($desconto, $total_reserva);
             $total_net_reserva = DescontoService::aplicarDescontoValorNet($desconto, $total_net_reserva);
@@ -173,9 +169,13 @@ class PedidoService
                 if($cupom != null) {
                     $total_reserva = CupomDescontoService::aplicarDescontoValor($cupom, $total_reserva);
                     $total_net_reserva = CupomDescontoService::aplicarDescontoValorNet($cupom, $total_net_reserva);
-                    self::$pedido['valor_total'] = CupomDescontoService::aplicarDescontoValor($cupom, self::$pedido['valor_total']);
+                    self::$pedido['cupom_desconto_id'] = $cupom->id ?? null;
                 }
             }
+
+            // Soma ao valor total do pedido
+            self::$pedido['valor_total'] += (float) number_format($total_reserva, 2, ".", "");
+            self::$pedido['valor_total'] = DescontoService::aplicarDescontoValor($desconto, self::$pedido['valor_total']);
 
             // Dados da reserva
             self::$pedido['reservas'][] = [
@@ -195,7 +195,6 @@ class PedidoService
                 "acompanhantes" => $servico_carrinho['acompanhantes'] ?? null,
                 "adicionais" => $servico_carrinho['adicionais'] ?? null,
                 "desconto_id" => $desconto->id ?? null,
-                "cupom_desconto_id" => $cupon->id ?? null,
             ];
 
             // Salva os dados para split de pagamento
@@ -280,6 +279,7 @@ class PedidoService
      */
     public static function gerarPedidoCartao($pedido_array, $payment, $juros, $cliente, $canal_venda_id, $origem, $tipo_cartao)
     {
+
         // Cria o pedido
         $pedido = Pedido::create([
             "cliente_id" => $cliente->id,
@@ -291,6 +291,7 @@ class PedidoService
             "status" => StatusPedidoEnum::PAGO,
             "status_pagamento" => StatusPagamentoEnum::AUTORIZADO,
             "metodo_pagamento" => $tipo_cartao,
+            "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
         ]);
 
         // Salva os dados da transacao

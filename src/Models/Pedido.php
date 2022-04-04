@@ -28,6 +28,7 @@ class Pedido extends Model
         'status',
         'status_pagamento',
         'metodo_pagamento',
+        'cupom_desconto_id',
     ];
 
     /**
