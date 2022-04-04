@@ -170,6 +170,7 @@ class PedidoService
                     $total_reserva = CupomDescontoService::aplicarDescontoValor($cupom, $total_reserva);
                     $total_net_reserva = CupomDescontoService::aplicarDescontoValorNet($cupom, $total_net_reserva);
                     self::$pedido['cupom_desconto_id'] = $cupom->id ?? null;
+                    self::$pedido['cupom'] = $cupom;
                 }
             }
 
@@ -293,6 +294,15 @@ class PedidoService
             "metodo_pagamento" => $tipo_cartao,
             "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
         ]);
+
+        // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
+        if(array_key_exists('cupom', $pedido_array)) {
+            $pedido_array['cupom']->vezes_utilizado++;
+            $pedido_array['cupom']->save();
+
+            // Remove o cupom da sessão
+            session()->forget('cupom_desconto');
+        }
 
         // Salva os dados da transacao
         $pedido->transacaoPedido()->create([
