@@ -11,6 +11,7 @@ use TourFacil\Core\Enum\StatusPedidoEnum;
 use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Enum\TerminaisEnum;
 use TourFacil\Core\Models\AgendaDataServico;
+use TourFacil\Core\Models\CupomDesconto;
 use TourFacil\Core\Models\Pedido;
 use TourFacil\Core\Models\Servico;
 
@@ -149,8 +150,37 @@ class PedidoService
                 ];
             }
 
+            // Verifica se o serviço esta com um desconto ativo
+            $desconto = $servico->descontoAtivo;
+
+            // Caso o serviço tenha um desconto ativo aplica
+            $total_reserva = DescontoService::aplicarDescontoValor($desconto, $total_reserva);
+            $total_net_reserva = DescontoService::aplicarDescontoValorNet($desconto, $total_net_reserva);
+
+            $cupom = null;
+
+            // Caso tenha um cupom ativo. Aplica-o
+            if(session()->exists('cupom_desconto')) {
+
+                // Busca o cupom atualizado pelo banco de dados
+                $cupom = CupomDesconto::find(session()->get('cupom_desconto')->id);
+
+                // Caso o cupom seja diferente de NULL, aplica o desconto
+                if($cupom != null) {
+
+                    // Caso seja cupom de serviço especifico. Verifica se é o serviço de fato
+                    if($cupom->servico_id == null || $cupom->servico_id == $servico->id) {
+                        $total_reserva = CupomDescontoService::aplicarDescontoValor($cupom, $total_reserva);
+                        $total_net_reserva = CupomDescontoService::aplicarDescontoValorNet($cupom, $total_net_reserva);
+                        self::$pedido['cupom_desconto_id'] = $cupom->id ?? null;
+                        self::$pedido['cupom'] = $cupom;
+                    }
+                }
+            }
+
             // Soma ao valor total do pedido
             self::$pedido['valor_total'] += (float) number_format($total_reserva, 2, ".", "");
+            self::$pedido['valor_total'] = DescontoService::aplicarDescontoValor($desconto, self::$pedido['valor_total']);
 
             // Dados da reserva
             self::$pedido['reservas'][] = [
@@ -169,6 +199,7 @@ class PedidoService
                 "variacoes_reserva" => $variacoes,
                 "acompanhantes" => $servico_carrinho['acompanhantes'] ?? null,
                 "adicionais" => $servico_carrinho['adicionais'] ?? null,
+                "desconto_id" => $desconto->id ?? null,
             ];
 
             // Salva os dados para split de pagamento
@@ -253,6 +284,7 @@ class PedidoService
      */
     public static function gerarPedidoCartao($pedido_array, $payment, $juros, $cliente, $canal_venda_id, $origem, $tipo_cartao)
     {
+
         // Cria o pedido
         $pedido = Pedido::create([
             "cliente_id" => $cliente->id,
@@ -264,7 +296,17 @@ class PedidoService
             "status" => StatusPedidoEnum::PAGO,
             "status_pagamento" => StatusPagamentoEnum::AUTORIZADO,
             "metodo_pagamento" => $tipo_cartao,
+            "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
         ]);
+
+        // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
+        if(array_key_exists('cupom', $pedido_array)) {
+            $pedido_array['cupom']->vezes_utilizado++;
+            $pedido_array['cupom']->save();
+
+            // Remove o cupom da sessão
+            session()->forget('cupom_desconto');
+        }
 
         // Salva os dados da transacao
         $pedido->transacaoPedido()->create([
@@ -295,6 +337,7 @@ class PedidoService
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
                 "status" => StatusReservaEnum::ATIVA,
                 "afiliado_id" => $afiliado_reserva,
+                "desconto_id" => $reserva_carrinho["desconto_id"],
             ]);
 
             // Percorre as variacoes compradas
