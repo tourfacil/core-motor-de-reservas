@@ -28,6 +28,7 @@ class ReservaPedido extends Model
         "bloqueio_consumido",
         "status",
         "afiliado_id",
+        "desconto_id",
     ];
 
     /**
