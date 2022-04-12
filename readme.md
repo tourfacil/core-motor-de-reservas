@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.2.1 (12 de Abril de 2022)*
+- Adicionado pequeno sistema de conferencia de reservas
+
 ### *v1.2.0 (06 de Abril de 2022)*
 - Adicionado sistema de cupons de desconto.
 

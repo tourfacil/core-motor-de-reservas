@@ -147,4 +147,8 @@ class ReservaPedido extends Model
     public function afiliado() {
         return $this->belongsTo(Afiliado::class);
     }
+
+    public function conferenciaReserva() {
+        return $this->hasOne(ConferenciaReserva::class);
+    }
 }
