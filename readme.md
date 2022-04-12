@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.2.0 (06 de Abril de 2022)*
+- Adicionado sistema de cupons de desconto.
+
 ### *v1.0.1 (24 de Março de 2022)*
 - Adicionado FinalizacaoService, que serve para garantir que os fornecedores só recebam o e-mail depois que a reserva esteja finalizada.
 
