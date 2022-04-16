@@ -426,15 +426,29 @@ class PedidoService
             "status" => StatusPedidoEnum::PAGO,
             "status_pagamento" => StatusPagamentoEnum::AUTORIZADO,
             "metodo_pagamento" => $metodo_pagamento,
+            "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
         ]);
 
-        // Salva os dados da transacao
-        // $pedido->transacaoPedido()->create([
-        //     "transacao" => $payment
-        // ]);
+        // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
+        if(array_key_exists('cupom', $pedido_array)) {
+            $pedido_array['cupom']->vezes_utilizado++;
+            $pedido_array['cupom']->save();
+
+            // Remove o cupom da sessão
+            session()->forget('cupom_desconto');
+        }
 
         // Percorre cada servico para criar uma reserva
         foreach ($pedido_array["reservas"] as $reserva_carrinho) {
+
+            // Verifica que se tem algum afiliado na venda
+            $afiliado_session = session()->get('afiliado');
+            $afiliado_reserva = null;
+
+            if($afiliado_session != null) {
+                $afiliado_reserva = $afiliado_session->id;
+            }
+
 
             // Cria uma reserva para o servico selecionado
             $reserva = $pedido->reservas()->create([
@@ -445,7 +459,9 @@ class PedidoService
                 "valor_net" => $reserva_carrinho["valor_net"],
                 "quantidade" => $reserva_carrinho["quantidade"],
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
-                "status" => StatusReservaEnum::ATIVA
+                "status" => StatusReservaEnum::ATIVA,
+                "afiliado_id" => $afiliado_reserva,
+                "desconto_id" => $reserva_carrinho["desconto_id"],
             ]);
 
             // Percorre as variacoes compradas

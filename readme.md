@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.2.2 (16 de Abril de 2022)*
+- Adicionado PixService para fazer todas as validações e operacionais do novo sistema de PIX
+
 ### *v1.2.1 (12 de Abril de 2022)*
 - Adicionado pequeno sistema de conferencia de reservas
 
