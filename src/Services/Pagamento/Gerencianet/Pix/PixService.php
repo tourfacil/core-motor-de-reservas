@@ -17,16 +17,17 @@ abstract class PixService
     public static function isPixPago($valor_para_conferencia, $txid) {
 
         // Busca as configurações do PIX no .env
-        $rota_base = env('PIX_URL');
-        $client_id = env('PIX_ID');
-        $client_secret = env('PIX_SECRET');
+        $rota_base = config('site.PIX_API.URL');
+        $client_id = config('site.PIX_API.ID');
+        $client_secret = config('site.PIX_API.SECRET');
+        $cert_path = config('site.PIX_API.CERT_PATH');
 
         // Instancia a classe para fazer a req
         $payload = new Api(
             $rota_base,
             $client_id,
             $client_secret,
-            env('PIX_CERT_PATH')
+            $cert_path
         );
 
         // Da o comando para fazer a pesquisa
@@ -48,15 +49,16 @@ abstract class PixService
 
     public static function gerarCodigoPix($cliente, $valor_pix) {
 
-        $rota_base = env('PIX_URL');
-        $client_id = env('PIX_ID');
-        $client_secret = env('PIX_SECRET');
+        $rota_base = config('site.PIX_API.URL');
+        $client_id = config('site.PIX_API.ID');
+        $client_secret = config('site.PIX_API.SECRET');
+        $cert_path = config('site.PIX_API.CERT_PATH');
 
         $payload = new Api(
             $rota_base,
             $client_id,
             $client_secret,
-            env('PIX_CERT_PATH')
+            $cert_path
         );
 
         $cliente['cpf'] = str_replace(".", "", $cliente['cpf']);
@@ -83,6 +85,11 @@ abstract class PixService
         $txid = bin2hex($restultado_bytes);
 
         $result = $payload->createCob($txid, $requisicao);
+
+        // Caso haver erro para gerar o código PIX
+        if($result == null) {
+            return false;
+        }
 
         // Caso a geração do COB falhar, retorna false
         if(array_key_exists("location", $result) == false) {
