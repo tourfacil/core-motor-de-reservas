@@ -16,11 +16,15 @@ abstract class PixService
      */
     public static function isPixPago($valor_para_conferencia, $txid) {
 
+        if(self::isPixEnabled() == false) {
+            return false;
+        }
+
         // Busca as configurações do PIX no .env
-        $rota_base = config('site.PIX_API.URL');
-        $client_id = config('site.PIX_API.ID');
-        $client_secret = config('site.PIX_API.SECRET');
-        $cert_path = config('site.PIX_API.CERT_PATH');
+        $rota_base = env('PIX_URL');
+        $client_id = env('PIX_ID');
+        $client_secret = env('PIX_SECRET');
+        $cert_path = env('PIX_CERT_PATH');
 
         // Instancia a classe para fazer a req
         $payload = new Api(
@@ -49,10 +53,14 @@ abstract class PixService
 
     public static function gerarCodigoPix($cliente, $valor_pix) {
 
-        $rota_base = config('site.PIX_API.URL');
-        $client_id = config('site.PIX_API.ID');
-        $client_secret = config('site.PIX_API.SECRET');
-        $cert_path = config('site.PIX_API.CERT_PATH');
+        if(self::isPixEnabled() == false) {
+            return false;
+        }
+
+        $rota_base = env('PIX_URL');
+        $client_id = env('PIX_ID');
+        $client_secret = env('PIX_SECRET');
+        $cert_path = env('PIX_CERT_PATH');
 
         $payload = new Api(
             $rota_base,
@@ -119,5 +127,18 @@ abstract class PixService
     public static function cancelarPixSessao() {
         session()->forget('pix');
         return;
+    }
+
+    public static function isPixEnabled() {
+
+        if(is_bool(env('PIX_ENABLED')) == false) {
+            return false;
+        }
+
+        if(env('PIX_ENABLED') == true) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
