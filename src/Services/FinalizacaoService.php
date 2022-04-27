@@ -2,10 +2,13 @@
 
 namespace TourFacil\Core\Services;
 
+use TourFacil\Core\Enum\StatusFinalizacaoReservaEnum;
+
 class FinalizacaoService
 {
     /**
      * Verifica se o pedido esta finalizado
+     * Caso for encontrada uma reserva não finalizada ele marca ela com uma FLAG
      *
      * @param $pedido
      * @return bool
@@ -23,6 +26,9 @@ class FinalizacaoService
 
             if(self::isReservaFinalizada($reserva) == false) {
                 $is_finalizado = false;
+
+                // Seta uma flag na reserva para identificar que a mesma não esta finalizada
+                $reserva->update(['finalizada' => StatusFinalizacaoReservaEnum::NAO_FINALIZADA]);
             }
         }
 
