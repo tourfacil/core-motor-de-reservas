@@ -29,6 +29,7 @@ class ReservaPedido extends Model
         "status",
         "afiliado_id",
         "desconto_id",
+        "finalizada",
     ];
 
     /**
