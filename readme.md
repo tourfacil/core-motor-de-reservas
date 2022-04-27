@@ -14,6 +14,14 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.2.4 (23 de Abril de 2022)*
+- Configurações de PIX movidas para .ENV (Ou seja, removida deste projeto)
+- PixService recebe função para retornar se PIX este ou não ativo
+
+### *v1.2.3 (16 de Abril de 2022)*
+- APIPix verificação para evitar erros
+- Configurações da API de PIX movido para o arquivo de config site.php
+
 ### *v1.2.2 (16 de Abril de 2022)*
 - Adicionado PixService para fazer todas as validações e operacionais do novo sistema de PIX
 
