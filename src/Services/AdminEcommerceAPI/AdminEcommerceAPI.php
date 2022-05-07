@@ -29,7 +29,7 @@ abstract class AdminEcommerceAPI
         // Manda a requisição para método de req para executar a operação
         $response = self::sendPostReq($payload);
 
-        dd($response->getContents());
+        return;
     }
 
 
@@ -50,14 +50,13 @@ abstract class AdminEcommerceAPI
         $payload = [
             'key_code' => config('site.admin_ecommerce_api.key_code'),
             'data' => $data,
-            'user' => auth()->user(),
         ];
 
         // Recupera o link do ecommerce da .ENV
-        $link = env('ECOMMERCE_URL') . '/admin-ecommerce-api/enviar-email-cliente-fornecedor';
+        $link = env('ECOMMERCE_URL') . '/api/admin-ecommerce-api/enviar-email-cliente-fornecedor';
 
         // Faz a requisição
-        $response = $client->request('POST', $link, []);
+        $response = $client->request('POST', $link, $payload);
 
         // Retorna o array de resposta da REQ
         return $response->getBody();
