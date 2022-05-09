@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.2.6 (09 de Maio de 2022)*
+- Adicionado API, para que o Admin mande e-mails pelo Ecommerce.
+
 ### *v1.2.5 (27 de Abril de 2022)*
 - Adicionado FLAG na reserva para ver se esta ou não finalizada.
 
