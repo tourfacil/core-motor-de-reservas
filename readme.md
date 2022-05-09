@@ -14,6 +14,12 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.2.6 (09 de Maio de 2022)*
+- Adicionado API, para que o Admin mande e-mails pelo Ecommerce.
+
+### *v1.2.5 (27 de Abril de 2022)*
+- Adicionado FLAG na reserva para ver se esta ou não finalizada.
+
 ### *v1.2.4 (23 de Abril de 2022)*
 - Configurações de PIX movidas para .ENV (Ou seja, removida deste projeto)
 - PixService recebe função para retornar se PIX este ou não ativo
