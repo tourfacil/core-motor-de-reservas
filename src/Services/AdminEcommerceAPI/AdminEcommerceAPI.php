@@ -2,6 +2,7 @@
 
 namespace TourFacil\Core\Services\AdminEcommerceAPI;
 
+use Exception;
 use GuzzleHttp\Client;
 use TourFacil\Core\Models\Pedido;
 
@@ -26,10 +27,17 @@ abstract class AdminEcommerceAPI
             'pedido_id' => $pedido->id,
         ];
 
-        // Manda a requisição para método de req para executar a operação
-        $response = self::sendPostReq($payload);
+        // Flag para avisar que e-mail foi enviado
+        $email_enviado = true;
 
-        return;
+        // Manda a requisição para método de req para executar a operação
+        try {
+            $response = self::sendPostReq($payload);
+        } catch( Exception $e ) {
+            $email_enviado = false;
+        }
+        
+        return $email_enviado;
     }
 
 
@@ -48,17 +56,19 @@ abstract class AdminEcommerceAPI
 
         // Monta o array quer será enviado no POST
         $payload = [
-            'key_code' => config('site.admin_ecommerce_api.key_code'),
-            'data' => $data,
+            'form_params' => [
+                'key_code' => config('site.admin_ecommerce_api.key_code'),
+                'data' => $data,
+            ],
         ];
 
         // Recupera o link do ecommerce da .ENV
-        $link = env('ECOMMERCE_URL') . '/api/admin-ecommerce-api/enviar-email-cliente-fornecedor';
+        $link = env('ECOMMERCE_URL') . '/admin-ecommerce-api/enviar-email-cliente-fornecedor';
 
         // Faz a requisição
         $response = $client->request('POST', $link, $payload);
 
         // Retorna o array de resposta da REQ
-        return $response->getBody();
+        return $response;
     }
 }
