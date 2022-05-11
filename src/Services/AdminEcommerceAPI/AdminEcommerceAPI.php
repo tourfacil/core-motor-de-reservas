@@ -52,7 +52,7 @@ abstract class AdminEcommerceAPI
     private static function sendPostReq(Array $data) {
 
         // Instancia o cliente do Guzzle
-        $client = new Client();
+        $client = new Client(['verify' => false]);
 
         // Monta o array quer será enviado no POST
         $payload = [
