@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.2.7 (09 de Maio de 2022)*
+- Guzzle agora ignora certificado SSL.
+
 ### *v1.2.6 (09 de Maio de 2022)*
 - Adicionado API, para que o Admin mande e-mails pelo Ecommerce.
 
