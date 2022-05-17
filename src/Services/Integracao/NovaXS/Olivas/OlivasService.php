@@ -92,6 +92,8 @@ class OlivasService
             'date' => $this->reserva->agendaDataServico->data->format('d/m/Y')
         ]);
 
+        // dd($this->servicosDisponiveis);
+
         // Log
         Storage::append($this->path, "Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
 
@@ -153,7 +155,7 @@ class OlivasService
     }
 
     /** Filtra a lista de serviços disponiveis */
-    private function filterServicoSnowlad() {
+    private function filterServicoOlivas() {
 
         // Array para armazenar os novos id
         $servicos = [];
@@ -194,7 +196,7 @@ class OlivasService
     private function productsArray() {
 
         // Filtra os serviços disponiveis
-        $this->filterServicoSnowlad();
+        $this->filterServicoOlivas();
 
         // Data de utilizacao
         $data_utilizacao = $this->reserva->agendaDataServico->data->format('d/m/Y');
