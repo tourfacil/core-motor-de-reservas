@@ -92,16 +92,16 @@ class OlivasService
             'date' => $this->reserva->agendaDataServico->data->format('d/m/Y')
         ]);
 
-        // dd($this->servicosDisponiveis);
-
         // Log
-        Storage::append($this->path, "Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
+        Storage::append($this->path, "#". $this->reserva->id .": Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
 
         // Forma a lista de serviços e separa os IDs de cada serviço por categoria de idade
         $this->productsArray = $this->productsArray();
 
+       
+
         // Log
-        Storage::append($this->path, "productsArray: " . json_encode($this->productsArray));
+        Storage::append($this->path, "#" . $this->reserva->id . "productsArray: " . json_encode($this->productsArray));
 
         // Retorna os dados do comprador
         $this->personAsString = $this->personAsString($this->reserva->pedido->cliente);
@@ -113,7 +113,7 @@ class OlivasService
         ]);
 
         // Log
-        Storage::append($this->path, "buyToBillFor: " . json_encode($this->buyToBillFor));
+        Storage::append($this->path, "#" . $this->reserva->id . "buyToBillFor: " . json_encode($this->buyToBillFor));
 
         // Confirmação da compra
         $this->billFor = $this->olivas->billFor([
@@ -121,7 +121,7 @@ class OlivasService
         ]);
 
         // Log
-        Storage::append($this->path, "billFor: " . json_encode($this->billFor));
+        Storage::append($this->path, "#" . $this->reserva->id . "billFor: " . json_encode($this->billFor));
 
         // Recupera a lista de passageiros
         $this->getAccessList = $this->olivas->getAccessList([
@@ -129,7 +129,7 @@ class OlivasService
         ]);
 
         // Log
-        Storage::append($this->path, "getAccessList: " . json_encode($this->getAccessList));
+        Storage::append($this->path, "#" . $this->reserva->id . "getAccessList: " . json_encode($this->getAccessList));
 
         // Cria a lista de passageiros conforme os clientes
         $this->createAccessList();
@@ -151,7 +151,7 @@ class OlivasService
         ]);
 
         // Log
-        Storage::append($this->path, "Integração finalizada: " . date('d/m/Y H:i:s'));
+        Storage::append($this->path, "#" . $this->reserva->id . "Integração finalizada: " . date('d/m/Y H:i:s'));
     }
 
     /** Filtra a lista de serviços disponiveis */

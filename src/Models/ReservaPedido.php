@@ -130,6 +130,14 @@ class ReservaPedido extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function olivasVoucher()
+    {
+        return $this->hasOne(OlivasReservaPedido::class);
+    }
+
+    /**
      * @return mixed
      */
     public function getStatusReservaAttribute()

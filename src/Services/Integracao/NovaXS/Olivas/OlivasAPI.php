@@ -59,7 +59,7 @@ class OlivasAPI
                     "method" => $metodo,
                     "token" => $this->token,
                     "login" => $this->login,
-                    // "password" => $this->password
+                    "password" => $this->password
                 ];
 
                 // Juntamos os dois arrays
@@ -73,6 +73,8 @@ class OlivasAPI
                         'content' => http_build_query($dados_post)
                     ]
                 ]);
+
+                // dd($this->url, $dados_post);
 
                 // Realiza o POST
                 $resultado = file_get_contents($this->url, false, $context);
@@ -130,7 +132,7 @@ class OlivasAPI
      */
     public function getAccessList($dados = [])
     {
-        return json_decode($this->consultaAPI(__FUNCTION__, $dados, true), true);
+        return $this->consultaAPI(__FUNCTION__, $dados, true);
     }
 
     /**
