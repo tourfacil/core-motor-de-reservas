@@ -12,35 +12,51 @@ class OlivasAPI
      *
      * @var string
      */
-    protected $login = "api.integracao.tour.facil";
+    protected $login;
 
     /**
      * Senha do usuario na API
      *
      * @var string
      */
-    protected $password = "abc123";
+    protected $password;
 
     /**
      * TOKEN de acesso para API
      *
      * @var string
      */
-    protected $token = "A6F29D4E1A8B0E5067A6D314DC7B4E31045980E6";
+    protected $token;
 
     /**
      * URL base da API do Olivas usada tbm para impressao do voucher
      *
      * @var string
      */
-    const base_url = "http://travel.novaxs.com.br/api";
+    protected $base_url;
 
     /**
      * URL da API do Olivas
      *
      * @var string
      */
-    protected $url = self::base_url . "/v1/15208";
+    protected $url;
+    
+    /**
+     * Configura a classe de acordo com as configurações que vem do arquivo 
+     * de configurações das integrações
+     *
+     * @return void
+     */
+    public function __construct() {
+        
+        $this->login = config('integracao.olivas.login');
+        $this->password = config('integracao.olivas.password');
+        $this->token = config('integracao.olivas.token');
+        $this->base_url = config('integracao.base_url');
+
+        $this->url = $this->base_url . config('integracao.olivas.suffix_url');
+    }
 
     /**
      * Função para realizar POST na API
