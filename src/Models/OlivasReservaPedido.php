@@ -43,7 +43,7 @@ class OlivasReservaPedido extends Model
      */
     public function getUrlVoucherAttribute()
     {
-        return OlivasAPI::base_url . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
+        return config('integracao.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
     }
 
     /**
@@ -53,6 +53,6 @@ class OlivasReservaPedido extends Model
      */
     public function getVoucherAsByteAttribute()
     {
-        return OlivasAPI::base_url . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
+        return config('integracao.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
     }
 }
