@@ -43,16 +43,19 @@ class OlivasService
     protected $getAccessList;
 
     /** @var string  */
-    protected $path = "/olivas/";
+    protected $path = "integracao/olivas/";
 
     /** @var string */
-    const CRIANCA = "crianca";
+    const CRIANCA = "crian";
+
+    /** @var string */
+    const INFANTIL = "infantil";
 
     /** @var string */
     const ADULTO = "adulto";
 
     /** @var string */
-    const MELHOR_IDADE = "melhor idade";
+    const MELHOR_IDADE = "idade";
 
     /** @var string */
     const SENIOR = "senior";
@@ -97,8 +100,6 @@ class OlivasService
 
         // Forma a lista de serviços e separa os IDs de cada serviço por categoria de idade
         $this->productsArray = $this->productsArray();
-
-       
 
         // Log
         Storage::append($this->path, "#" . $this->reserva->id . "productsArray: " . json_encode($this->productsArray));
@@ -165,18 +166,16 @@ class OlivasService
             // Verifica se existe a casa shortName pois os combos nao tem shortName
             if(isset($servico['shortName'])) {
                 // Procura o serviço pelas categorias
-                $nome_servico = preg_replace("/(ç|Ç)/", "c", mb_strtolower($servico['shortName']));
-                // Diferenca para olivas normal e olivas night
-                if($this->reserva->servico->integracao == IntegracaoEnum::OLIVAS) {
-                    // Separa o tipo night
-                    if(! strripos($nome_servico,"night")) {
-                        foreach (self::TIPO_PESSOAS as $tipo_pessoa) {
-                            if(strripos($nome_servico, $tipo_pessoa)) {
-                                // Deixa sempre como MELHOR IDADE
-                                $tipo_pessoa = ($tipo_pessoa == self::SENIOR) ? self::MELHOR_IDADE : $tipo_pessoa;
-                                $servicos[Str::slug($tipo_pessoa, "_")] = $servico['path'];
-                            }
-                        }
+                $nome_servico = preg_replace("/(ç|Ç)/", "c", mb_strtolower($servico['name']));
+
+                // Percorre os tipos de pessoas disponiveis
+                foreach (self::TIPO_PESSOAS as $tipo_pessoa) {
+                    if(strripos($nome_servico, $tipo_pessoa)) {
+                        // Deixa sempre como MELHOR IDADE
+                        $tipo_pessoa = ($tipo_pessoa == self::SENIOR) ? self::MELHOR_IDADE : $tipo_pessoa;
+                        // Deixa sempre como CRIANCA
+                        $tipo_pessoa = ($tipo_pessoa == self::INFANTIL) ? self::CRIANCA : $tipo_pessoa;
+                        $servicos[Str::slug($tipo_pessoa, "_")] = $servico['path'];
                     }
                 }
             }
@@ -211,7 +210,8 @@ class OlivasService
 
             // Variacao adquirida
             $nome_variacao = preg_replace("/(ç|Ç)/", "c", mb_strtolower($quantidade_reserva->variacaoServico->nome));
-
+            $nome_variacao = str_replace('ê', 'e', $nome_variacao);
+            
             // Somente pessoas pagantes
             if($quantidade_reserva->valor_net > 0) {
 
@@ -244,7 +244,7 @@ class OlivasService
                 }
 
                 /** Recupera o ID do serviço para melhor idade */
-                if(Str::contains($nome_variacao, self::MELHOR_IDADE)) {
+                if(Str::contains($nome_variacao, self::SENIOR)) {
                     $product_path = $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")];
                     $productsArray[] = [
                         "path" => $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")],
