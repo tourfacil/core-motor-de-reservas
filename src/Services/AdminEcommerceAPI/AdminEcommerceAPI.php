@@ -5,6 +5,7 @@ namespace TourFacil\Core\Services\AdminEcommerceAPI;
 use Exception;
 use GuzzleHttp\Client;
 use TourFacil\Core\Models\Pedido;
+use Illuminate\Support\Facades\Log;
 
 abstract class AdminEcommerceAPI
 {
@@ -35,6 +36,20 @@ abstract class AdminEcommerceAPI
             $response = self::sendPostReq($payload);
         } catch( Exception $e ) {
             $email_enviado = false;
+
+            try {
+                // Manda um email para avisar que a integração / Envio de e-mail falhou
+                simpleMail(
+                    'ATENÇÃO - Problema na Integração - Pedido #' . $pedido->codigo,
+                    'Houve um problema na integração entre Admin e Tourfacil e por isso os e-mails e reservas integradas com parques do pedido #' . $pedido->codigo . ' não foram executados corretamente. Favor avisar aos fornecedores e integrar com os parques manualmente.',
+                    config('site.admin_ecommerce_api.email_alerta')
+                );
+            } catch( Exception $e ) {
+                Log::warning('Houve um erro no envio do e-mail de alerta sobre o não funcionamento da integração do pedido #' . $pedido->codigo);
+            }
+
+            Log::warning('Houve um problema na integração entre Admin e Tourfacil e por isso os e-mails e reservas integradas com parques do pedido #' . $pedido->codigo . ' não foram executados corretamente. Favor avisar aos fornecedores e integrar com os parques manualmente.');
+
         }
         
         return $email_enviado;
