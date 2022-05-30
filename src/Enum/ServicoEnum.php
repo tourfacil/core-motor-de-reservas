@@ -53,7 +53,7 @@ abstract class ServicoEnum
         self::INATIVO => "danger",
         self::INDISPONIVEL => "danger",
         self::PENDENTE => "info",
-        self::INVISIVEL => 'black',
+        self::INVISIVEL => 'warning',
     ];
 
     // Corretagem de valor em percentual
