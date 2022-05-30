@@ -35,12 +35,16 @@ abstract class ServicoEnum
     // Status do serviço pendente
     const PENDENTE = "PENDENTE";
 
+    // Status de serviço invisivel. Ele esta habilitado para venda, mas não aparece nas listagens
+    const INVISIVEL = "INVISIVEL";
+
     // Status dos serviços
     const STATUS_SERVICO = [
         self::ATIVO => "Ativo",
         self::INATIVO => "Inativo",
         self::INDISPONIVEL => "Indisponível",
-        self::PENDENTE => "Pendente"
+        self::PENDENTE => "Pendente",
+        self::INVISIVEL => 'Invisivel',
     ];
 
     // Cores do status do servico
@@ -49,6 +53,7 @@ abstract class ServicoEnum
         self::INATIVO => "danger",
         self::INDISPONIVEL => "danger",
         self::PENDENTE => "info",
+        self::INVISIVEL => 'black',
     ];
 
     // Corretagem de valor em percentual
