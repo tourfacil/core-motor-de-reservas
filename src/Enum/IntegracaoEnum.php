@@ -14,15 +14,19 @@ abstract class IntegracaoEnum
 
     const EXCEED_PARK = "EXCEED_PARK";
 
+    const OLIVAS = "OLIVAS";
+
     const INTEGRACOES = [
         self::NAO => "Não possui",
         self::SNOWLAND => "Snowland",
         self::EXCEED_PARK => "Exceed Park",
+        self::OLIVAS => "Olivas",
     ];
 
     const INTEGRACOES_EXTERNAS = [
         self::SNOWLAND,
-        self::BETO_CARRERO
+        self::BETO_CARRERO,
+        self::OLIVAS,
     ];
 
     // Status do voucher na API

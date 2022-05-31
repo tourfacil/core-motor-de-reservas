@@ -14,6 +14,12 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.3.0 (31 de Maio de 2022)*
+- Adicionado integração com o Olivas.
+
+### *v1.2.8 (26 de Maio de 2022)*
+- Adicionado sistema de logs e de envio de e-mails de alerta caso a integração da venda interna falhe.
+
 ### *v1.2.7 (09 de Maio de 2022)*
 - Guzzle agora ignora certificado SSL.
 
