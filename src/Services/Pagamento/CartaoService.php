@@ -4,6 +4,7 @@ namespace TourFacil\Core\Services\Pagamento;
 
 use TourFacil\Core\Enum\MetodoPagamentoEnum;
 use TourFacil\Core\Enum\CartaoCreditoLivreEnum;
+use TourFacil\Core\Services\Pagamento\Pagarme\PagarmeCheckout;
 
 /**
  * Class CartaoService
@@ -212,7 +213,7 @@ class CartaoService
     public static function payCreditCardPagarme($array_pedido, $cliente, $dados_pagamento, $parcelamento)
     {
         // API Ecommerce da Cielo
-        $payment = GetnetCheckout::pay($array_pedido, $cliente, $dados_pagamento, $parcelamento);
+        $payment = PagarmeCheckout::pay($array_pedido, $cliente, $dados_pagamento, $parcelamento);
 
         // Caso seja aprovado
         if ($payment['approved']) {
