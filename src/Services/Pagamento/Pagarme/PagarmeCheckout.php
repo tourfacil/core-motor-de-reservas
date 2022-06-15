@@ -31,17 +31,25 @@ class PagarmeCheckout
             // Informa os dados do cliente (comprador)
             $sale->setCustomerName($cliente->nome);
             $sale->setCustomerEmail($cliente->email);
+            $sale->setCustomerDocument($cliente->cpf);
 
             // Informa os dados do cartão e número de parcelas
+
             $sale->setNumberInstallments((int) $dados_pagamento['parcelas']);
             $sale->setNumberCard($dados_pagamento['numero_cartao']);
             $sale->setExpirationMonth($dados_pagamento['validade_mes_cartao']);
             $sale->setExpirationYear($validade_ano[2] . $validade_ano[3]);
             $sale->setCardholderName($dados_pagamento['nome_cartao']);
+            $sale->setCardholderDocument($cliente->cpf);
             $sale->setSecurityCode($dados_pagamento['codigo_cartao']);
 
             // Informa os serviços sendo adquiridos
             $sale->setItems($array_pedido);
+
+            //dd(json_encode(array_values($sale->a())));
+
+            // dd(json_encode($sale->a()));
+            // dd(json_encode($sale->a()));
 
             // Efetua a cobrança no cartão
             return $sale->pay();

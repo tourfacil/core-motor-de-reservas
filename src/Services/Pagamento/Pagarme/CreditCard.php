@@ -3,6 +3,8 @@
 namespace TourFacil\Core\Services\Pagamento\Pagarme;
 
 use Illuminate\Http\Request;
+use \GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class CreditCard
@@ -11,8 +13,8 @@ use Illuminate\Http\Request;
 class CreditCard
 {
     /** PATH da URl na API */
-    const URL = 'https://api.pagar.me/';
-    const PREFIX = 'core/v5/orders/';
+    protected $URL = 'https://api.pagar.me/';
+    protected $PREFIX = 'core/v5/orders/';
 
     /**
      * Formatado do array que ira para API
@@ -20,27 +22,38 @@ class CreditCard
      * @var array
      */
     protected $payload = [
-        'items' => [],
         'customer' => [
+            // 'code' => '',
+            'document' => '',
             'name' => 'NOME DO CLIENTE',
-            'email' => 'NOME DO E-MAIL'
+            'type' => 'individual',
+            'email' => 'NOME DO E-MAIL',
+            'document_type' => 'CPF',
         ],
+        'items' => [],
         'payments' => [
-            'payment_method' => 'credit_card',
-            'credit_card' => [
-                'recurrence'   => false,
-                'installments' =>  1,
-                'statement_descriptor' => "Tourfacil",
-                'card' => [
-                    'number' => '',
-                    'holder_name' => '',
-                    'exp_month'   => 0,
-                    'exp_year'    => 0,
-                    'cvv'         => '',
+            [
+                'credit_card' => [
+                    'card' => [
+                        'number' => '',
+                        'holder_name' => '',
+                        'holder_document' => '',
+                        'exp_month'   => 0,
+                        'exp_year'    => 0,
+                        'cvv'         => '',
+                    ],
+                    'operation_type' => 'auth_and_capture',
+                    'installments' =>  1,
+                    'statement_descriptor' => 'Tourfacil',
                 ],
+                'payment_method' => 'credit_card'
             ],
         ],
     ];
+
+    public function a() {
+        return $this->payload;
+    }
 
     /**
      * Valor da compra em centavos
@@ -66,7 +79,7 @@ class CreditCard
 
         foreach($reservas as $reserva) {
             $this->payload['items'][] = [
-                'amount'      => $reserva['valor_total'],
+                'amount'      => $this->toCent($reserva['valor_total']),
                 'description' => $reserva['servico'],
                 'quantity'    => 1
             ];
@@ -74,7 +87,7 @@ class CreditCard
     }
 
     /**
-     * Nome do cliente
+     * Email do cliente
      *
      */
     public function setCustomerEmail(String $customer_email)
@@ -92,6 +105,14 @@ class CreditCard
     }
 
     /**
+     * CPF do cliente
+     *
+     */
+    public function setCustomerDocument(String $document) {
+        $this->payload['customer']['document'] = $this->onlyNumbers($document);
+    }
+
+    /**
      * Número de parcelas
      *
      * @param $number_installments
@@ -99,7 +120,7 @@ class CreditCard
      */
     public function setNumberInstallments(int $number_installments)
     {
-        $this->payload['payments']['credit_card']['installments'] = $number_installments;
+        $this->payload['payments'][0]['credit_card']['installments'] = $number_installments;
     }
 
     /**
@@ -110,7 +131,7 @@ class CreditCard
      */
     public function setNumberCard(string $number_card)
     {
-        $this->payload['payments']['credit_card']['card']['number'] = $this->onlyNumbers($number_card);
+        $this->payload['payments'][0]['credit_card']['card']['number'] = $this->onlyNumbers($number_card);
     }
 
     /**
@@ -121,7 +142,15 @@ class CreditCard
      */
     public function setCardholderName(string $cardholder_name)
     {
-        $this->payload['payments']['credit_card']['card']['holder_name'] = strtoupper($this->removeAccentuation($cardholder_name));
+        $this->payload['payments'][0]['credit_card']['card']['holder_name'] = strtoupper($this->removeAccentuation($cardholder_name));
+    }
+
+    /**
+     * Documento do dono do cartão
+     *
+     */
+    public function setCardholderDocument(String $cardholder_document) {
+        $this->payload['payments'][0]['credit_card']['card']['holder_document'] = $this->onlyNumbers($cardholder_document);
     }
 
     /**
@@ -132,7 +161,7 @@ class CreditCard
      */
     public function setSecurityCode(string $security_code)
     {
-        $this->payload['payments']['credit_card']['card']['cvv'] = $security_code;
+        $this->payload['payments'][0]['credit_card']['card']['cvv'] = $security_code;
     }
 
     /**
@@ -143,7 +172,7 @@ class CreditCard
      */
     public function setExpirationMonth(string $expiration_month)
     {
-        $this->payload['payments']['credit_card']['card']['exp_month'] = $expiration_month;
+        $this->payload['payments'][0]['credit_card']['card']['exp_month'] = $expiration_month;
     }
 
     /**
@@ -154,7 +183,7 @@ class CreditCard
      */
     public function setExpirationYear(string $expiration_year)
     {
-        $this->payload['payments']['credit_card']['card']['exp_year'] = $expiration_year;
+        $this->payload['payments'][0]['credit_card']['card']['exp_year'] = $expiration_year;
 
         return $this;
     }
@@ -167,24 +196,41 @@ class CreditCard
      */
     public function pay()
     {
+        $link = $this->URL . $this->PREFIX;
 
+        $client = new Client();
 
-        // Verifica se deu certo
-        if($response->status == "APPROVED") {
-            return [
-                'approved' => true,
-                'payment_id' => $response->payment_id,
-                'message' => $response->credit->reason_message,
-                'response' => $response
-            ];
-        }
+        //dd(json_encode($this->payload), $this->payload);
 
-        // Caso falhe a transação
-        return [
-            'approved' => false,
-            'erro' => $response->message ?? "Não foi possível efetuar o pagamento!",
-            'response' => $response
-        ];
+        Log::info(json_encode($this->payload));
+
+        $response = $client->request('POST', $link, [
+            'body' => json_encode($this->payload),
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Basic c2tfdGVzdF83WExnWkc5SWdobGtWckpROg==',
+            ],
+        ]);
+
+        dd($response->getBody());
+
+        // // Verifica se deu certo
+        // if($response->status == "APPROVED") {
+        //     return [
+        //         'approved' => true,
+        //         'payment_id' => $response->payment_id,
+        //         'message' => $response->credit->reason_message,
+        //         'response' => $response
+        //     ];
+        // }
+
+        // // Caso falhe a transação
+        // return [
+        //     'approved' => false,
+        //     'erro' => $response->message ?? "Não foi possível efetuar o pagamento!",
+        //     'response' => $response
+        // ];
     }
 
     /**
@@ -214,5 +260,10 @@ class CreditCard
         $string = preg_replace('/[ç]/ui', 'c', $string);
 
         return $string;
+    }
+
+    private function toCent(string $valor)
+    {
+        return (int) number_format($valor * 100, 0, "", "");
     }
 }
