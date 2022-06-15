@@ -1,22 +1,22 @@
 <?php 
 
-namespace TourFacil\Core\Services\Integracao\NovaXS\Olivas;
+namespace TourFacil\Core\Services\Integracao\NovaXS\MiniMundo;
 
 use Exception;
 use Illuminate\Support\Str;
 use TourFacil\Core\Enum\IntegracaoEnum;
 use TourFacil\Core\Models\ReservaPedido;
-use TourFacil\Core\Models\OlivasReservaPedido; 
+use TourFacil\Core\Models\MiniMundoReservaPedido; 
 use Storage;
 
 /**
- * Class OlivasService
- * @package TourFacil\Core\Services\Integracao\NovaSX\Olivas
+ * Class MiniMundoService
+ * @package TourFacil\Core\Services\Integracao\NovaSX\MiniMundo
  */
-class OlivasService
+class MiniMundoService
 {
-    /** @var OlivasAPI */
-    protected $olivas;
+    /** @var MiniMundoAPI */
+    protected $mini_mundo;
 
     /** @var array  */
     protected $accessList = [];
@@ -43,7 +43,7 @@ class OlivasService
     protected $getAccessList;
 
     /** @var string  */
-    protected $path = "integracao/olivas/";
+    protected $path = "integracao/mini_mundo/";
 
     /** @var string */
     const CRIANCA = "crian";
@@ -70,13 +70,13 @@ class OlivasService
     ];
 
     /**
-     * OlivasService constructor.
+     * MiniMundoService constructor.
      * @param ReservaPedido $reservaPedido
      */
     public function __construct(ReservaPedido $reservaPedido)
     {
         $this->reserva = $reservaPedido;
-        $this->olivas = new OlivasAPI();
+        $this->mini_mundo = new MiniMundoAPI();
         // Nome do log
         $this->path = $this->path . "{$reservaPedido->id}.txt";
         // Cria um arquivo de log
@@ -84,14 +84,14 @@ class OlivasService
     }
 
     /**
-     * Gera o voucher da olivas
+     * Gera o voucher da MiniMundo
      *
      * @throws Exception
      */
-    public function gerarVoucherOlivas()
+    public function gerarVoucherMiniMundo()
     {
         // Recupera os serviços disponível para a data do serviço
-        $this->servicosDisponiveis = $this->olivas->getProductsByDate([
+        $this->servicosDisponiveis = $this->mini_mundo->getProductsByDate([
             'date' => $this->reserva->agendaDataServico->data->format('d/m/Y')
         ]);
 
@@ -108,7 +108,7 @@ class OlivasService
         $this->personAsString = $this->personAsString($this->reserva->pedido->cliente);
 
         // Bloqueio de compra
-        $this->buyToBillFor = $this->olivas->buyToBillFor([
+        $this->buyToBillFor = $this->mini_mundo->buyToBillFor([
             'productsArray' => json_encode($this->productsArray['productsArray']),
             'personAsString' => json_encode($this->personAsString)
         ]);
@@ -117,7 +117,7 @@ class OlivasService
         Storage::append($this->path, "#" . $this->reserva->id . "buyToBillFor: " . json_encode($this->buyToBillFor));
 
         // Confirmação da compra
-        $this->billFor = $this->olivas->billFor([
+        $this->billFor = $this->mini_mundo->billFor([
             'bill' => $this->buyToBillFor['id']
         ]);
 
@@ -125,7 +125,7 @@ class OlivasService
         Storage::append($this->path, "#" . $this->reserva->id . "billFor: " . json_encode($this->billFor));
 
         // Recupera a lista de passageiros
-        $this->getAccessList = $this->olivas->getAccessList([
+        $this->getAccessList = $this->mini_mundo->getAccessList([
             'bill' => $this->buyToBillFor['id']
         ]);
 
@@ -135,14 +135,14 @@ class OlivasService
         // Cria a lista de passageiros conforme os clientes
         $this->createAccessList();
 
-        // Salva a lista de viajantes para o olivas
-        $this->olivas->setAccessList([
+        // Salva a lista de viajantes para o Mini Mundo
+        $this->mini_mundo->setAccessList([
             'bill' => $this->buyToBillFor['id'],
             'list' => json_encode($this->accessList)
         ]);
 
         // Salva as informações de impressão no banco
-        OlivasReservaPedido::create([
+        MiniMundoReservaPedido::create([
             'reserva_pedido_id' => $this->reserva->id,
             'bill_id' => $this->buyToBillFor['id'],
             'data_servico' => $this->reserva->agendaDataServico->data,
@@ -156,7 +156,7 @@ class OlivasService
     }
 
     /** Filtra a lista de serviços disponiveis */
-    private function filterServicoOlivas() {
+    private function filterServicoMiniMundo() {
 
         // Array para armazenar os novos id
         $servicos = [];
@@ -186,7 +186,7 @@ class OlivasService
     }
 
     /**
-     * Retorna os serviços para enviar a comprar ao olivas
+     * Retorna os serviços para enviar a comprar ao Mini Mundo
      * ID,QUANTIDADE,DATA
      *
      * @return array
@@ -195,12 +195,12 @@ class OlivasService
     private function productsArray() {
 
         // Filtra os serviços disponiveis
-        $this->filterServicoOlivas();
+        $this->filterServicoMiniMundo();
 
         // Data de utilizacao
         $data_utilizacao = $this->reserva->agendaDataServico->data->format('d/m/Y');
 
-        // Array com os produtos olivas
+        // Array com os produtos Mini Mundo
         $productsArray = [];
         $variacoes_id = [];
         $productsIdArray = [];
@@ -359,20 +359,20 @@ class OlivasService
     }
 
     /**
-     * Cancela o voucher do olivas
+     * Cancela o voucher do Mini Mundo
      *
-     * @param OlivasReservaPedido $olivasReservaPedido
+     * @param MiniMundoReservaPedido $mini_mundoReservaPedido
      * @return array
      */
-    public function cancelarVoucher(OlivasReservaPedido $olivasReservaPedido)
+    public function cancelarVoucher(MiniMundoReservaPedido $mini_mundoReservaPedido)
     {
-        // Solicita o cancelamento ao olivas
-        $cancelado = $this->olivas->cancelBill([
-            'bill' => $olivasReservaPedido->bill_id
+        // Solicita o cancelamento ao Mini Mundo
+        $cancelado = $this->mini_mundo->cancelBill([
+            'bill' => $mini_mundoReservaPedido->bill_id
         ]);
 
         // atualiza o status do voucher para cancelado
-        $olivasReservaPedido->update(['status' => IntegracaoEnum::VOUCHER_CANCELADO]);
+        $mini_mundoReservaPedido->update(['status' => IntegracaoEnum::VOUCHER_CANCELADO]);
 
         return ['cancelamento' => $cancelado];
     }
