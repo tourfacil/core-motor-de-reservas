@@ -138,6 +138,14 @@ class ReservaPedido extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function miniMundoVoucher()
+    {
+        return $this->hasOne(MiniMundoReservaPedido::class);
+    }
+
+    /**
      * @return mixed
      */
     public function getStatusReservaAttribute()
