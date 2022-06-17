@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.3.2 (17 de Junho de 2022)*
+- Adicionado integração com o Mini Mundo
+
 ### *v1.3.1 (31 de Maio de 2022)*
 - Adicionado serviço invisivel. Fica disponivel para venda por link, mas não aparece nas listagens e na pesquisa do site.
 
