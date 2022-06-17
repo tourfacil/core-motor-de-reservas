@@ -46,7 +46,7 @@ class MiniMundoService
     protected $path = "integracao/mini_mundo/";
 
     /** @var string */
-    const CRIANCA = "crian";
+    const CRIANCA = "infan";
 
     /** @var string */
     const INFANTIL = "infantil";
@@ -170,6 +170,7 @@ class MiniMundoService
 
                 // Percorre os tipos de pessoas disponiveis
                 foreach (self::TIPO_PESSOAS as $tipo_pessoa) {
+
                     if(strripos($nome_servico, $tipo_pessoa)) {
                         // Deixa sempre como MELHOR IDADE
                         $tipo_pessoa = ($tipo_pessoa == self::SENIOR) ? self::MELHOR_IDADE : $tipo_pessoa;
@@ -196,7 +197,7 @@ class MiniMundoService
 
         // Filtra os serviços disponiveis
         $this->filterServicoMiniMundo();
-
+        
         // Data de utilizacao
         $data_utilizacao = $this->reserva->agendaDataServico->data->format('d/m/Y');
 
@@ -216,7 +217,7 @@ class MiniMundoService
             if($quantidade_reserva->valor_net > 0) {
 
                 /** Recupera os dados para crianca pagamente */
-                if(Str::contains($nome_variacao, self::CRIANCA)) {
+                if(Str::contains($nome_variacao, "crian")) {
                     $product_path = $this->servicosDisponiveis[Str::slug(self::CRIANCA, "_")];
                     $productsArray[] = [
                         "path" => $product_path,
