@@ -46,11 +46,6 @@ class PagarmeCheckout
             // Informa os serviços sendo adquiridos
             $sale->setItems($array_pedido);
 
-            //dd(json_encode(array_values($sale->a())));
-
-            // dd(json_encode($sale->a()));
-            // dd(json_encode($sale->a()));
-
             // Efetua a cobrança no cartão
             return $sale->pay();
 
