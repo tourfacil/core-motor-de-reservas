@@ -2,6 +2,7 @@
 
 namespace TourFacil\Core\Services\Pagamento\Pagarme;
 
+use Exception;
 use Illuminate\Http\Request;
 use \GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
@@ -50,10 +51,6 @@ class CreditCard
             ],
         ],
     ];
-
-    public function a() {
-        return $this->payload;
-    }
 
     /**
      * Valor da compra em centavos
@@ -172,7 +169,7 @@ class CreditCard
      */
     public function setExpirationMonth(string $expiration_month)
     {
-        $this->payload['payments'][0]['credit_card']['card']['exp_month'] = $expiration_month;
+        $this->payload['payments'][0]['credit_card']['card']['exp_month'] = intval($expiration_month);
     }
 
     /**
@@ -183,9 +180,7 @@ class CreditCard
      */
     public function setExpirationYear(string $expiration_year)
     {
-        $this->payload['payments'][0]['credit_card']['card']['exp_year'] = $expiration_year;
-
-        return $this;
+        $this->payload['payments'][0]['credit_card']['card']['exp_year'] = intval($expiration_year);
     }
 
     /**
@@ -200,37 +195,36 @@ class CreditCard
 
         $client = new Client();
 
-        //dd(json_encode($this->payload), $this->payload);
-
         Log::info(json_encode($this->payload));
 
-        $response = $client->request('POST', $link, [
-            'body' => json_encode($this->payload),
-            'headers' => [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Basic c2tfdGVzdF83WExnWkc5SWdobGtWckpROg==',
-            ],
-        ]);
+        try {
 
-        dd($response->getBody());
+            $response = $client->request('POST', $link, [
+                'body' => json_encode($this->payload, true),
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Basic c2tfdGVzdF83WExnWkc5SWdobGtWckpROg==',
+                ],
+            ]);
 
-        // // Verifica se deu certo
-        // if($response->status == "APPROVED") {
-        //     return [
-        //         'approved' => true,
-        //         'payment_id' => $response->payment_id,
-        //         'message' => $response->credit->reason_message,
-        //         'response' => $response
-        //     ];
-        // }
+            $data = $response->getBody()->getContents();
 
-        // // Caso falhe a transação
-        // return [
-        //     'approved' => false,
-        //     'erro' => $response->message ?? "Não foi possível efetuar o pagamento!",
-        //     'response' => $response
-        // ];
+            if($data->status == 'captured') {
+                return [
+                    'approved' => true,
+                    'payment_id' => $data['charges'][0]['id'],
+                    'response' => $data
+                ];
+            }
+
+        } catch ( Exception $e) {
+
+            return [
+                'approved' => false,
+                'erro' => 'Erro transacional',
+            ];
+        }
     }
 
     /**
