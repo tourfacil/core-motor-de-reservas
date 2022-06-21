@@ -26,6 +26,13 @@ class CreditCard
         'customer' => [
             // 'code' => '',
             'document' => '',
+            'phones' => [
+                'mobile_phone' => [
+                    'country_code' => '55',
+                    'area_code' => '54',
+                    'number' => '0000000',
+                ],
+            ],
             'name' => 'NOME DO CLIENTE',
             'type' => 'individual',
             'email' => 'NOME DO E-MAIL',
@@ -36,6 +43,14 @@ class CreditCard
             [
                 'credit_card' => [
                     'card' => [
+                        'billing_address' => [
+                            'line_1'   => '',
+                            'line_2'   => '',
+                            'zip_code' => '',
+                            'city'     => '',
+                            'state'    => '',
+                            'country'  => '',
+                        ],
                         'number' => '',
                         'holder_name' => '',
                         'holder_document' => '',
@@ -78,7 +93,8 @@ class CreditCard
             $this->payload['items'][] = [
                 'amount'      => $this->toCent($reserva['valor_total']),
                 'description' => $reserva['servico'],
-                'quantity'    => 1
+                'quantity'    => 1,
+                'code'        => $reserva['servico_id'], 
             ];
         }
     }
@@ -107,6 +123,19 @@ class CreditCard
      */
     public function setCustomerDocument(String $document) {
         $this->payload['customer']['document'] = $this->onlyNumbers($document);
+    }
+
+    public function setCustomerPhone(String $phone) {
+
+        $telefone_formatado = $this->onlyNumbers($phone);
+
+        $country_code = '55';
+        $area_code = substr($telefone_formatado, 0, 2);
+
+        $telefone_formatado = substr($telefone_formatado, 2, strlen($telefone_formatado));
+
+        $this->payload['customer']['phones']['mobile_phone']['area_code'] = $area_code;
+        $this->payload['customer']['phones']['mobile_phone']['number'] = $telefone_formatado;
     }
 
     /**
