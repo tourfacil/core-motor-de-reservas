@@ -24,19 +24,18 @@ class CreditCard
      */
     protected $payload = [
         'customer' => [
-            // 'code' => '',
             'document' => '',
             'phones' => [
                 'mobile_phone' => [
-                    'country_code' => '55',
-                    'area_code' => '54',
-                    'number' => '0000000',
+                    'country_code' => '',
+                    'area_code' => '',
+                    'number' => '',
                 ],
             ],
-            'name' => 'NOME DO CLIENTE',
+            'name' => '',
             'type' => 'individual',
-            'email' => 'NOME DO E-MAIL',
-            'document_type' => 'CPF',
+            'email' => '',
+            'document_type' => '',
         ],
         'items' => [],
         'payments' => [
@@ -134,6 +133,7 @@ class CreditCard
 
         $telefone_formatado = substr($telefone_formatado, 2, strlen($telefone_formatado));
 
+        $this->payload['customer']['phones']['mobile_phone']['country_code'] = $country_code;
         $this->payload['customer']['phones']['mobile_phone']['area_code'] = $area_code;
         $this->payload['customer']['phones']['mobile_phone']['number'] = $telefone_formatado;
     }
