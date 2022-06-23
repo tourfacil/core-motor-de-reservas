@@ -124,6 +124,10 @@ class CreditCard
         $this->payload['customer']['document'] = $this->onlyNumbers($document);
     }
 
+    /**
+     * Telefone do cliente
+     *
+     */
     public function setCustomerPhone(String $phone) {
 
         $telefone_formatado = $this->onlyNumbers($phone);
@@ -136,6 +140,24 @@ class CreditCard
         $this->payload['customer']['phones']['mobile_phone']['country_code'] = $country_code;
         $this->payload['customer']['phones']['mobile_phone']['area_code'] = $area_code;
         $this->payload['customer']['phones']['mobile_phone']['number'] = $telefone_formatado;
+    }
+
+    /**
+     * Endereço do cliente
+     *
+     */
+    public function setBillingAdress(String $rua, String $numero, String $bairro, String $cidade, String $estado, String $cep) {
+
+        $billing_address = [ 
+            'line_1' => "$numero, $rua, $bairro",
+            'line_2' => "$numero, $rua, $bairro, $estado",
+            'zip_code' => $this->onlyNumbers($cep),
+            'city' => $cidade,
+            'state' => $estado,
+            'country' => 'BR',
+        ];
+
+        $this->payload['payments'][0]['credit_card']['card']['billing_address'] = $billing_address;
     }
 
     /**
@@ -239,7 +261,9 @@ class CreditCard
 
             $data = $response->getBody()->getContents();
 
-            if($data->status == 'captured') {
+            $data = json_decode($data, true);
+
+            if($data['status'] == 'paid') {
                 return [
                     'approved' => true,
                     'payment_id' => $data['charges'][0]['id'],
@@ -248,7 +272,6 @@ class CreditCard
             }
 
         } catch ( Exception $e) {
-
             return [
                 'approved' => false,
                 'erro' => 'Erro transacional',

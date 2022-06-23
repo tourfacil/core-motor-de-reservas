@@ -32,9 +32,19 @@ class PagarmeCheckout
             $sale->setCustomerName($cliente->nome);
             $sale->setCustomerEmail($cliente->email);
             $sale->setCustomerDocument($cliente->cpf);
+            $sale->setCustomerPhone($cliente->telefone);
+            
+            // Informa os dados do endereço do comprador
+            $sale->setBillingAdress(
+                $cliente->endereco->rua,
+                $cliente->endereco->numero,
+                $cliente->endereco->bairro,
+                $cliente->endereco->cidade,
+                $cliente->endereco->estado,
+                $cliente->endereco->cep
+            );            
 
             // Informa os dados do cartão e número de parcelas
-
             $sale->setNumberInstallments((int) $dados_pagamento['parcelas']);
             $sale->setNumberCard($dados_pagamento['numero_cartao']);
             $sale->setExpirationMonth($dados_pagamento['validade_mes_cartao']);
