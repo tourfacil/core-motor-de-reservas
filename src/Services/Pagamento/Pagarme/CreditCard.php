@@ -23,6 +23,7 @@ class CreditCard
      * @var array
      */
     protected $payload = [
+        'code' => '',
         'customer' => [
             'document' => '',
             'phones' => [
@@ -105,6 +106,14 @@ class CreditCard
                 'code'        => 0, 
             ];
         }
+    }
+
+    /**
+     * Código do pedido
+     *
+     */
+    public function setOrderCode(String $codigo) {
+        $this->payload['code'] = '#' . $codigo;
     }
 
     /**

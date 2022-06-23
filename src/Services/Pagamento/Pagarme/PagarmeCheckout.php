@@ -34,6 +34,9 @@ class PagarmeCheckout
             $sale->setCustomerDocument($cliente->cpf);
             $sale->setCustomerPhone($cliente->telefone);
             
+            // Informa o código do pedido
+            $sale->setOrderCode($array_pedido['codigo_pedido']);
+
             // Informa os dados do endereço do comprador
             $sale->setBillingAdress(
                 $cliente->endereco->rua,
