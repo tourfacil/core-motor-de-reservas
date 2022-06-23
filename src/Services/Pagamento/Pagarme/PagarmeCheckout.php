@@ -54,7 +54,7 @@ class PagarmeCheckout
             $sale->setSecurityCode($dados_pagamento['codigo_cartao']);
 
             // Informa os serviços sendo adquiridos
-            $sale->setItems($array_pedido);
+            $sale->setItems($array_pedido, $parcelamento['valor_juros']);
 
             // Efetua a cobrança no cartão
             return $sale->pay();

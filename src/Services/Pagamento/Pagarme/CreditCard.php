@@ -84,7 +84,7 @@ class CreditCard
      * Itens que formarão o pedido
      *
      */
-    public function setItems(Array $items) {
+    public function setItems(Array $items, $juros) {
 
         $reservas = $items['reservas'];
 
@@ -94,6 +94,15 @@ class CreditCard
                 'description' => $reserva['servico'],
                 'quantity'    => 1,
                 'code'        => $reserva['servico_id'], 
+            ];
+        }
+
+        if($juros > 0) {
+            $this->payload['items'][] = [
+                'amount'      => $this->toCent($juros),
+                'description' => 'Juros',
+                'quantity'    => 1,
+                'code'        => 0, 
             ];
         }
     }
