@@ -264,7 +264,13 @@ class CreditCard
 
         $client = new Client();
 
-        Log::info(json_encode($this->payload));
+        $codigo_auth_pagarme = '';
+
+        if(env('APP_ENV') == 'production') {
+            $codigo_auth_pagarme = 'Basic c2tfTnhaVkVNMlZ1amg0OU1QWTo=';
+        } else {
+            $codigo_auth_pagarme = 'Basic c2tfdGVzdF83WExnWkc5SWdobGtWckpROg==';
+        }
 
         try {
 
@@ -273,7 +279,7 @@ class CreditCard
                 'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
-                    'Authorization' => 'Basic c2tfdGVzdF83WExnWkc5SWdobGtWckpROg==',
+                    'Authorization' => $codigo_auth_pagarme,
                 ],
             ]);
 
