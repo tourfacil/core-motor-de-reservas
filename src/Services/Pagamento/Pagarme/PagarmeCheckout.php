@@ -2,6 +2,7 @@
 
 namespace TourFacil\Core\Services\Pagamento\Pagarme;
 
+use TourFacil\Core\Models\Cliente;
 use TourFacil\Core\Services\Pagamento\Pagarme\CreditCard;
 
 class PagarmeCheckout
@@ -36,6 +37,8 @@ class PagarmeCheckout
             
             // Informa o código do pedido
             $sale->setOrderCode($array_pedido['codigo_pedido']);
+
+            $cliente = Cliente::where('id', $cliente->id)->with(['endereco'])->get()->first();
 
             // Informa os dados do endereço do comprador
             $sale->setBillingAdress(
