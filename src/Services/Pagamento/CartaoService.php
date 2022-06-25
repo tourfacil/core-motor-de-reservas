@@ -4,6 +4,7 @@ namespace TourFacil\Core\Services\Pagamento;
 
 use TourFacil\Core\Enum\MetodoPagamentoEnum;
 use TourFacil\Core\Enum\CartaoCreditoLivreEnum;
+use TourFacil\Core\Services\Pagamento\Pagarme\PagarmeCheckout;
 
 /**
  * Class CartaoService
@@ -191,6 +192,50 @@ class CartaoService
             "message" => $payment['erro'],
             "dados_pagamento" => [
                 'gateway' => MetodoPagamentoEnum::WIRECARD,
+                'nome_cartao' => $dados_pagamento["nome_cartao"],
+                'numero_cartao' => maskNumberCard($dados_pagamento["numero_cartao"]),
+                'parcelas' => $dados_pagamento["parcelas"],
+                'bandeira' => $dados_pagamento["bandeira_cartao"],
+                'transacao' => $payment
+            ],
+        ];
+    }
+
+    /**
+     * Realiza a cobranca no cartao de credito usando a Pagarme
+     *
+     * @param $array_pedido
+     * @param $cliente
+     * @param $dados_pagamento
+     * @param $parcelamento
+     * @return array
+     */
+    public static function payCreditCardPagarme($array_pedido, $cliente, $dados_pagamento, $parcelamento)
+    {
+        // API Ecommerce da Cielo
+        $payment = PagarmeCheckout::pay($array_pedido, $cliente, $dados_pagamento, $parcelamento);
+
+        // Caso seja aprovado
+        if ($payment['approved']) {
+            return [
+                "approved" => true,
+                "payment_id" => $payment['payment_id'],
+                "dados_pagamento" => [
+                    'gateway' => MetodoPagamentoEnum::PAGARME,
+                    'nome_cartao' => $dados_pagamento["nome_cartao"],
+                    'numero_cartao' => maskNumberCard($dados_pagamento["numero_cartao"]),
+                    'parcelas' => $dados_pagamento["parcelas"],
+                    'bandeira' => $dados_pagamento["bandeira_cartao"],
+                    'transacao' => $payment
+                ],
+            ];
+        }
+
+        return [
+            "approved" => false,
+            "message" => $payment['erro'],
+            "dados_pagamento" => [
+                'gateway' => MetodoPagamentoEnum::PAGARME,
                 'nome_cartao' => $dados_pagamento["nome_cartao"],
                 'numero_cartao' => maskNumberCard($dados_pagamento["numero_cartao"]),
                 'parcelas' => $dados_pagamento["parcelas"],
