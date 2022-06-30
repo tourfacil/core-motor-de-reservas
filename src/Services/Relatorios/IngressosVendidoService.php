@@ -99,7 +99,8 @@ class IngressosVendidoService
                     ->where('reserva_pedidos.status', StatusReservaEnum::UTILIZADO);
             }
         } else {
-            $query->whereBetween('agenda_data_servicos.data', [$inicio, $final]);
+            $query->whereBetween('agenda_data_servicos.data', [$inicio, $final])
+            ->whereIn('reserva_pedidos.status', StatusReservaEnum::RESERVAS_VALIDAS);
         }
 
         return $query->orderBy('quantidade', 'DESC')->get();
