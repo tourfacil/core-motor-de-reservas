@@ -189,7 +189,7 @@ class FornecedorService
     }
 
     /**
-     * Reservas vendidas pro fornecedor
+     * Reservas vendidas pro fornecedor por data de venda
      *
      * @param $fornecedor_id
      * @param $inicio
@@ -205,6 +205,34 @@ class FornecedorService
         // Pesquisa de ingressos vendidos
         $query = ReservaPedido::with($relacoes)->where('fornecedor_id', $fornecedor_id)
             ->whereBetween('created_at', [$inicio, $final]);
+
+        // Filtra por servicos
+        if(is_array($servicos)) {
+            $query->whereIn('servico_id', $servicos);
+        }
+
+        return $query->oldest()->get();
+    }
+
+    /**
+     * Reservas vendidas pro fornecedor por data de utilização
+     *
+     * @param $fornecedor_id
+     * @param $inicio
+     * @param $final
+     * @param null $servicos
+     * @param array $relacoes
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|ReservaPedido[]
+     */
+    public static function reservasVendidasFornecedorUtilizacao($fornecedor_id, $inicio, $final, $servicos = null, $relacoes = [])
+    {
+        $relacoes = array_merge(['servico', 'agendaDataServico'], $relacoes);
+
+        // Pesquisa de ingressos vendidos
+        $query = ReservaPedido::with($relacoes)->where('fornecedor_id', $fornecedor_id)
+            ->whereHas('agendaDataServico', function($query) use ($inicio, $final) {
+                $query->whereBetween('data', [$inicio, $final]);
+            });
 
         // Filtra por servicos
         if(is_array($servicos)) {
