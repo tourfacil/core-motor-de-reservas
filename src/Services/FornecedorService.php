@@ -33,7 +33,7 @@ class FornecedorService
             'servico' => function($q) {
                 return $q->select(['id', 'nome']);
             }
-        ])->where('fornecedor_id', $fornecedor_id)->limit(50)->latest()->get();
+        ])->where('fornecedor_id', $fornecedor_id)->latest()->get();
 
         // Percorre as ultimas vendas do fornecedor
         foreach ($reservas as $reserva) {
