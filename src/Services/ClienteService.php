@@ -3,6 +3,7 @@
 use Hashids\Hashids;
 use TourFacil\Core\Models\Cliente;
 use TourFacil\Core\Models\Pedido;
+use TourFacil\Core\Models\EnderecoCliente;
 use TourFacil\Core\Models\Servico;
 
 /**
@@ -58,6 +59,10 @@ class ClienteService
 
         // Cadastra o cliente no canal de venda
         $cliente = Cliente::create($dados);
+
+        $dados['cliente_id'] = $cliente->id;
+
+        $endereco = EnderecoCliente::create($dados);
 
         return [
             'cliente' => $cliente,
