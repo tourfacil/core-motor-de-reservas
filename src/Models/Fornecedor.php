@@ -61,6 +61,11 @@ class Fornecedor extends Model
         return $this->hasMany(UsuarioFornecedor::class);
     }
 
+    public function reservas()
+    {
+        return $this->hasMany(ReservaPedido::class);
+    }
+
     /**
      * Retorna se o fornecedor está ativo ou não
      *
