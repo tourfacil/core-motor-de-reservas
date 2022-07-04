@@ -78,31 +78,82 @@ class IngressosVendidoService
     public static function relatorioFornecedoresComVendas($inicio, $final, $canal_venda_id, $autenticados = false, $tipo_data = "VENDA")
     {
 
-        // Pesquisa de ingressos vendidos
-        $query = Fornecedor::select("fornecedores.id", "nome_fantasia", "fornecedores.cnpj",
-            DB::raw(" SUM(reserva_pedidos.valor_total) AS vendido, SUM(reserva_pedidos.valor_net) AS tarifa_net, SUM(reserva_pedidos.quantidade) as quantidade")
-        )->leftJoin('reserva_pedidos', 'reserva_pedidos.fornecedor_id', '=', 'fornecedores.id')
-         ->leftJoin('servicos', 'servicos.id', '=', 'reserva_pedidos.servico_id')
-         ->leftJoin('validacao_reserva_pedidos', 'validacao_reserva_pedidos.reserva_pedido_id', '=', 'reserva_pedidos.id')
-         ->leftJoin('agenda_data_servicos', 'agenda_data_servicos.id', '=', 'reserva_pedidos.agenda_data_servico_id')
-            ->where('servicos.canal_venda_id', $canal_venda_id)
-            ->groupBy('fornecedores.nome_fantasia')->groupBy('fornecedores.id')->groupBy('fornecedores.cnpj');
+        $fornecedores = [];
 
-        // Caso seja para filtrar por reservas autenticadas
+        // Caso o tipo de data for igual a venda será puxado um relatório com as seguintes caracteristicas.
+        // 1 - Todos os fornecedores com reservas vendidas entre as datas $inicio e $final, com as reservas do mesmo periodo.
+        // 2 - Se $autenticados for verdadeiro, somente retornará as reservas que foram marcadas como utilizado pelo fornecedor, se não, todas.
+        // 3 - Só buscara as reservas do canal de venda informado.
+        if($tipo_data == 'VENDA') {
 
-        if($tipo_data == "VENDA") {
-            if($autenticados == false) {
-                $query->whereBetween('reserva_pedidos.created_at', [$inicio, $final])
-                    ->whereIn('reserva_pedidos.status', StatusReservaEnum::RESERVAS_VALIDAS);
-            } else {
-                $query->whereBetween('validacao_reserva_pedidos.created_at', [$inicio, $final])
-                    ->where('reserva_pedidos.status', StatusReservaEnum::UTILIZADO);
-            }
+            $fornecedores = Fornecedor::whereHas('reservas', function($query) use ($inicio, $final, $canal_venda_id, $autenticados) {
+                $query->whereBetween('created_at', [$inicio, $final])
+                      ->whereIn('status', ($autenticados ? [StatusReservaEnum::UTILIZADO] : StatusReservaEnum::RESERVAS_VALIDAS))
+                      ->whereHas('servico', function($query2) use ($canal_venda_id) {
+                            $query2->where('canal_venda_id', $canal_venda_id);
+                        });
+                })                        
+            ->with(['reservas' => function($query) use ($inicio, $final, $canal_venda_id, $autenticados) {
+                $query->whereBetween('created_at', [$inicio, $final])
+                      ->whereIn('status', ($autenticados ? [StatusReservaEnum::UTILIZADO] : StatusReservaEnum::RESERVAS_VALIDAS))
+                      ->whereHas('servico', function($query2) use ($canal_venda_id) {
+                            $query2->where('canal_venda_id', $canal_venda_id);
+                        });
+                }])
+            ->select('id', 'nome_fantasia', 'cnpj')
+            ->get();
+
         } else {
-            $query->whereBetween('agenda_data_servicos.data', [$inicio, $final])
-            ->whereIn('reserva_pedidos.status', StatusReservaEnum::RESERVAS_VALIDAS);
+
+        // Caso o tipo de data for igual a utilização será puxado um relatório com as seguintes caracteristicas.
+        // 1 - Todos os fornecedores com reservas com utilização entre as datas $inicio e $final, com as reservas do mesmo periodo.
+        // 2 - Se $autenticados for verdadeiro, somente retornará as reservas que foram marcadas como utilizado pelo fornecedor, se não, todas.
+        // 3 - Só buscara as reservas do canal de venda informado.
+
+            $fornecedores = Fornecedor::whereHas('reservas', function($query) use ($inicio, $final, $canal_venda_id, $autenticados) {
+                $query->whereHas('agendaDataServico', function($query2) use ($inicio, $final) {
+                    $query2->whereBetween('data', [$inicio, $final]);
+                })
+                ->whereIn('status', ($autenticados ? [StatusReservaEnum::UTILIZADO] : StatusReservaEnum::RESERVAS_VALIDAS))
+                ->whereHas('servico', function($query2) use ($canal_venda_id) {
+                    $query2->where('canal_venda_id', $canal_venda_id);
+                });
+            })
+            ->with(['reservas' => function($query) use ($inicio, $final, $canal_venda_id, $autenticados) {
+                $query->whereHas('agendaDataServico', function($query2) use ($inicio, $final) {
+                    $query2->whereBetween('data', [$inicio, $final]);
+                })
+                ->whereIn('status', ($autenticados ? [StatusReservaEnum::UTILIZADO] : StatusReservaEnum::RESERVAS_VALIDAS))
+                ->whereHas('servico', function($query2) use ($canal_venda_id) {
+                    $query2->where('canal_venda_id', $canal_venda_id);
+                });
+            }])
+            ->select('id', 'nome_fantasia', 'cnpj')
+            ->get();
         }
 
-        return $query->orderBy('quantidade', 'DESC')->get();
+        // Percorre todos os fornecedores retornados
+        foreach($fornecedores as $fornecedor) {
+            
+            $vendido = 0;
+            $tarifa_net = 0;
+            $quantidade = 0;
+
+            // Percorre todas as reservas do fornecedores para contar de forma precisa todos os valores
+            foreach($fornecedor->reservas as $reserva) {
+
+                $vendido += $reserva->valor_total;
+                $tarifa_net += $reserva->valor_net;
+                $quantidade += $reserva->quantidade;
+            }
+
+            // Aumenta o contador de acordo com o vendido pelo fornecedor
+            $fornecedor->vendido = $vendido;
+            $fornecedor->tarifa_net = $tarifa_net;
+            $fornecedor->quantidade = $quantidade;
+        }
+
+        // Retorna a lista com os valores de quantidades, net e venda ordenados de maior para menor por venda
+        return $fornecedores->sortByDesc('vendido');
     }
 }
