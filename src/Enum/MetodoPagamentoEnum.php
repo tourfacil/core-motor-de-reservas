@@ -36,11 +36,14 @@ abstract class MetodoPagamentoEnum
 
     const WIRECARD = "WIRECARD";
 
+    const PAGARME = "PAGARME";
+
     const GATEWAYS = [
         self::CIELO => "Cielo",
         self::GETNET => "Getnet",
         self::GETNET_TERMINAIS => "Getnet Terminais",
         self::MERCADO_PAGO => "Mercado Pago",
-        self::WIRECARD => "Wirecard"
+        self::WIRECARD => "Wirecard",
+        self::PAGARME => "Pagarme",
     ];
 }

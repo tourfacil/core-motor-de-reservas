@@ -140,4 +140,8 @@ class Cliente extends Authenticatable
     {
         return ($this->attributes['deleted_at'] == null);
     }
+    
+    public function endereco() {
+        return $this->hasOne(EnderecoCliente::class);
+    }
 }
