@@ -282,7 +282,7 @@ class PedidoService
      * @param $tipo_cartao
      * @return mixed
      */
-    public static function gerarPedidoCartao($pedido_array, $payment, $juros, $cliente, $canal_venda_id, $origem, $tipo_cartao)
+    public static function gerarPedidoCartao($pedido_array, $payment, $juros, $cliente, $canal_venda_id, $origem, $tipo_cartao, $aprovado = true)
     {
 
         // Cria o pedido
@@ -293,14 +293,14 @@ class PedidoService
             "canal_venda_id" => $canal_venda_id,
             "juros" => $juros,
             "origem" => $origem,
-            "status" => StatusPedidoEnum::PAGO,
-            "status_pagamento" => StatusPagamentoEnum::AUTORIZADO,
+            "status" => $aprovado ? StatusPedidoEnum::PAGO : StatusPedidoEnum::NEGADO,
+            "status_pagamento" => $aprovado ? StatusPagamentoEnum::AUTORIZADO : StatusPagamentoEnum::NAO_AUTORIZADO,
             "metodo_pagamento" => $tipo_cartao,
             "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
         ]);
 
         // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
-        if(array_key_exists('cupom', $pedido_array)) {
+        if(array_key_exists('cupom', $pedido_array) && $aprovado == true) {
             $pedido_array['cupom']->vezes_utilizado++;
             $pedido_array['cupom']->save();
 
@@ -335,7 +335,7 @@ class PedidoService
                 "valor_net" => $reserva_carrinho["valor_net"],
                 "quantidade" => $reserva_carrinho["quantidade"],
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
-                "status" => StatusReservaEnum::ATIVA,
+                "status" => $aprovado ? StatusReservaEnum::ATIVA : StatusReservaEnum::NEGADO,
                 "afiliado_id" => $afiliado_reserva,
                 "desconto_id" => $reserva_carrinho["desconto_id"],
             ]);
@@ -352,21 +352,23 @@ class PedidoService
                 ]);
             }
 
-            // Diminui a quantidade da disponibilidade na agenda
-            $agenda_servico = AgendaDataServico::find($reserva_carrinho["agenda_data_servico_id"]);
+            if($aprovado) {
+                // Diminui a quantidade da disponibilidade na agenda
+                $agenda_servico = AgendaDataServico::find($reserva_carrinho["agenda_data_servico_id"]);
 
-            // Quantidade disponivel final diminuido a quantidade do carrinho
-            $disponivel = $agenda_servico->disponivel - $reserva_carrinho["bloqueio_consumido"];
+                // Quantidade disponivel final diminuido a quantidade do carrinho
+                $disponivel = $agenda_servico->disponivel - $reserva_carrinho["bloqueio_consumido"];
 
-            // Status da agenda
-            $status_agenda = ($disponivel >= 1) ? AgendaEnum::ATIVO : AgendaEnum::INDISPONIVEL;
+                // Status da agenda
+                $status_agenda = ($disponivel >= 1) ? AgendaEnum::ATIVO : AgendaEnum::INDISPONIVEL;
 
-            // Atualiza a quantidade disponivel na agenda
-            $agenda_servico->update([
-                "disponivel" => $agenda_servico->disponivel - $reserva_carrinho["bloqueio_consumido"],
-                "consumido" => $agenda_servico->consumido + $reserva_carrinho["bloqueio_consumido"],
-                "status" => $status_agenda
-            ]);
+                // Atualiza a quantidade disponivel na agenda
+                $agenda_servico->update([
+                    "disponivel" => $agenda_servico->disponivel - $reserva_carrinho["bloqueio_consumido"],
+                    "consumido" => $agenda_servico->consumido + $reserva_carrinho["bloqueio_consumido"],
+                    "status" => $status_agenda
+                ]);
+            }
 
             // Verifica se tem dados dos acompanhantes na reserva
             if (isset($reserva_carrinho['acompanhantes']) && is_array($reserva_carrinho['acompanhantes'])) {
