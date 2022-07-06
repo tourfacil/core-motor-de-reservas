@@ -21,6 +21,9 @@ abstract class StatusReservaEnum
     // pagamento ok porem falta preencher dados da reserva
     const FINALIZAR = "FINALIZAR";
 
+    // Foi  barrado pelo operadora do cartão ou anti fraude.
+    const NEGADO = "NEGADO";
+
     const RESERVAS_VALIDAS = [
         self::ATIVA, self::UTILIZADO, self::FINALIZAR
     ];
@@ -30,7 +33,8 @@ abstract class StatusReservaEnum
         self::UTILIZADO => "Utilizado",
         self::CANCELADO => "Cancelado",
         self::AGUARDANDO => "Aguardando",
-        self::FINALIZAR => "Em andamento"
+        self::FINALIZAR => "Em andamento",
+        self::NEGADO => "Negado",
     ];
 
     const CORES_STATUS = [
@@ -38,6 +42,7 @@ abstract class StatusReservaEnum
         self::UTILIZADO => "info",
         self::CANCELADO => "danger",
         self::AGUARDANDO => "warning",
-        self::FINALIZAR => "warning"
+        self::FINALIZAR => "warning",
+        self::NEGADO => 'danger',
     ];
 }
