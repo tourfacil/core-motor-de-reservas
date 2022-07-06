@@ -296,9 +296,20 @@ class CreditCard
             }
 
         } catch ( Exception $e) {
+
+            $message = $e->getMessage();
+
+            $erro = "";
+
+            if(strpos($message, "Card expi") != false) {
+                $erro = "Cartão vencido - " . $message;
+            } else {
+                $erro = $message;
+            }
+
             return [
                 'approved' => false,
-                'erro' => 'Erro transacional',
+                'erro' => $erro,
             ];
         }
     }
