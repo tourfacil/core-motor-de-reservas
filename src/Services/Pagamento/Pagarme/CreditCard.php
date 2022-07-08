@@ -293,6 +293,11 @@ class CreditCard
                     'payment_id' => $data['charges'][0]['id'],
                     'response' => $data
                 ];
+            } else {
+                return [
+                    'approved' => false,
+                    'erro' => $data
+                ];
             }
 
         } catch ( Exception $e) {
