@@ -293,12 +293,28 @@ class CreditCard
                     'payment_id' => $data['charges'][0]['id'],
                     'response' => $data
                 ];
+            } else {
+                return [
+                    'approved' => false,
+                    'erro' => $data
+                ];
             }
 
         } catch ( Exception $e) {
+
+            $message = $e->getMessage();
+
+            $erro = "";
+
+            if(strpos($message, "Card expi") != false) {
+                $erro = "Cartão vencido - " . $message;
+            } else {
+                $erro = $message;
+            }
+
             return [
                 'approved' => false,
-                'erro' => 'Erro transacional',
+                'erro' => $erro,
             ];
         }
     }
