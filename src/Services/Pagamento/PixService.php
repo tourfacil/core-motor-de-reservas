@@ -3,8 +3,11 @@
 namespace TourFacil\Core\Services\Pagamento;
 
 use TourFacil\Core\Enum\MetodoPagamentoEnum;
+use TourFacil\Core\Enum\StatusPixEnum;
 use TourFacil\Core\Models\Cliente;
+use TourFacil\Core\Models\Pedido;
 use TourFacil\Core\Services\Pagamento\Pagarme\Pix;
+use TourFacil\Core\Services\PedidoService;
 
 /**
  * Class PixService
@@ -60,5 +63,21 @@ class PixService
                 'transacao' => $codigo_pix
             ],
         ];
+    }
+
+
+    public static function getAndUpdateSituacaoPix(Pedido $pedido) {
+
+        $status_pix = Pix::getStatus($pedido);
+        
+        if($status_pix == StatusPixEnum::PAGO) {
+            PedidoService::setStatusPedidoPago($pedido);
+        }
+
+        if($status_pix == StatusPixEnum::EXPIRADO) {
+            // Programar essa parte
+        }
+
+        return $status_pix;
     }
 }
