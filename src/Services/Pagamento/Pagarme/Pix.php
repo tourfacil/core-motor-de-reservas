@@ -6,6 +6,9 @@ use Exception;
 use Illuminate\Http\Request;
 use \GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use TourFacil\Core\Enum\StatusPixEnum;
+use TourFacil\Core\Models\Pedido;
+use Carbon\Carbon;
 
 /**
  * Class Pix
@@ -14,8 +17,8 @@ use Illuminate\Support\Facades\Log;
 class Pix
 {
     /** PATH da URl na API */
-    protected $URL = 'https://api.pagar.me/';
-    protected $PREFIX = 'core/v5/orders/';
+    protected static $URL = 'https://api.pagar.me/';
+    protected static $PREFIX = 'core/v5/orders/';
 
     /**
      * Formatado do array que ira para API
@@ -78,7 +81,7 @@ class Pix
      *
      */
     public function setOrderCode(String $codigo) {
-        $this->payload['code'] = '#' . $codigo;
+        $this->payload['code'] = $codigo;
     }
 
     /**
@@ -142,7 +145,7 @@ class Pix
      */
     public function gerarCodigoPix()
     {
-        $link = $this->URL . $this->PREFIX;
+        $link = self::$URL . self::$PREFIX;
 
         $client = new Client();
 
@@ -196,6 +199,54 @@ class Pix
         }
     }
 
+    public static function getStatus(Pedido $pedido) {
+
+        $cod_pedido_pagarme = $pedido->transacaoPedido->transacao->transacao->response->id;
+        $link = self::$URL . self::$PREFIX . $cod_pedido_pagarme;
+
+        $client = new Client();
+
+        $codigo_auth_pagarme = '';
+
+        if(env('APP_ENV') == 'production') {
+            $codigo_auth_pagarme = 'Basic c2tfTnhaVkVNMlZ1amg0OU1QWTo=';
+        } else {
+            $codigo_auth_pagarme = 'Basic c2tfdGVzdF83WExnWkc5SWdobGtWckpROg==';
+        }
+
+        try {
+
+            $response = $client->request('GET', $link, [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Authorization' => $codigo_auth_pagarme,
+                ],
+            ]);
+
+            $data = $response->getBody()->getContents();
+
+            $data = json_decode($data, true);
+
+            $transacao = $data['charges'][0]['last_transaction'];
+
+            self::isPixExpirado($transacao['expires_at']);
+
+            if($transacao['status'] == 'paid') {
+                return StatusPixEnum::PAGO;
+            }
+
+            if(self::isPixExpirado($transacao['expires_at'])) {
+                return StatusPixEnum::EXPIRADO;
+            }
+
+            return StatusPixEnum::PENDENTE;
+            
+        } catch ( Exception $e) {
+            
+            return StatusPixEnum::PENDENTE;
+        }
+    }
+
     /**
      * Retorna somente os numeros de uma string
      *
@@ -228,5 +279,16 @@ class Pix
     private function toCent(string $valor)
     {
         return (int) number_format($valor * 100, 0, "", "");
+    }
+
+    private static function isPixExpirado($expiracao) {
+        $data_expiracao = Carbon::parse($expiracao);
+        $agora = Carbon::now();
+
+        if($agora->isAfter($data_expiracao)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
