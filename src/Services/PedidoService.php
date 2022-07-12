@@ -2,6 +2,7 @@
 
 namespace TourFacil\Core\Services;
 
+use App\Jobs\NovaVendaJob;
 use Carbon\Carbon;
 use TourFacil\Core\Enum\AgendaEnum;
 use TourFacil\Core\Enum\ComissaoStatus;
@@ -624,5 +625,45 @@ class PedidoService
         }
 
         return $pedido;
+    }
+
+
+    /**
+     * Coloca o status do Pedido como PAGO e o Status do pagamento como Autorizado
+     * Também pega todas as reservas do pedido e coloca o status como ATIVA
+     * Deve ser usado em casos onde o pedido feito por PIX ou Boleto que estava aguardando foi pago
+     * ATENÇÃO: Este método não valida se o pagamento foi realmente feito, apenas muda o status
+     * A conferencia deve ser feita anteriormente, pois o método assume que ja tenha sido feita verificação anterior 
+     * 
+     */
+    public static function setStatusPedidoPago(Pedido $pedido) {
+
+        // Cria um array com os novos status que o pedido irá receber
+        $novo_status_pedido = [
+            'status' => StatusPedidoEnum::PAGO,
+            'status_pagamento' => StatusPagamentoEnum::AUTORIZADO,
+        ];
+
+        // Atualiza o pedido com os novos status
+        $pedido->update($novo_status_pedido);
+
+        // Pega todas as reservas do pedido e coloca em um array
+        $reservas = $pedido->reservas;
+
+        // Roda todos as reservas do pedido
+        foreach($reservas as $reserva) {
+
+            // Seta a reserva atual como ativa
+            $reserva->update(['status' => StatusReservaEnum::ATIVA]);
+        }
+
+        // Verifica se o pedido ja esta finalizado
+        // Caso não esteja, ele não envia os e-mails
+        // Caso esteja, ele envia os e-mails para cliente e fornecedor
+        // Caso for encontrada uma reserva não finalizada ele marca ela com uma FLAG
+        if(FinalizacaoService::isPedidoFinalizado($pedido)) {
+            // Dispara o job de nova compra
+            NovaVendaJob::dispatch($pedido);
+        }
     }
 }
