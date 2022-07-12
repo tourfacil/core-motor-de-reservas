@@ -24,6 +24,8 @@ abstract class StatusReservaEnum
     // Foi  barrado pelo operadora do cartão ou anti fraude.
     const NEGADO = "NEGADO";
 
+    const EXPIRADO = "EXPIRADO";
+
     const RESERVAS_VALIDAS = [
         self::ATIVA, self::UTILIZADO, self::FINALIZAR
     ];
@@ -35,6 +37,7 @@ abstract class StatusReservaEnum
         self::AGUARDANDO => "Aguardando",
         self::FINALIZAR => "Em andamento",
         self::NEGADO => "Negado",
+        self::EXPIRADO => "Expirado",
     ];
 
     const CORES_STATUS = [
@@ -43,6 +46,7 @@ abstract class StatusReservaEnum
         self::CANCELADO => "danger",
         self::AGUARDANDO => "warning",
         self::FINALIZAR => "warning",
-        self::NEGADO => 'danger',
+        self::NEGADO => "danger",
+        self::EXPIRADO => "danger",
     ];
 }
