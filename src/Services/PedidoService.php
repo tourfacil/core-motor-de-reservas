@@ -666,4 +666,47 @@ class PedidoService
             NovaVendaJob::dispatch($pedido);
         }
     }
+
+    /**
+     * Coloca o status do Pedido como Expirado e o Status do pagamento como Expirado
+     * Também pega todas as reservas do pedido e coloca o status como Expirado
+     * Também libera toda a disponibilidade que estava alocada nas reservas deste pedido
+     */
+    public static function setStatusPedidoExpirado(Pedido $pedido) {
+        
+        // Cria um array com os novos status que o pedido irá receber
+        $novo_status_pedido = [
+            'status' => StatusPedidoEnum::EXPIRADO,
+            'status_pagamento' => StatusPagamentoEnum::EXPIRADO,
+        ];
+
+        // Atualiza o pedido com os novos status
+        $pedido->update($novo_status_pedido);
+
+        // Pega todas as reservas do pedido e coloca em um array
+        $reservas = $pedido->reservas;
+
+        // Roda todos as reservas do pedido
+        foreach($reservas as $reserva) {
+
+            // Seta a reserva atual como Expirado
+            $reserva->update(['status' => StatusReservaEnum::EXPIRADO]);
+
+            // Diminui a quantidade da disponibilidade na agenda
+            $agenda_servico = $reserva->agendaDataServico;
+
+            // Quantidade disponivel final diminuido a quantidade do carrinho
+            $disponivel = $agenda_servico->disponivel + $reserva->bloqueio_consumido;
+
+            // Status da agenda
+            $status_agenda = ($disponivel >= 1) ? AgendaEnum::ATIVO : AgendaEnum::INDISPONIVEL;
+
+            // Atualiza a quantidade disponivel na agenda
+            $agenda_servico->update([
+                "disponivel" => $agenda_servico->disponivel + $reserva->bloqueio_consumido,
+                "consumido" => $agenda_servico->consumido - $reserva->bloqueio_consumido,
+                "status" => $status_agenda
+            ]);
+        }
+    }
 }
