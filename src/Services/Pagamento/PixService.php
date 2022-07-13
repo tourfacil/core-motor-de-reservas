@@ -37,7 +37,7 @@ class PixService
 
         $cliente = Cliente::where('id', $cliente->id)->with(['endereco'])->get()->first();
 
-        $pix->setExpiresIn(5);
+        $pix->setExpiresIn(env('PIX_TIMEOUT', 5));
         $pix->setItems($array_pedido);
 
         $codigo_pix = $pix->gerarCodigoPix();
@@ -75,7 +75,7 @@ class PixService
         }
 
         if($status_pix == StatusPixEnum::EXPIRADO) {
-            // Programar essa parte
+            PedidoService::setStatusPedidoExpirado($pedido);
         }
 
         return $status_pix;
