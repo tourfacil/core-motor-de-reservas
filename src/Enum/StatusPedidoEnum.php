@@ -30,7 +30,7 @@ abstract class StatusPedidoEnum
     const COR_STATUS = [
         self::PAGO => "success",
         self::CANCELADO => "danger",
-        self::EXPIRADO => "info",
+        self::EXPIRADO => "danger",
         self::AGUARDANDO => "warning",
         self::UTILIZADO => "info",
         self::NEGADO => 'danger',
