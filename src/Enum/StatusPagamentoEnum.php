@@ -14,11 +14,14 @@ abstract class StatusPagamentoEnum
 
     const PENDENTE = "PENDENTE";
 
+    const EXPIRADO = "EXPIRADO";
+
     const STATUS = [
         self::AUTORIZADO => "Autorizado",
         self::ESTORNADO => "Estornado",
         self::NAO_AUTORIZADO => "Não autorizado",
-        self::PENDENTE => "Pendente"
+        self::PENDENTE => "Pendente",
+        self::EXPIRADO => "Expirado",
     ];
 
     const CORES_STATUS = [
@@ -26,5 +29,6 @@ abstract class StatusPagamentoEnum
         self::NAO_AUTORIZADO => "danger",
         self::ESTORNADO => "danger",
         self::PENDENTE => "warning",
+        self::EXPIRADO => "danger",
     ];
 }

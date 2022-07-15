@@ -16,19 +16,23 @@ abstract class StatusPedidoEnum
 
     const AGUARDANDO = "AGUARDANDO";
 
+    const NEGADO = "NEGADO";
+
     const STATUS = [
         self::PAGO => "Pago",
         self::CANCELADO => "Cancelado",
         self::UTILIZADO => "Utilizado",
         self::EXPIRADO => "Expirado",
         self::AGUARDANDO => "Aguardando",
+        self::NEGADO => "Negado",
     ];
 
     const COR_STATUS = [
         self::PAGO => "success",
         self::CANCELADO => "danger",
-        self::EXPIRADO => "info",
+        self::EXPIRADO => "danger",
         self::AGUARDANDO => "warning",
         self::UTILIZADO => "info",
+        self::NEGADO => 'danger',
     ];
 }

@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.0 (15 de Julho de 2022)*
+- Adicionado novo sistema de PIX pela Pagarme.
+- Agora todas as reservas são registradas no sistema. Até as que falham.
 
 ### *v1.3.3 (04 de Julho de 2022)*
 - Substituido raw query por EloquentQuery no relatório de fornecedor

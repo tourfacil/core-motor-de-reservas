@@ -6,16 +6,19 @@ use Exception;
 use Illuminate\Http\Request;
 use \GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use TourFacil\Core\Enum\StatusPixEnum;
+use TourFacil\Core\Models\Pedido;
+use Carbon\Carbon;
 
 /**
- * Class CreditCard
+ * Class Pix
  * @package TourFacil\Core\Services\Pagamento\Getnet\Payment
  */
-class CreditCard
+class Pix
 {
     /** PATH da URl na API */
-    protected $URL = 'https://api.pagar.me/';
-    protected $PREFIX = 'core/v5/orders/';
+    protected static $URL = 'https://api.pagar.me/';
+    protected static $PREFIX = 'core/v5/orders/';
 
     /**
      * Formatado do array que ira para API
@@ -41,51 +44,25 @@ class CreditCard
         'items' => [],
         'payments' => [
             [
-                'credit_card' => [
-                    'card' => [
-                        'billing_address' => [
-                            'line_1'   => '',
-                            'line_2'   => '',
-                            'zip_code' => '',
-                            'city'     => '',
-                            'state'    => '',
-                            'country'  => '',
+                'pix' => [
+                    'expires_in' => 60,
+                    'additional_information' => [
+                        [
+                            'name'  => 'Tourfacil',  
+                            'value' => '1',
                         ],
-                        'number' => '',
-                        'holder_name' => '',
-                        'holder_document' => '',
-                        'exp_month'   => 0,
-                        'exp_year'    => 0,
-                        'cvv'         => '',
                     ],
-                    'operation_type' => 'auth_and_capture',
-                    'installments' =>  1,
-                    'statement_descriptor' => 'Tourfacil',
                 ],
-                'payment_method' => 'credit_card'
+                'payment_method' => 'pix'
             ],
         ],
     ];
 
     /**
-     * Valor da compra em centavos
-     *
-     * @param $valor
-     * @return $this
-     */
-    public function setAmount($valor)
-    {
-        // Valor da compra
-        $this->payload['amount'] = self::toCent($valor);
-
-        return $this;
-    }
-
-    /**
      * Itens que formarão o pedido
      *
      */
-    public function setItems(Array $items, $juros) {
+    public function setItems(Array $items) {
 
         $reservas = $items['reservas'];
 
@@ -97,15 +74,6 @@ class CreditCard
                 'code'        => $reserva['servico_id'], 
             ];
         }
-
-        if($juros > 0) {
-            $this->payload['items'][] = [
-                'amount'      => $this->toCent($juros),
-                'description' => 'Juros',
-                'quantity'    => 1,
-                'code'        => 0, 
-            ];
-        }
     }
 
     /**
@@ -113,7 +81,7 @@ class CreditCard
      *
      */
     public function setOrderCode(String $codigo) {
-        $this->payload['code'] = '#' . $codigo;
+        $this->payload['code'] = $codigo;
     }
 
     /**
@@ -160,96 +128,13 @@ class CreditCard
         $this->payload['customer']['phones']['mobile_phone']['number'] = $telefone_formatado;
     }
 
-    /**
-     * Endereço do cliente
-     *
-     */
-    public function setBillingAdress(String $rua, String $numero, String $bairro, String $cidade, String $estado, String $cep) {
-
-        $billing_address = [ 
-            'line_1' => "$numero, $rua, $bairro",
-            'line_2' => "$numero, $rua, $bairro, $estado",
-            'zip_code' => $this->onlyNumbers($cep),
-            'city' => $cidade,
-            'state' => $estado,
-            'country' => 'BR',
-        ];
-
-        $this->payload['payments'][0]['credit_card']['card']['billing_address'] = $billing_address;
-    }
 
     /**
-     * Número de parcelas
-     *
-     * @param $number_installments
-     * @return $this
+     * Tempo de expiração do código PIX. Informar em minutos
+     * 
      */
-    public function setNumberInstallments(int $number_installments)
-    {
-        $this->payload['payments'][0]['credit_card']['installments'] = $number_installments;
-    }
-
-    /**
-     * Numero do cartao
-     *
-     * @param string $number_card
-     * @return $this
-     */
-    public function setNumberCard(string $number_card)
-    {
-        $this->payload['payments'][0]['credit_card']['card']['number'] = $this->onlyNumbers($number_card);
-    }
-
-    /**
-     * Nome impresso no cartão
-     *
-     * @param string $cardholder_name
-     * @return $this
-     */
-    public function setCardholderName(string $cardholder_name)
-    {
-        $this->payload['payments'][0]['credit_card']['card']['holder_name'] = strtoupper($this->removeAccentuation($cardholder_name));
-    }
-
-    /**
-     * Documento do dono do cartão
-     *
-     */
-    public function setCardholderDocument(String $cardholder_document) {
-        $this->payload['payments'][0]['credit_card']['card']['holder_document'] = $this->onlyNumbers($cardholder_document);
-    }
-
-    /**
-     * Código de segurança
-     *
-     * @param string $security_code
-     * @return $this
-     */
-    public function setSecurityCode(string $security_code)
-    {
-        $this->payload['payments'][0]['credit_card']['card']['cvv'] = $security_code;
-    }
-
-    /**
-     * Mês que expira o cartão
-     *
-     * @param string $expiration_month
-     * @return $this
-     */
-    public function setExpirationMonth(string $expiration_month)
-    {
-        $this->payload['payments'][0]['credit_card']['card']['exp_month'] = intval($expiration_month);
-    }
-
-    /**
-     * Ano que expira o cartão
-     *
-     * @param string $expiration_year
-     * @return $this
-     */
-    public function setExpirationYear(string $expiration_year)
-    {
-        $this->payload['payments'][0]['credit_card']['card']['exp_year'] = intval($expiration_year);
+    public function setExpiresIn(Int $minutos) {
+        $this->payload['payments'][0]['pix']['expires_in'] = $minutos * 60;
     }
 
     /**
@@ -258,9 +143,9 @@ class CreditCard
      * @return array
      * @throws \Exception
      */
-    public function pay()
+    public function gerarCodigoPix()
     {
-        $link = $this->URL . $this->PREFIX;
+        $link = self::$URL . self::$PREFIX;
 
         $client = new Client();
 
@@ -287,16 +172,19 @@ class CreditCard
 
             $data = json_decode($data, true);
 
-            if($data['status'] == 'paid') {
+            if($data['status'] == 'pending') {
+
                 return [
                     'approved' => true,
                     'payment_id' => $data['charges'][0]['id'],
-                    'response' => $data
+                    'response' => $data,
                 ];
+
             } else {
+
                 return [
                     'approved' => false,
-                    'erro' => $data
+                    'erro' => 'Erro desconhecido na geração do código PIX',
                 ];
             }
 
@@ -304,18 +192,58 @@ class CreditCard
 
             $message = $e->getMessage();
 
-            $erro = "";
-
-            if(strpos($message, "Card expi") != false) {
-                $erro = "Cartão vencido - " . $message;
-            } else {
-                $erro = $message;
-            }
-
             return [
                 'approved' => false,
-                'erro' => $erro,
+                'erro' => $message,
             ];
+        }
+    }
+
+    public static function getStatus(Pedido $pedido) {
+
+        $cod_pedido_pagarme = $pedido->transacaoPedido->transacao->transacao->response->id;
+        $link = self::$URL . self::$PREFIX . $cod_pedido_pagarme;
+
+        $client = new Client();
+
+        $codigo_auth_pagarme = '';
+
+        if(env('APP_ENV') == 'production') {
+            $codigo_auth_pagarme = 'Basic c2tfTnhaVkVNMlZ1amg0OU1QWTo=';
+        } else {
+            $codigo_auth_pagarme = 'Basic c2tfdGVzdF83WExnWkc5SWdobGtWckpROg==';
+        }
+
+        try {
+
+            $response = $client->request('GET', $link, [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Authorization' => $codigo_auth_pagarme,
+                ],
+            ]);
+
+            $data = $response->getBody()->getContents();
+
+            $data = json_decode($data, true);
+
+            $transacao = $data['charges'][0]['last_transaction'];
+
+            self::isPixExpirado($transacao['expires_at']);
+
+            if($transacao['status'] == 'paid') {
+                return StatusPixEnum::PAGO;
+            }
+
+            if(self::isPixExpirado($transacao['expires_at'])) {
+                return StatusPixEnum::EXPIRADO;
+            }
+
+            return StatusPixEnum::PENDENTE;
+            
+        } catch ( Exception $e) {
+            
+            return StatusPixEnum::PENDENTE;
         }
     }
 
@@ -351,5 +279,16 @@ class CreditCard
     private function toCent(string $valor)
     {
         return (int) number_format($valor * 100, 0, "", "");
+    }
+
+    private static function isPixExpirado($expiracao) {
+        $data_expiracao = Carbon::parse($expiracao);
+        $agora = Carbon::now();
+
+        if($agora->isAfter($data_expiracao)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
