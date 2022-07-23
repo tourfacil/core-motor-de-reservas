@@ -3,6 +3,7 @@
 use Cache;
 use TourFacil\Core\Enum\StatusPedidoEnum;
 use TourFacil\Core\Enum\StatusReservaEnum;
+use TourFacil\Core\Models\Afiliado;
 use TourFacil\Core\Models\CanalVenda;
 use TourFacil\Core\Models\ComissaoTerminal;
 use TourFacil\Core\Models\Pedido;
@@ -50,7 +51,7 @@ class CanalVendaService
      * @param $canal_venda
      * @return array
      */
-    public static function dashboardCanal($canal_venda)
+    public static function dashboardCanal($canal_venda, Afiliado $afiliado = null)
     {
         $vendas_hoje = 0;
         $vendas_mes = 0;
@@ -60,9 +61,16 @@ class CanalVendaService
         $hoje_formatado = $periodo['hoje']['start']->format('dmY');
 
         // Quantidade de vendas do canal nos ultimos 30 dias
-        $qtd_vendas = Pedido::where('canal_venda_id', $canal_venda->id)->whereBetween('created_at', [
-            $periodo['ultimos_30']['start'], $periodo['ultimos_30']['end']
-        ])->count();
+        $qtd_vendas = Pedido::where('canal_venda_id', $canal_venda->id)
+            ->whereBetween('created_at', [
+                $periodo['ultimos_30']['start'], $periodo['ultimos_30']['end']
+            ]);
+            if($afiliado) {
+                $qtd_vendas->whereHas('reservas', function($query) use ($afiliado) {
+                    $query->where('afiliado_id', $afiliado->id);
+                });
+            }
+            $qtd_vendas = $qtd_vendas->get()->count();
 
         // Vendas do canal
         if($qtd_vendas > 31) {
@@ -72,14 +80,22 @@ class CanalVendaService
                 }
             ])->where('canal_venda_id', $canal_venda->id)->whereBetween('created_at', [
                 $periodo['ultimos_30']['start'], $periodo['ultimos_30']['end']
-            ])->latest()->get();
+            ])->latest();
         } else {
             $vendas = Pedido::with([
                 'reservas.servico' => function($q) {
                     return $q->select('id', 'nome');
                 }
-            ])->where('canal_venda_id', $canal_venda->id)->limit(31)->latest()->get();
+            ])->where('canal_venda_id', $canal_venda->id)->limit(31)->latest();
         }
+
+        if($afiliado) {
+            $vendas->whereHas('reservas', function($query) use ($afiliado) {
+                $query->where('afiliado_id', $afiliado->id);
+            });
+        }
+
+        $vendas = $vendas->get();
 
         // Percorre as ultimas vendas do canal
         foreach ($vendas as $pedido) {
