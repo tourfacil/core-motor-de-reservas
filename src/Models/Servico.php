@@ -200,6 +200,14 @@ class Servico extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tagsInternas()
+    {
+        return $this->hasMany(TagServicoInterno::class)->orderBy('ordem');
+    }
+
+    /**
      * Retira a casa da relação com categoria
      *
      * @return null
