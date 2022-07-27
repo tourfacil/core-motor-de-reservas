@@ -141,6 +141,7 @@ class ServicoCacheService extends DefaultCacheService
         return self::run($cache, __FUNCTION__ . $servico_slug, function () use ($servico_slug, $canal_id) {
             return Servico::with([
                 'fotos',
+                'tagsInternas',
                 'fornecedor' => function($q) {
                     return $q->select(['id', 'termos', 'nome_fantasia']);
                 },
