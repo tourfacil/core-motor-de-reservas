@@ -35,7 +35,7 @@ class CanalVendaCacheService extends DefaultCacheService
         $canal_id = self::getCanalVenda();
 
         return self::run($cache, __FUNCTION__ . $canal_id, function () use ($canal_id) {
-            return CanalVenda::select(['id', 'parcelas_sem_juros'])->find($canal_id);
+            return CanalVenda::select(['id', 'parcelas_sem_juros', 'maximo_parcelas'])->find($canal_id);
         });
     }
 }
