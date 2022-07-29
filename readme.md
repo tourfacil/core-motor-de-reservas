@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.3 (29 de Julho de 2022)*
+- Adicionado sistema de finalização de reservas
+
 ### *v1.4.2 (27 de Julho de 2022)*
 - Adicionado novo pacote de icones do font awesome.
 - Novo sistema de tags de serviço com descrição e icone.
