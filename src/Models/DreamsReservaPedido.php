@@ -3,7 +3,7 @@
 namespace TourFacil\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use TourFacil\Core\Services\Dreams\DreamsAPI;
+use TourFacil\Core\Services\Integracao\NovaXS\Dreams\DreamsAPI;
 
 /**
  * Class DreamsReservaPedido
@@ -45,7 +45,7 @@ class DreamsReservaPedido extends Model
      */
     public function getUrlVoucherAttribute()
     {
-        return DreamsAPI::base_url . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
+        return config('integracao.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
     }
 
     /**
@@ -55,6 +55,6 @@ class DreamsReservaPedido extends Model
      */
     public function getVoucherAsByteAttribute()
     {
-        return DreamsAPI::base_url . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
+        return config('integracao.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
     }
 }
