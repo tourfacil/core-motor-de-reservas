@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.4 (02 de Agosto de 2022)*
+- Adicionado integração com o Dreams
+
 ### *v1.4.3 (29 de Julho de 2022)*
 - Adicionado sistema de finalização de reservas
 
