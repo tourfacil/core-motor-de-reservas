@@ -145,6 +145,14 @@ class ReservaPedido extends Model
         return $this->hasOne(MiniMundoReservaPedido::class);
     }
 
+        /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function dreamsVoucher()
+    {
+        return $this->hasOne(DreamsReservaPedido::class);
+    }
+
     /**
      * @return mixed
      */
