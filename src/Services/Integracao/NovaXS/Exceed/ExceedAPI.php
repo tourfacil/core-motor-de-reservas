@@ -1,4 +1,4 @@
-<?php namespace TourFacil\Core\Services\Exceedpark;
+<?php namespace TourFacil\Core\Services\Integracao\NovaXS\Exceed;
 
 use Exception;
 
@@ -6,42 +6,58 @@ use Exception;
  * Class ExceedParkAPI
  * @package TourFacil\Core\Services\Exceedpark
  */
-class ExceedParkAPI
+class ExceedAPI
 {
     /**
      * Nome do usuário de login da API
      *
      * @var string
      */
-    protected $login = "";
+    protected $login;
 
     /**
      * Senha do usuario na API
      *
      * @var string
      */
-    protected $password = "";
+    protected $password;
 
     /**
      * TOKEN de acesso para API
      *
      * @var string
      */
-    protected $token = "DEA5F95B1D6C74EDD56DF55DF8C9F498BA6F47FA";
+    protected $token;
 
     /**
-     * URL base da API do exceed park usada tbm para impressao do voucher
+     * URL base da API do Olivas usada tbm para impressao do voucher
      *
      * @var string
      */
-    const base_url = "https://travel.exceedpark.com.br/api";
+    protected $base_url;
 
     /**
-     * URL da API do Exceed Park
+     * URL da API do Olivas
      *
      * @var string
      */
-    protected $url = self::base_url . "/v1/140";
+    protected $url;
+
+    /**
+     * Configura a classe de acordo com as configurações que vem do arquivo
+     * de configurações das integrações
+     *
+     * @return void
+     */
+    public function __construct() {
+
+        $this->login = config('integracao.exceed.login');
+        $this->password = config('integracao.exceed.password');
+        $this->token = config('integracao.exceed.token');
+        $this->base_url = config('integracao.exceed.base_url');
+
+        $this->url = $this->base_url . config('integracao.exceed.suffix_url');
+    }
 
     /**
      * Função para realizar POST na API
@@ -131,7 +147,7 @@ class ExceedParkAPI
      */
     public function getAccessList($dados = [])
     {
-        return json_decode($this->consultaAPI(__FUNCTION__, $dados, true), true);
+        return $this->consultaAPI(__FUNCTION__, $dados, true);
     }
 
     /**

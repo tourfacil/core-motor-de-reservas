@@ -1,7 +1,7 @@
 <?php namespace TourFacil\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use TourFacil\Core\Services\Exceedpark\ExceedParkAPI;
+use TourFacil\Core\Services\Integracao\NovaXS\Exceed\ExceedAPI;
 
 /**
  * Class ExceedReservaPedido
@@ -43,7 +43,7 @@ class ExceedReservaPedido extends Model
      */
     public function getUrlVoucherAttribute()
     {
-        return ExceedParkAPI::base_url . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
+        return config('integracao.exceed.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
     }
 
     /**
@@ -53,6 +53,6 @@ class ExceedReservaPedido extends Model
      */
     public function getVoucherAsByteAttribute()
     {
-        return ExceedParkAPI::base_url . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
+        return config('integracao.exceed.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
     }
 }
