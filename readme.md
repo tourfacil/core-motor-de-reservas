@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.5 (08 de Agosto de 2022)*
+- Adicionado integração com o Exceed
+
 ### *v1.4.4 (02 de Agosto de 2022)*
 - Adicionado integração com o Dreams
 
