@@ -42,10 +42,10 @@ class AlpenService
     protected $path = "integracao/alpen/";
 
     /** @var string */
-    const CRIANCA = "crian";
+    const CRIANCA = "Kids";
 
     /** @var string */
-    const ADULTO = "pa";
+    const ADULTO = "Alpen Park";
 
     /**
      * ATENÇÃO NÃO MUDAR A ORDEM
@@ -201,7 +201,7 @@ class AlpenService
             if($quantidade_reserva->valor_net > 0) {
 
                 /** Recupera os dados para crianca pagamente */
-                if(Str::contains($nome_variacao, self::CRIANCA)) {
+                if(Str::contains($nome_variacao, "pagante")) {
                     $product_path = $this->servicosDisponiveis[Str::slug(self::CRIANCA, "_")];
                     $productsArray[] = [
                         "path" => $product_path,
@@ -215,7 +215,7 @@ class AlpenService
                 }
 
                 /** Recupera os dados para o adulto */
-                if(Str::contains($nome_variacao, self::ADULTO)) {
+                if(Str::contains($nome_variacao, "adulto")) {
                     $product_path = $this->servicosDisponiveis[Str::slug(self::ADULTO, "_")];
                     $productsArray[] = [
                         "path" => $product_path,

@@ -154,6 +154,14 @@ class ReservaPedido extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function alpenVoucher()
+    {
+        return $this->hasOne(AlpenReservaPedido::class);
+    }
+
+    /**
      * @return mixed
      */
     public function getStatusReservaAttribute()
