@@ -20,6 +20,8 @@ abstract class IntegracaoEnum
 
     const DREAMS = "DREAMS";
 
+    const ALPEN = "ALPEN";
+
     const INTEGRACOES = [
         self::NAO => "Não possui",
         self::SNOWLAND => "Snowland",
@@ -27,6 +29,7 @@ abstract class IntegracaoEnum
         self::OLIVAS => "Olivas",
         self::MINI_MUNDO => "Mini Mundo",
         self::DREAMS => "Dreams",
+        self::ALPEN => "Alpen Park",
     ];
 
     const INTEGRACOES_EXTERNAS = [
