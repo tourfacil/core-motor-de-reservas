@@ -2,9 +2,11 @@
 
 namespace TourFacil\Core\Services\Integracao\NovaXS\FantasticHouse;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use TourFacil\Core\Enum\IntegracaoEnum;
 use TourFacil\Core\Models\AlpenReservaPedido;
+use TourFacil\Core\Models\FantasticHouseReservaPedido;
 use TourFacil\Core\Models\ReservaPedido;
 use TourFacil\Core\Services\Integracao\NovaXS\Alpen\AlpenAPI;
 
@@ -129,7 +131,7 @@ class FantasticHouseService
         ]);
 
         // Salva as informações de impressão no banco
-        AlpenReservaPedido::create([
+        FantasticHouseReservaPedido::create([
             'reserva_pedido_id' => $this->reserva->id,
             'bill_id' => $this->buyToBillFor['id'],
             'data_servico' => $this->reserva->agendaDataServico->data,
@@ -324,15 +326,15 @@ class FantasticHouseService
      * @param AlpenReservaPedido $olivasReservaPedido
      * @return array
      */
-    public function cancelarVoucher(AlpenReservaPedido $alpenReservaPedido)
+    public function cancelarVoucher(FantasticHouseReservaPedido $fantasticHouseReservaPedido)
     {
         // Solicita o cancelamento ao olivas
         $cancelado = $this->fantastic_house->cancelBill([
-            'bill' => $alpenReservaPedido->bill_id
+            'bill' => $fantasticHouseReservaPedido->bill_id
         ]);
 
         // atualiza o status do voucher para cancelado
-        $alpenReservaPedido->update(['status' => IntegracaoEnum::VOUCHER_CANCELADO]);
+        $fantasticHouseReservaPedido->update(['status' => IntegracaoEnum::VOUCHER_CANCELADO]);
 
         return ['cancelamento' => $cancelado];
     }
