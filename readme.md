@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.7 (11 de Agosto de 2022)*
+- Adicionado integração com o Fantastic House
+
 ### *v1.4.6 (08 de Agosto de 2022)*
 - Adicionado integração com o Alpen Park
 
