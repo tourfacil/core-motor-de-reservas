@@ -162,6 +162,14 @@ class ReservaPedido extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function fantasticHouseVoucher()
+    {
+        return $this->hasOne(FantasticHouseReservaPedido::class);
+    }
+
+    /**
      * @return mixed
      */
     public function getStatusReservaAttribute()
