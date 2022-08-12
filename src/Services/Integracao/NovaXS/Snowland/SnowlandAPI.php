@@ -54,7 +54,7 @@ class SnowlandAPI
         $this->login = config('integracao.snowland.login');
         $this->password = config('integracao.snowland.password');
         $this->token = config('integracao.snowland.token');
-        $this->base_url = config('integracao.base_url');
+        $this->base_url = config('integracao.snowland.base_url');
 
         $this->url = $this->base_url . config('integracao.snowland.suffix_url');
     }
@@ -76,7 +76,7 @@ class SnowlandAPI
                     "method" => $metodo,
                     "token" => $this->token,
                     "login" => $this->login,
-                    // "password" => $this->password
+                    "password" => $this->password
                 ];
 
                 // Juntamos os dois arrays
@@ -147,7 +147,7 @@ class SnowlandAPI
      */
     public function getAccessList($dados = [])
     {
-        return json_decode($this->consultaAPI(__FUNCTION__, $dados, true), true);
+        return $this->consultaAPI(__FUNCTION__, $dados, true);
     }
 
     /**
