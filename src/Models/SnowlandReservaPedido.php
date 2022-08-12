@@ -1,7 +1,7 @@
 <?php namespace TourFacil\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use TourFacil\Core\Services\Snowland\SnowlandAPI;
+use TourFacil\Core\Services\Integracao\NovaXS\Snowland\SnowlandAPI;
 
 /**
  * Class SnowlandReservaPedido

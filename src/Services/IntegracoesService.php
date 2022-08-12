@@ -2,7 +2,7 @@
 
 use TourFacil\Core\Enum\IntegracaoEnum;
 use TourFacil\Core\Models\ReservaPedido;
-use TourFacil\Core\Services\Snowland\SnowlandService;
+use TourFacil\Core\Services\Integracao\NovaXS\Snowland\SnowlandService;
 
 /**
  * Class IntegracoesService

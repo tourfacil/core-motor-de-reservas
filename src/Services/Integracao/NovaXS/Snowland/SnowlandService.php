@@ -1,11 +1,11 @@
-<?php namespace TourFacil\Core\Services\Snowland;
+<?php namespace TourFacil\Core\Services\Integracao\NovaXS\Snowland;
 
 use Exception;
 use Illuminate\Support\Str;
+use Storage;
 use TourFacil\Core\Enum\IntegracaoEnum;
 use TourFacil\Core\Models\ReservaPedido;
 use TourFacil\Core\Models\SnowlandReservaPedido;
-use Storage;
 
 /**
  * Class SnowlandService
@@ -41,7 +41,7 @@ class SnowlandService
     protected $getAccessList;
 
     /** @var string  */
-    protected $path = "/snowland/";
+    protected $path = "integracao/snowland/";
 
     /** @var string */
     const CRIANCA = "crianca";
