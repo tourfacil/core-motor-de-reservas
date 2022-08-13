@@ -1,11 +1,11 @@
-<?php namespace TourFacil\Core\Services\Snowland;
+<?php namespace TourFacil\Core\Services\Integracao\NovaXS\Snowland;
 
 use Exception;
 use Illuminate\Support\Str;
+use Storage;
 use TourFacil\Core\Enum\IntegracaoEnum;
 use TourFacil\Core\Models\ReservaPedido;
 use TourFacil\Core\Models\SnowlandReservaPedido;
-use Storage;
 
 /**
  * Class SnowlandService
@@ -41,10 +41,10 @@ class SnowlandService
     protected $getAccessList;
 
     /** @var string  */
-    protected $path = "/snowland/";
+    protected $path = "integracao/snowland/";
 
     /** @var string */
-    const CRIANCA = "crianca";
+    const CRIANCA = "cria";
 
     /** @var string */
     const ADULTO = "adulto";
@@ -53,7 +53,7 @@ class SnowlandService
     const MELHOR_IDADE = "melhor idade";
 
     /** @var string */
-    const SENIOR = "senior";
+    const SENIOR = "sênior";
 
     /**
      * ATENÇÃO NÃO MUDAR A ORDEM
@@ -72,6 +72,7 @@ class SnowlandService
     {
         $this->reserva = $reservaPedido;
         $this->snowland = new SnowlandAPI();
+
         // Nome do log
         $this->path = $this->path . "{$reservaPedido->id}.txt";
         // Cria um arquivo de log
@@ -100,6 +101,7 @@ class SnowlandService
         Storage::append($this->path, "productsArray: " . json_encode($this->productsArray));
 
         // Retorna os dados do comprador
+        $this->personAsString = $this->personAsString($this->reserva->pedido->cliente);
         $this->personAsString = $this->personAsString($this->reserva->pedido->cliente);
 
         // Bloqueio de compra
@@ -240,7 +242,7 @@ class SnowlandService
                 }
 
                 /** Recupera o ID do serviço para melhor idade */
-                if(Str::contains($nome_variacao, self::MELHOR_IDADE)) {
+                if(Str::contains( $nome_variacao, 'nior')) {
                     $product_path = $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")];
                     $productsArray[] = [
                         "path" => $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")],

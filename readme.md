@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.8 (13 de Agosto de 2022)*
+- Adicionado integração com o Snowland.
+
 ### *v1.4.7 (11 de Agosto de 2022)*
 - Adicionado integração com o Fantastic House
 
