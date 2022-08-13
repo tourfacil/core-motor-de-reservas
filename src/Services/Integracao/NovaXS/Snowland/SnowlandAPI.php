@@ -1,4 +1,4 @@
-<?php namespace TourFacil\Core\Services\Snowland;
+<?php namespace TourFacil\Core\Services\Integracao\NovaXS\Snowland;
 
 use Exception;
 
@@ -13,35 +13,51 @@ class SnowlandAPI
      *
      * @var string
      */
-    protected $login = "tour.facil";
+    protected $login;
 
     /**
      * Senha do usuario na API
      *
      * @var string
      */
-    protected $password = "abc123";
+    protected $password;
 
     /**
      * TOKEN de acesso para API
      *
      * @var string
      */
-    protected $token = "";
+    protected $token;
 
     /**
-     * URL base da API do snowland usada tbm para impressao do voucher
+     * URL base da API usada tbm para impressao do voucher
      *
      * @var string
      */
-    const base_url = "http://travel.snowland.com.br/api";
+    protected $base_url;
 
     /**
-     * URL da API do Snowland
+     * URL da API
      *
      * @var string
      */
-    protected $url = self::base_url . "/v1/99";
+    protected $url;
+
+    /**
+     * Configura a classe de acordo com as configurações que vem do arquivo
+     * de configurações das integrações
+     *
+     * @return void
+     */
+    public function __construct() {
+
+        $this->login = config('integracao.snowland.login');
+        $this->password = config('integracao.snowland.password');
+        $this->token = config('integracao.snowland.token');
+        $this->base_url = config('integracao.snowland.base_url');
+
+        $this->url = $this->base_url . config('integracao.snowland.suffix_url');
+    }
 
     /**
      * Função para realizar POST na API
@@ -60,7 +76,7 @@ class SnowlandAPI
                     "method" => $metodo,
                     "token" => $this->token,
                     "login" => $this->login,
-                    // "password" => $this->password
+                    "password" => $this->password
                 ];
 
                 // Juntamos os dois arrays
@@ -131,7 +147,7 @@ class SnowlandAPI
      */
     public function getAccessList($dados = [])
     {
-        return json_decode($this->consultaAPI(__FUNCTION__, $dados, true), true);
+        return $this->consultaAPI(__FUNCTION__, $dados, true);
     }
 
     /**
@@ -156,3 +172,4 @@ class SnowlandAPI
         return $this->consultaAPI(__FUNCTION__, $dados, true);
     }
 }
+
