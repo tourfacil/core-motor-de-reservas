@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.9 (16 de Agosto de 2022)*
+- Adicionado sistema de afiliados com comissões registradas.
+
 ### *v1.4.8 (13 de Agosto de 2022)*
 - Adicionado integração com o Snowland.
 
