@@ -5,11 +5,17 @@ namespace TourFacil\Core\Services;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use TourFacil\Core\Enum\StatusReservaEnum;
+use TourFacil\Core\Models\Afiliado;
 use TourFacil\Core\Models\ReservaPedido;
 
 abstract class AfiliadoService
 {
-    public static function getComissaoAfiliado(ReservaPedido  $reserva) {
+    /**
+     * Calcula a comissão do afiliado
+     * @param ReservaPedido $reserva
+     * @return float|int
+     */
+    public static function getComissaoAfiliado(ReservaPedido $reserva) {
 
         if($reserva->afiliado_id == null) {
             return 0;
@@ -36,6 +42,11 @@ abstract class AfiliadoService
         }
     }
 
+    /**
+     * Retorna qual o percentual o afiliado ganhará na reserva
+     * @param ReservaPedido $reserva
+     * @return int
+     */
     public static function getComissaoPercentual(ReservaPedido $reserva) {
 
         if($reserva->afiliado_id == null) {
@@ -60,11 +71,22 @@ abstract class AfiliadoService
         }
     }
 
+    /**
+     * Faz a regra de três para saber o valor que o afiliado ganhará
+     * @param $valor
+     * @param $porcentagem
+     * @return float|int
+     */
     private static function regraTres($valor, $porcentagem) {
         $porcentagem = str_replace(",", '.', $porcentagem);
         return ($valor * $porcentagem) / 100;
     }
 
+    /**
+     * Faz os cálculos e retorna os dados necessários para o relatório de afiliados geral
+     * @param Request $request
+     * @return array
+     */
     public static function relatorioAfiliados(Request $request) {
 
         // Array para guardar os dados necessários
@@ -127,6 +149,73 @@ abstract class AfiliadoService
                 $dados['afiliados'][$reserva->afiliado->nome_fantasia]['valor_comissao'] += $comissao_afiliado;
                 $dados['afiliados'][$reserva->afiliado->nome_fantasia]['quantidade'] += $reserva->quantidade;
             }
+        }
+
+        return $dados;
+    }
+
+    /**
+     * Faz os cálculos e retorna os dados necessários para o relatório de afiliados especifico
+     * @param Request $request
+     * @return array
+     */
+    public static function relatorioAfiliado(Request $request) {
+
+        // Recupera informações da URL
+        $afiliado_id = $request->get('afiliado_id');
+        $data_inicio = $request->get('inicio');
+        $data_final = $request->get('final');
+        // O tipo de operação é para decidir se o relatório será por data de venda ou utilização
+        $tipo_operacao = $request->get('tipo_operacao');
+
+        $afiliado = Afiliado::find($afiliado_id);
+
+        // Transforma as datas para o modelo Carbon
+        $data_inicio = \Carbon\Carbon::parse($data_inicio);
+        $data_final =  \Carbon\Carbon::parse($data_final);
+
+        // Busca as reservas do afiliado pela data da venda ou utilização
+
+        if($tipo_operacao == "UTILIZACAO") {
+
+            // Busca todas as reservas do afiliado pelo periodo de utilização
+            $reservas = ReservaPedido::where('afiliado_id', $afiliado->id)
+                ->whereHas('agendaDataServico', function($query) use ($data_inicio, $data_final) {
+                    $query->whereDate('data', '>=', $data_inicio);
+                    $query->whereDate('data', '<=', $data_final);
+                })
+                ->whereIn('status', StatusReservaEnum::RESERVAS_VALIDAS)
+                ->with(['servico', 'servico.categorias'])
+                ->get();
+
+        } else if($tipo_operacao == "VENDA") {
+
+            // Busca todas as reservas do afiliado pelo periodo de venda
+            $reservas = ReservaPedido::where('afiliado_id', $afiliado->id)
+                ->whereHas('agendaDataServico')
+                ->whereDate('created_at', '>=', $data_inicio)
+                ->whereDate('created_at', '<=', $data_final)
+                ->whereIn('status', StatusReservaEnum::RESERVAS_VALIDAS)
+                ->with(['servico', 'servico.categorias'])
+                ->get();
+        }
+
+        // Monta o ARRAY com todos os dados necessários para imprimir a página
+        $dados = [
+            'afiliado' => $afiliado,
+            'data_inicio' => $data_inicio,
+            'data_final' => $data_final,
+            'reservas' => $reservas,
+            'tipo_operacao' => $tipo_operacao,
+            'total_comissionado' => 0,
+            'total_vendido' => 0,
+            'quantidade_reservas' => 0,
+        ];
+
+        foreach($reservas as $reserva) {
+            $dados['total_comissionado'] += AfiliadoService::getComissaoAfiliado($reserva);
+            $dados['total_vendido'] += $reserva->valor_total;
+            $dados['quantidade_reservas']++;
         }
 
         return $dados;
