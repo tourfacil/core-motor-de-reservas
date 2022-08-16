@@ -20,7 +20,11 @@ class Afiliado extends Model
         'bairro',
         'cidade',
         'estado',
-        'comissao'
+        'comissao',
+        'comissao_passeios',
+        'comissao_ingressos',
+        'comissao_gastronomia',
+        'comissao_transfer',
     ];
 
     protected function reservaPedidos() {
