@@ -151,6 +151,10 @@ abstract class AfiliadoService
             }
         }
 
+        // Transforma o array de afiliados em Collection para organizar por valor de venda
+        $dados['afiliados'] = collect($dados['afiliados']);
+        $dados['afiliados'] = $dados['afiliados']->sortByDesc('valor_venda');
+
         return $dados;
     }
 
