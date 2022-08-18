@@ -323,6 +323,113 @@ class AgendaService
         return ['events' => []];
     }
 
+    public static function disponibilidadeDia(AgendaDataServico $data_agenda, Servico $servico) {
+
+        // Pega o desconto caso tenha
+        $desconto = $servico->descontoAtivo;
+
+        // Configuracoes da agenda
+        $configuracoes_agenda = $data_agenda->agendaServico->substituicoes_agenda;
+
+        // Substituicoes agenda
+        $substitui_net = $configuracoes_agenda[AgendaEnum::SUBSTITUI_NET] ?? null;
+        $substitui_venda = $configuracoes_agenda[AgendaEnum::SUBSTITUI_VENDA] ?? null;
+
+        $variacaoes = [];
+        $valor_venda_data = 0;
+
+        // Calcula o valor de venda das variacoes
+        foreach ($servico->variacaoServicoAtivas as $variacao) {
+
+            // Valor net de cada variacao
+            $net_variacao =  ($variacao->percentual / 100) * $data_agenda->valor_net;
+
+            // Verifica se possui valores no NET para substituir
+            if(is_array($substitui_net)) {
+                $net_variacao = (string) number_format($net_variacao, 2, ".", "");
+                $net_variacao = ($substitui_net[$net_variacao]) ?? $net_variacao;
+            }
+
+            // Valor de venda da variacao
+            $venda_variacao = $net_variacao * $variacao->markup;
+
+            // Verifica se o servico possui corretagem de valor
+            if($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
+
+                // Verifica se a corretagem é em percentual
+                if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
+                    $venda_variacao += ($venda_variacao / 100 * $servico->corretagem);
+                }
+
+                // Verifica se a corretagem é em valor fixo
+                if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
+                    $venda_variacao += $servico->corretagem;
+                }
+            }
+
+            // Verifica se possui valores da venda para substituir
+            if(is_array($substitui_venda)) {
+                $venda_variacao = (string) number_format($venda_variacao, 2, ".", "");
+                $venda_variacao = $substitui_venda[$venda_variacao] ?? $venda_variacao;
+            }
+
+            // Salva o maior valor de venda ou salva o valor da variacao destaque
+            $valor_venda_data = (
+                $venda_variacao > $valor_venda_data || $variacao->destaque == VariacaoServicoEnum::VARIACAO_DESTAQUE
+            ) ? $venda_variacao : $valor_venda_data;
+
+            // Caso a variacao deva ser vendida por 1 real
+            if($variacao->percentual == 0 && $variacao->markup == AgendaEnum::MARKUP_UM_REAL) {
+                $venda_variacao = 1;
+            }
+
+            // Guarda o valor sem desconto
+            $valor_original = $venda_variacao;
+
+            // Aplica o desconto caso tenha
+            $venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
+
+            // Dados para o array
+            $variacaoes[] = [
+                'variacao_id' => $variacao->id,
+                'variacao' => $variacao->nome,
+                'descricao' => $variacao->descricao,
+                'bloqueio' => $variacao->consome_bloqueio,
+                'valor_venda' => (float) number_format($venda_variacao, 2, ".", ""),
+                'valor_venda_original' => (float) number_format($valor_original, 2, ".", ""),
+                'valor_venda_brl' => formataValor($venda_variacao),
+                'valor_venda_brl_original' => formataValor($valor_original),
+            ];
+        }
+
+        $data_agenda_valor_venda_original = $data_agenda->valor_venda;
+        $valor_venda_data_original = $valor_venda_data;
+        $data_agenda_valor_venda = DescontoService::aplicarDescontoValor($desconto, $data_agenda->valor_venda);
+        $valor_venda_data = DescontoService::aplicarDescontoValor($desconto, $valor_venda_data);
+
+        // Dados da agenda
+        $retorno['disponibilidade'][] = [
+            'data_servico_id' => $data_agenda->id,
+            'data' => $data_agenda->data->format('Y-m-d'),
+            'valor_venda' => (float) number_format($data_agenda_valor_venda, 2, ".", ""),
+            'valor_venda_original' => (float) number_format($data_agenda_valor_venda_original, 2, ".", ""),
+            'valor_venda_brl' => formataValor($valor_venda_data),
+            'valor_venda_brl_original' => formataValor($valor_venda_data_original),
+            'variacoes' => $variacaoes,
+            'disponibilidade' => $data_agenda->disponivel
+        ];
+
+        // Array para o calendario
+        $retorno['events'][] = [
+            'date' => $data_agenda->data->format('Y-m-d') . " 00:00:00",
+            'text' => "R$ " . formataValor($valor_venda_data),
+            'text_original' => "R$ " . formataValor($valor_venda_data_original),
+        ];
+
+
+        return $retorno;
+    }
+
     /**
      * Cadastrar datas na agenda
      *
