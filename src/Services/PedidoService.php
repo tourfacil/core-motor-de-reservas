@@ -14,6 +14,7 @@ use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Enum\TerminaisEnum;
 use TourFacil\Core\Models\AgendaDataServico;
 use TourFacil\Core\Models\CupomDesconto;
+use TourFacil\Core\Models\Desconto;
 use TourFacil\Core\Models\Pedido;
 use TourFacil\Core\Models\Servico;
 use TourFacil\Core\Services\Pagamento\DescontoPIXService;
@@ -426,6 +427,7 @@ class PedidoService
             "valor_total" => DescontoPIXService::calcularValorPixDesconto($pedido_array['valor_total']),
             "canal_venda_id" => $canal_venda_id,
             "juros" => 0,
+            "desconto_pix" => DescontoPIXService::calcularValorPixDescontado($pedido_array['valor_total']),
             "origem" => $origem,
             "status" => StatusPedidoEnum::AGUARDANDO,
             "status_pagamento" => StatusPagamentoEnum::PENDENTE,
@@ -465,6 +467,7 @@ class PedidoService
                 "agenda_data_servico_id" => $reserva_carrinho["agenda_data_servico_id"],
                 "valor_total" => DescontoPIXService::calcularValorPixDesconto($reserva_carrinho["valor_total"]),
                 "valor_net" => $reserva_carrinho["valor_net"],
+                "desconto_pix" => DescontoPIXService::calcularValorPixDescontado($reserva_carrinho['valor_total']),
                 "quantidade" => $reserva_carrinho["quantidade"],
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
                 "status" => StatusReservaEnum::AGUARDANDO,

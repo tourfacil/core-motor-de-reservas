@@ -54,4 +54,14 @@ abstract class DescontoPIXService
 
         return true;
     }
+
+    /**
+     * Retorna o valor que foi descontado.
+     * Ex: Se o total for R$ 1.000,00 e haver um desconto 10%. O valor retornado será de R$ 100,00
+     * @param $valor
+     * @return int|mixed
+     */
+    public static function calcularValorPixDescontado($valor) {
+        return number_format($valor - self::calcularValorPixDesconto($valor), 2);
+    }
 }
