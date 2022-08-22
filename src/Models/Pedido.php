@@ -24,6 +24,7 @@ class Pedido extends Model
         'canal_venda_id',
         'valor_total',
         'juros',
+        'desconto_pix',
         'origem',
         'status',
         'status_pagamento',
