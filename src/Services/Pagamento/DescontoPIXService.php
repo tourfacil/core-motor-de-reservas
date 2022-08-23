@@ -11,8 +11,8 @@ abstract class DescontoPIXService
      * Config feita direto na .ENV
      * @return bool
      */
-    private static function isDescontoPixAtivo() {
-        return env('PIX_DESCONTO_ENABLED') === true;
+    public static function isDescontoPixAtivo() {
+        return env('PIX_DESCONTO_ENABLED') === true && env('PIX_DESCONTO_PERCENTUAL') > 0;
     }
 
     /**
