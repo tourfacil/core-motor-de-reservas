@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace TourFacil\Core\Services\Pagamento\Pagarme;
 
@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use TourFacil\Core\Enum\StatusPixEnum;
 use TourFacil\Core\Models\Pedido;
 use Carbon\Carbon;
+use TourFacil\Core\Services\Pagamento\DescontoPIXService;
 
 /**
  * Class Pix
@@ -48,7 +49,7 @@ class Pix
                     'expires_in' => 60,
                     'additional_information' => [
                         [
-                            'name'  => 'Tourfacil',  
+                            'name'  => 'Tourfacil',
                             'value' => '1',
                         ],
                     ],
@@ -68,10 +69,10 @@ class Pix
 
         foreach($reservas as $reserva) {
             $this->payload['items'][] = [
-                'amount'      => $this->toCent($reserva['valor_total']),
+                'amount'      => $this->toCent(DescontoPIXService::calcularValorPixDesconto($reserva['valor_total'])),
                 'description' => $reserva['servico'],
                 'quantity'    => 1,
-                'code'        => $reserva['servico_id'], 
+                'code'        => $reserva['servico_id'],
             ];
         }
     }
@@ -131,7 +132,7 @@ class Pix
 
     /**
      * Tempo de expiração do código PIX. Informar em minutos
-     * 
+     *
      */
     public function setExpiresIn(Int $minutos) {
         $this->payload['payments'][0]['pix']['expires_in'] = $minutos * 60;
@@ -240,9 +241,9 @@ class Pix
             }
 
             return StatusPixEnum::PENDENTE;
-            
+
         } catch ( Exception $e) {
-            
+
             return StatusPixEnum::PENDENTE;
         }
     }
