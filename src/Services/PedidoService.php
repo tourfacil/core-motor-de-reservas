@@ -14,8 +14,10 @@ use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Enum\TerminaisEnum;
 use TourFacil\Core\Models\AgendaDataServico;
 use TourFacil\Core\Models\CupomDesconto;
+use TourFacil\Core\Models\Desconto;
 use TourFacil\Core\Models\Pedido;
 use TourFacil\Core\Models\Servico;
+use TourFacil\Core\Services\Pagamento\DescontoPIXService;
 
 /**
  * Class PedidoService
@@ -422,9 +424,10 @@ class PedidoService
         $pedido = Pedido::create([
             "cliente_id" => $cliente->id,
             "codigo" => $pedido_array['codigo_pedido'],
-            "valor_total" => $pedido_array['valor_total'],
+            "valor_total" => DescontoPIXService::calcularValorPixDesconto($pedido_array['valor_total']),
             "canal_venda_id" => $canal_venda_id,
             "juros" => 0,
+            "desconto_pix" => DescontoPIXService::calcularValorPixDescontado($pedido_array['valor_total']),
             "origem" => $origem,
             "status" => StatusPedidoEnum::AGUARDANDO,
             "status_pagamento" => StatusPagamentoEnum::PENDENTE,
@@ -462,8 +465,9 @@ class PedidoService
                 "servico_id" => $reserva_carrinho["servico_id"],
                 "fornecedor_id" => $reserva_carrinho["fornecedor_id"],
                 "agenda_data_servico_id" => $reserva_carrinho["agenda_data_servico_id"],
-                "valor_total" => $reserva_carrinho["valor_total"],
+                "valor_total" => DescontoPIXService::calcularValorPixDesconto($reserva_carrinho["valor_total"]),
                 "valor_net" => $reserva_carrinho["valor_net"],
+                "desconto_pix" => DescontoPIXService::calcularValorPixDescontado($reserva_carrinho['valor_total']),
                 "quantidade" => $reserva_carrinho["quantidade"],
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
                 "status" => StatusReservaEnum::AGUARDANDO,
@@ -482,7 +486,7 @@ class PedidoService
                     "valor_net" => $variacaoes_reserva["valor_net"],
                 ]);
             }
-           
+
             // Diminui a quantidade da disponibilidade na agenda
             $agenda_servico = AgendaDataServico::find($reserva_carrinho["agenda_data_servico_id"]);
 
@@ -633,8 +637,8 @@ class PedidoService
      * Também pega todas as reservas do pedido e coloca o status como ATIVA
      * Deve ser usado em casos onde o pedido feito por PIX ou Boleto que estava aguardando foi pago
      * ATENÇÃO: Este método não valida se o pagamento foi realmente feito, apenas muda o status
-     * A conferencia deve ser feita anteriormente, pois o método assume que ja tenha sido feita verificação anterior 
-     * 
+     * A conferencia deve ser feita anteriormente, pois o método assume que ja tenha sido feita verificação anterior
+     *
      */
     public static function setStatusPedidoPago(Pedido $pedido) {
 
@@ -673,7 +677,7 @@ class PedidoService
      * Também libera toda a disponibilidade que estava alocada nas reservas deste pedido
      */
     public static function setStatusPedidoExpirado(Pedido $pedido) {
-        
+
         // Cria um array com os novos status que o pedido irá receber
         $novo_status_pedido = [
             'status' => StatusPedidoEnum::EXPIRADO,

@@ -24,6 +24,7 @@ class ReservaPedido extends Model
         "agenda_data_servico_id",
         "valor_total",
         "valor_net",
+        'desconto_pix',
         "quantidade",
         "bloqueio_consumido",
         "status",
