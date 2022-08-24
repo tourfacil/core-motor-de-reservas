@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.12 (24 de Agosto de 2022)*
+- Adicionado fillables de título de página de serviços e categorias
+
 ### *v1.4.11 (23 de Agosto de 2022)*
 - Novo sistema de descontos por PIX.
 - Sistema de cupons adaptado para não ter incompatibilidade com desconto de PIX.
