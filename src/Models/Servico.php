@@ -45,6 +45,7 @@ class Servico extends Model
         'tipo_corretagem',
         'corretagem',
         'horario',
+        'titulo_pagina',
         'descricao_curta',
         'descricao_completa',
         'regras',

@@ -22,6 +22,7 @@ class Categoria extends Model
         'destino_id',
         'nome',
         'descricao',
+        'titulo_pagina',
         'foto',
         'valor_minimo',
         'posicao_menu',
@@ -47,6 +48,7 @@ class Categoria extends Model
     const ARRAY_UPDATE = [
         'nome',
         'descricao',
+        'titulo_pagina',
         'posicao_menu',
         'tipo'
     ];
