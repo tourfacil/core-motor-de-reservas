@@ -36,6 +36,7 @@ class Destino extends Model
         'descricao_curta',
         'descricao_completa',
         'valor_minimo',
+        'titulo_pagina',
     ];
 
     /**
