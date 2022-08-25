@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.13 (24 de Agosto de 2022)*
+- Adicionado fillable de título de página de destino.
+
 ### *v1.4.12 (24 de Agosto de 2022)*
 - Adicionado fillables de título de página de serviços e categorias
 

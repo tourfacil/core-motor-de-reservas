@@ -33,7 +33,8 @@ class FornecedorService
             'servico' => function($q) {
                 return $q->select(['id', 'nome']);
             }
-        ])->where('fornecedor_id', $fornecedor_id)->latest()->get();
+        ])->whereIn('status', [StatusReservaEnum::ATIVA, StatusReservaEnum::CANCELADO, StatusReservaEnum::UTILIZADO])
+        ->where('fornecedor_id', $fornecedor_id)->latest()->get();
 
         // Percorre as ultimas vendas do fornecedor
         foreach ($reservas as $reserva) {
@@ -93,6 +94,7 @@ class FornecedorService
                 return $q->select(['id', 'nome']);
             }
         ])->where('fornecedor_id', $fornecedor)
+            ->whereIn('status', [StatusReservaEnum::ATIVA, StatusReservaEnum::CANCELADO, StatusReservaEnum::UTILIZADO])
             ->whereBetween('created_at', [$pp_start, $pp_end])->latest()->get();
     }
 
@@ -232,7 +234,7 @@ class FornecedorService
         $query = ReservaPedido::with($relacoes)->where('fornecedor_id', $fornecedor_id)
             ->whereHas('agendaDataServico', function($query) use ($inicio, $final) {
                 $query->whereBetween('data', [$inicio, $final]);
-            });
+            })->whereIn('status', [StatusReservaEnum::UTILIZADO, StatusReservaEnum::ATIVA, StatusReservaEnum::CANCELADO]);
 
         // Filtra por servicos
         if(is_array($servicos)) {
