@@ -1,47 +1,59 @@
-<?php namespace TourFacil\Core\Services\Exceedpark;
+<?php
 
-use Exception;
+namespace TourFacil\Core\Services\Integracao\NovaXS\FantasticHouse;
 
-/**
- * Class ExceedParkAPI
- * @package TourFacil\Core\Services\Exceedpark
- */
-class ExceedParkAPI
+class FantasticHouseAPI
 {
     /**
      * Nome do usuário de login da API
      *
      * @var string
      */
-    protected $login = "";
+    protected $login;
 
     /**
      * Senha do usuario na API
      *
      * @var string
      */
-    protected $password = "";
+    protected $password;
 
     /**
      * TOKEN de acesso para API
      *
      * @var string
      */
-    protected $token = "DEA5F95B1D6C74EDD56DF55DF8C9F498BA6F47FA";
+    protected $token;
 
     /**
-     * URL base da API do exceed park usada tbm para impressao do voucher
+     * URL base da API usada tbm para impressao do voucher
      *
      * @var string
      */
-    const base_url = "https://travel.exceedpark.com.br/api";
+    protected $base_url;
 
     /**
-     * URL da API do Exceed Park
+     * URL da API
      *
      * @var string
      */
-    protected $url = self::base_url . "/v1/140";
+    protected $url;
+
+    /**
+     * Configura a classe de acordo com as configurações que vem do arquivo
+     * de configurações das integrações
+     *
+     * @return void
+     */
+    public function __construct() {
+
+        $this->login = config('integracao.fantastichouse.login');
+        $this->password = config('integracao.fantastichouse.password');
+        $this->token = config('integracao.fantastichouse.token');
+        $this->base_url = config('integracao.base_url');
+
+        $this->url = $this->base_url . config('integracao.fantastichouse.suffix_url');
+    }
 
     /**
      * Função para realizar POST na API
@@ -60,7 +72,7 @@ class ExceedParkAPI
                     "method" => $metodo,
                     "token" => $this->token,
                     "login" => $this->login,
-                     "password" => $this->password
+                    "password" => $this->password
                 ];
 
                 // Juntamos os dois arrays
@@ -102,7 +114,7 @@ class ExceedParkAPI
     }
 
     /**
-     * Solicita a compra para o Exceed
+     * Solicita a compra
      *
      * @param array $dados
      * @return mixed|string
@@ -113,7 +125,7 @@ class ExceedParkAPI
     }
 
     /**
-     * Confirma a compra para o Exceed
+     * Confirma a compra
      *
      * @param array $dados
      * @return mixed|string
@@ -124,14 +136,14 @@ class ExceedParkAPI
     }
 
     /**
-     * Recupera a lista de viajantes para o Exceed
+     * Recupera a lista de viajantes
      *
      * @param array $dados
      * @return mixed
      */
     public function getAccessList($dados = [])
     {
-        return json_decode($this->consultaAPI(__FUNCTION__, $dados, true), true);
+        return $this->consultaAPI(__FUNCTION__, $dados, true);
     }
 
     /**

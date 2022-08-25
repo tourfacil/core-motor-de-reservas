@@ -45,6 +45,7 @@ class Servico extends Model
         'tipo_corretagem',
         'corretagem',
         'horario',
+        'titulo_pagina',
         'descricao_curta',
         'descricao_completa',
         'regras',
@@ -197,6 +198,14 @@ class Servico extends Model
     public function tags()
     {
         return $this->hasMany(TagServico::class)->orderBy('ordem');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tagsInternas()
+    {
+        return $this->hasMany(TagServicoInterno::class)->orderBy('ordem');
     }
 
     /**

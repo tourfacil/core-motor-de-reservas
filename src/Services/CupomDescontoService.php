@@ -275,4 +275,18 @@ abstract class CupomDescontoService
             return 1;
         }
     }
+
+    /**
+     * Retorna se há um cupom ativo na sessão do cliente atualmente
+     * @return bool
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public static function isCupomNaSessao() {
+
+        if(session()->get('cupom_desconto') != null)
+            return true;
+
+        return false;
+    }
 }

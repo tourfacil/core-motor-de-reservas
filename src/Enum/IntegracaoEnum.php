@@ -18,12 +18,21 @@ abstract class IntegracaoEnum
 
     const MINI_MUNDO = "MINI_MUNDO";
 
+    const DREAMS = "DREAMS";
+
+    const ALPEN = "ALPEN";
+
+    const FANTASTIC_HOUSE = "FANTASTIC_HOUSE";
+
     const INTEGRACOES = [
         self::NAO => "Não possui",
         self::SNOWLAND => "Snowland",
         self::EXCEED_PARK => "Exceed Park",
         self::OLIVAS => "Olivas",
         self::MINI_MUNDO => "Mini Mundo",
+        self::DREAMS => "Dreams",
+        self::ALPEN => "Alpen Park",
+        self::FANTASTIC_HOUSE => "Fantastic House",
     ];
 
     const INTEGRACOES_EXTERNAS = [

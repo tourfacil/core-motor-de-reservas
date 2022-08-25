@@ -1,13 +1,15 @@
-<?php namespace TourFacil\Core\Models;
+<?php 
+
+namespace TourFacil\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use TourFacil\Core\Services\Integracao\NovaXS\Snowland\SnowlandAPI;
+use TourFacil\Core\Services\Integracao\NovaXS\Dreams\DreamsAPI;
 
 /**
- * Class SnowlandReservaPedido
+ * Class DreamsReservaPedido
  * @package TourFacil\Core\Models
  */
-class SnowlandReservaPedido extends Model
+class DreamsReservaPedido extends Model
 {
     /**
      * @var array
@@ -43,7 +45,7 @@ class SnowlandReservaPedido extends Model
      */
     public function getUrlVoucherAttribute()
     {
-        return config('integracao.snowland.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
+        return config('integracao.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
     }
 
     /**
@@ -53,6 +55,6 @@ class SnowlandReservaPedido extends Model
      */
     public function getVoucherAsByteAttribute()
     {
-        return config('integracao.snowland.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
+        return config('integracao.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
     }
 }

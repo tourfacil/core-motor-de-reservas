@@ -14,6 +14,44 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.4.12 (24 de Agosto de 2022)*
+- Adicionado fillables de título de página de serviços e categorias
+
+### *v1.4.11 (23 de Agosto de 2022)*
+- Novo sistema de descontos por PIX.
+- Sistema de cupons adaptado para não ter incompatibilidade com desconto de PIX.
+
+### *v1.4.10 (18 de Agosto de 2022)*
+- Adicionado método para calcular valor de um único dia.
+
+### *v1.4.9 (16 de Agosto de 2022)*
+- Adicionado sistema de afiliados com comissões registradas.
+
+### *v1.4.8 (13 de Agosto de 2022)*
+- Adicionado integração com o Snowland.
+
+### *v1.4.7 (11 de Agosto de 2022)*
+- Adicionado integração com o Fantastic House
+
+### *v1.4.6 (08 de Agosto de 2022)*
+- Adicionado integração com o Alpen Park
+
+### *v1.4.5 (08 de Agosto de 2022)*
+- Adicionado integração com o Exceed
+
+### *v1.4.4 (02 de Agosto de 2022)*
+- Adicionado integração com o Dreams
+
+### *v1.4.3 (29 de Julho de 2022)*
+- Adicionado sistema de finalização de reservas
+
+### *v1.4.2 (27 de Julho de 2022)*
+- Adicionado novo pacote de icones do font awesome.
+- Novo sistema de tags de serviço com descrição e icone.
+
+### *v1.4.1 (21 de Julho de 2022)*
+- Adicionado novo dashboard para as vendedoras.
+
 ### *v1.4.0 (15 de Julho de 2022)*
 - Adicionado novo sistema de PIX pela Pagarme.
 - Agora todas as reservas são registradas no sistema. Até as que falham.

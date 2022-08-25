@@ -1,47 +1,61 @@
-<?php namespace TourFacil\Core\Services\Snowland;
+<?php
+
+namespace TourFacil\Core\Services\Integracao\NovaXS\Alpen;
 
 use Exception;
 
-/**
- * Class SnowlandAPI
- * @package TourFacil\Core\Services\Snowland
- */
-class SnowlandAPI
+class AlpenAPI
 {
     /**
      * Nome do usuário de login da API
      *
      * @var string
      */
-    protected $login = "tour.facil";
+    protected $login;
 
     /**
      * Senha do usuario na API
      *
      * @var string
      */
-    protected $password = "abc123";
+    protected $password;
 
     /**
      * TOKEN de acesso para API
      *
      * @var string
      */
-    protected $token = "";
+    protected $token;
 
     /**
-     * URL base da API do snowland usada tbm para impressao do voucher
+     * URL base da API usada tbm para impressao do voucher
      *
      * @var string
      */
-    const base_url = "http://travel.snowland.com.br/api";
+    protected $base_url;
 
     /**
-     * URL da API do Snowland
+     * URL da API
      *
      * @var string
      */
-    protected $url = self::base_url . "/v1/99";
+    protected $url;
+
+    /**
+     * Configura a classe de acordo com as configurações que vem do arquivo
+     * de configurações das integrações
+     *
+     * @return void
+     */
+    public function __construct() {
+
+        $this->login = config('integracao.alpen.login');
+        $this->password = config('integracao.alpen.password');
+        $this->token = config('integracao.alpen.token');
+        $this->base_url = config('integracao.base_url');
+
+        $this->url = $this->base_url . config('integracao.alpen.suffix_url');
+    }
 
     /**
      * Função para realizar POST na API
@@ -60,7 +74,7 @@ class SnowlandAPI
                     "method" => $metodo,
                     "token" => $this->token,
                     "login" => $this->login,
-                    // "password" => $this->password
+                    "password" => $this->password
                 ];
 
                 // Juntamos os dois arrays
@@ -102,7 +116,7 @@ class SnowlandAPI
     }
 
     /**
-     * Solicita a compra para o Snowland
+     * Solicita a compra
      *
      * @param array $dados
      * @return mixed|string
@@ -113,7 +127,7 @@ class SnowlandAPI
     }
 
     /**
-     * Confirma a compra para o Snowland
+     * Confirma a compra
      *
      * @param array $dados
      * @return mixed|string
@@ -124,14 +138,14 @@ class SnowlandAPI
     }
 
     /**
-     * Recupera a lista de viajantes para o Snowland
+     * Recupera a lista de viajantes
      *
      * @param array $dados
      * @return mixed
      */
     public function getAccessList($dados = [])
     {
-        return json_decode($this->consultaAPI(__FUNCTION__, $dados, true), true);
+        return $this->consultaAPI(__FUNCTION__, $dados, true);
     }
 
     /**

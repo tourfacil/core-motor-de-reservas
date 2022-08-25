@@ -1,20 +1,19 @@
-<?php namespace TourFacil\Core\Services\Exceedpark;
+<?php
 
-use Exception;
+namespace TourFacil\Core\Services\Integracao\NovaXS\FantasticHouse;
+
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use TourFacil\Core\Enum\IntegracaoEnum;
-use TourFacil\Core\Models\ExceedReservaPedido;
+use TourFacil\Core\Models\AlpenReservaPedido;
+use TourFacil\Core\Models\FantasticHouseReservaPedido;
 use TourFacil\Core\Models\ReservaPedido;
-use Storage;
+use TourFacil\Core\Services\Integracao\NovaXS\Alpen\AlpenAPI;
 
-/**
- * Class ExceedService
- * @package TourFacil\Core\Services\Exceedpark
- */
-class ExceedService
+class FantasticHouseService
 {
-    /** @var ExceedParkAPI */
-    protected $exceed;
+    /** @var AlpenAPI */
+    protected $fantastic_house;
 
     /** @var array  */
     protected $accessList = [];
@@ -41,22 +40,13 @@ class ExceedService
     protected $getAccessList;
 
     /** @var string  */
-    protected $path = "/exceed/";
+    protected $path = "integracao/fantastic_house/";
 
     /** @var string */
-    const CRIANCA = "crianca";
-
-    /** @var string */
-    const INFANTIL = "infantil";
+    const CRIANCA = "infantil";
 
     /** @var string */
     const ADULTO = "adulto";
-
-    /** @var string */
-    const MELHOR_IDADE = "melhor idade";
-
-    /** @var string */
-    const SENIOR = "senior";
 
     /**
      * ATENÇÃO NÃO MUDAR A ORDEM
@@ -64,17 +54,18 @@ class ExceedService
      * @var array
      */
     const TIPO_PESSOAS = [
-        self::CRIANCA, self::INFANTIL, self::ADULTO, self::MELHOR_IDADE, self::SENIOR
+        self::CRIANCA,
+        self::ADULTO,
     ];
 
     /**
-     * ExceedService constructor.
+     * FantasticHouseService constructor.
      * @param ReservaPedido $reservaPedido
      */
     public function __construct(ReservaPedido $reservaPedido)
     {
         $this->reserva = $reservaPedido;
-        $this->exceed = new ExceedParkAPI();
+        $this->fantastic_house = new FantasticHouseAPI();
         // Nome do log
         $this->path = $this->path . "{$reservaPedido->id}.txt";
         // Cria um arquivo de log
@@ -82,72 +73,65 @@ class ExceedService
     }
 
     /**
-     * Gera o voucher do Exceed Park
+     * Gera o voucher
      *
      * @throws Exception
      */
-    public function gerarVoucherExceed()
+    public function gerarVoucherFantasticHose()
     {
         // Recupera os serviços disponível para a data do serviço
-        $this->servicosDisponiveis = $this->exceed->getProductsByDate([
+        $this->servicosDisponiveis = $this->fantastic_house->getProductsByDate([
             'date' => $this->reserva->agendaDataServico->data->format('d/m/Y')
         ]);
 
         // Log
-        Storage::append($this->path, "Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
+        Storage::append($this->path, "#". $this->reserva->id .": Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
 
         // Forma a lista de serviços e separa os IDs de cada serviço por categoria de idade
         $this->productsArray = $this->productsArray();
 
         // Log
-        Storage::append($this->path, "productsArray: " . json_encode($this->productsArray));
+        Storage::append($this->path, "#" . $this->reserva->id . "productsArray: " . json_encode($this->productsArray));
 
         // Retorna os dados do comprador
         $this->personAsString = $this->personAsString($this->reserva->pedido->cliente);
 
         // Bloqueio de compra
-        $this->buyToBillFor = $this->exceed->buyToBillFor([
+        $this->buyToBillFor = $this->fantastic_house->buyToBillFor([
             'productsArray' => json_encode($this->productsArray['productsArray']),
             'personAsString' => json_encode($this->personAsString)
         ]);
 
         // Log
-        Storage::append($this->path, "buyToBillFor: " . json_encode($this->buyToBillFor));
+        Storage::append($this->path, "#" . $this->reserva->id . "buyToBillFor: " . json_encode($this->buyToBillFor));
 
         // Confirmação da compra
-        $this->billFor = $this->exceed->billFor([
+        $this->billFor = $this->fantastic_house->billFor([
             'bill' => $this->buyToBillFor['id']
         ]);
 
         // Log
-        Storage::append($this->path, "billFor: " . json_encode($this->billFor));
+        Storage::append($this->path, "#" . $this->reserva->id . "billFor: " . json_encode($this->billFor));
 
-        // Verifica se existe dados dos acompanhantes - NÃO É OBRIGATORIO
-        if($this->reserva->dadoClienteReservaPedido->count()) {
+        // Recupera a lista de passageiros
+        $this->getAccessList = $this->fantastic_house->getAccessList([
+            'bill' => $this->buyToBillFor['id']
+        ]);
 
-            // Recupera a lista de passageiros
-            $this->getAccessList = $this->exceed->getAccessList([
-                'bill' => $this->buyToBillFor['id']
-            ]);
+        // Log
+        Storage::append($this->path, "#" . $this->reserva->id . "getAccessList: " . json_encode($this->getAccessList));
 
-            // Log
-            Storage::append($this->path, "getAccessList: " . json_encode($this->getAccessList));
+        // Cria a lista de passageiros conforme os clientes
+        $this->createAccessList();
 
-            // Cria a lista de passageiros conforme os clientes
-            $this->createAccessList();
-
-            // Salva a lista de viajantes para o parque
-            $list = $this->exceed->setAccessList([
-                'bill' => $this->buyToBillFor['id'],
-                'list' => json_encode($this->accessList)
-            ]);
-
-            // Log
-            Storage::append($this->path, "setAccessList: " . json_encode($list));
-        }
+        // Salva a lista de viajantes para o olivas
+        $this->fantastic_house->setAccessList([
+            'bill' => $this->buyToBillFor['id'],
+            'list' => json_encode($this->accessList)
+        ]);
 
         // Salva as informações de impressão no banco
-        ExceedReservaPedido::create([
+        FantasticHouseReservaPedido::create([
             'reserva_pedido_id' => $this->reserva->id,
             'bill_id' => $this->buyToBillFor['id'],
             'data_servico' => $this->reserva->agendaDataServico->data,
@@ -157,11 +141,11 @@ class ExceedService
         ]);
 
         // Log
-        Storage::append($this->path, "Integração finalizada: " . date('d/m/Y H:i:s'));
+        Storage::append($this->path, "#" . $this->reserva->id . "Integração finalizada: " . date('d/m/Y H:i:s'));
     }
 
     /** Filtra a lista de serviços disponiveis */
-    private function filterServicos() {
+    private function filterServicoFantasticHouse() {
 
         // Array para armazenar os novos id
         $servicos = [];
@@ -169,16 +153,14 @@ class ExceedService
         // Percorre todos os serviços disponiveis
         foreach ($this->servicosDisponiveis as $servico) {
             // Verifica se existe a casa shortName pois os combos nao tem shortName
-            if(isset($servico['name'])) {
+            if(isset($servico['shortName'])) {
                 // Procura o serviço pelas categorias
                 $nome_servico = preg_replace("/(ç|Ç)/", "c", mb_strtolower($servico['name']));
+
                 // Percorre os tipos de pessoas disponiveis
                 foreach (self::TIPO_PESSOAS as $tipo_pessoa) {
+
                     if(strripos($nome_servico, $tipo_pessoa)) {
-                        // Deixa sempre como MELHOR IDADE
-                        $tipo_pessoa = ($tipo_pessoa == self::SENIOR) ? self::MELHOR_IDADE : $tipo_pessoa;
-                        // Deixa sempre como CRIANCA
-                        $tipo_pessoa = ($tipo_pessoa == self::INFANTIL) ? self::CRIANCA : $tipo_pessoa;
                         $servicos[Str::slug($tipo_pessoa, "_")] = $servico['path'];
                     }
                 }
@@ -190,7 +172,7 @@ class ExceedService
     }
 
     /**
-     * Retorna os serviços para enviar a comprar ao parque
+     * Retorna os serviços para enviar a comprar
      * ID,QUANTIDADE,DATA
      *
      * @return array
@@ -199,12 +181,12 @@ class ExceedService
     private function productsArray() {
 
         // Filtra os serviços disponiveis
-        $this->filterServicos();
+        $this->filterServicoFantasticHouse();
 
         // Data de utilizacao
         $data_utilizacao = $this->reserva->agendaDataServico->data->format('d/m/Y');
 
-        // Array com os produtos do parque exceed
+        // Array com os produtos
         $productsArray = [];
         $variacoes_id = [];
         $productsIdArray = [];
@@ -214,12 +196,13 @@ class ExceedService
 
             // Variacao adquirida
             $nome_variacao = preg_replace("/(ç|Ç)/", "c", mb_strtolower($quantidade_reserva->variacaoServico->nome));
+            $nome_variacao = str_replace('ê', 'e', $nome_variacao);
 
             // Somente pessoas pagantes
             if($quantidade_reserva->valor_net > 0) {
 
                 /** Recupera os dados para crianca pagamente */
-                if(Str::contains($nome_variacao, self::CRIANCA)) {
+                if(Str::contains($nome_variacao, "pagante")) {
                     $product_path = $this->servicosDisponiveis[Str::slug(self::CRIANCA, "_")];
                     $productsArray[] = [
                         "path" => $product_path,
@@ -233,7 +216,7 @@ class ExceedService
                 }
 
                 /** Recupera os dados para o adulto */
-                if(Str::contains($nome_variacao, self::ADULTO)) {
+                if(Str::contains($nome_variacao, "adulto")) {
                     $product_path = $this->servicosDisponiveis[Str::slug(self::ADULTO, "_")];
                     $productsArray[] = [
                         "path" => $product_path,
@@ -244,20 +227,6 @@ class ExceedService
                     // Salva qual é a variacao
                     $variacoes_id[self::ADULTO] = $quantidade_reserva->variacaoServico->id;
                     $productsIdArray[self::ADULTO] = $this->onlyNumbers($product_path);
-                }
-
-                /** Recupera o ID do serviço para melhor idade */
-                if(Str::contains($nome_variacao, self::MELHOR_IDADE)) {
-                    $product_path = $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")];
-                    $productsArray[] = [
-                        "path" => $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")],
-                        "amount" => (string) $quantidade_reserva->quantidade,
-                        "date" => $data_utilizacao,
-                        "name" => self::MELHOR_IDADE
-                    ];
-                    // Salva qual é a variacao
-                    $variacoes_id[self::MELHOR_IDADE] = $quantidade_reserva->variacaoServico->id;
-                    $productsIdArray[self::MELHOR_IDADE] = $this->onlyNumbers($product_path);
                 }
             }
         }
@@ -290,9 +259,6 @@ class ExceedService
         // Recupera todos os adultos do pedido
         $adultos = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::ADULTO] ?? null);
 
-        // Recupera todos os senior da reserva
-        $senior = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::MELHOR_IDADE] ?? null);
-
         // Recupera todas as crianças do pedido
         $criancas = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::CRIANCA] ?? null);
 
@@ -303,20 +269,13 @@ class ExceedService
             if(isset($this->productsArray['productsIdArray'][self::ADULTO])) {
                 if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::ADULTO]) {
                     // Cria array conforme o retorno
-                    $this->accessList[] = $this->createPeople($viajante, $adultos->last());
+
+                    if($adultos->last() != null) {
+                        $this->accessList[] = $this->createPeople($viajante, $adultos->last());
+                    }
+
                     // Remove o ultimo item do array
                     $adultos->pop();
-                    continue;
-                }
-            }
-
-            // Se for senior
-            if(isset($this->productsArray['productsIdArray'][self::MELHOR_IDADE])) {
-                if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::MELHOR_IDADE]) {
-                    // Cria array conforme o retorno
-                    $this->accessList[] = $this->createPeople($viajante, $senior->last());
-                    // Remove o ultimo item do array
-                    $senior->pop();
                     continue;
                 }
             }
@@ -362,20 +321,20 @@ class ExceedService
     }
 
     /**
-     * Cancela o voucher do parque
+     * Cancela o voucher
      *
-     * @param ExceedReservaPedido $exceedReservaPedido
+     * @param AlpenReservaPedido $olivasReservaPedido
      * @return array
      */
-    public function cancelarVoucher(ExceedReservaPedido $exceedReservaPedido)
+    public function cancelarVoucher(FantasticHouseReservaPedido $fantasticHouseReservaPedido)
     {
-        // Solicita o cancelamento ao parque
-        $cancelado = $this->exceed->cancelBill([
-            'bill' => $exceedReservaPedido->bill_id
+        // Solicita o cancelamento ao olivas
+        $cancelado = $this->fantastic_house->cancelBill([
+            'bill' => $fantasticHouseReservaPedido->bill_id
         ]);
 
         // atualiza o status do voucher para cancelado
-        $exceedReservaPedido->update(['status' => IntegracaoEnum::VOUCHER_CANCELADO]);
+        $fantasticHouseReservaPedido->update(['status' => IntegracaoEnum::VOUCHER_CANCELADO]);
 
         return ['cancelamento' => $cancelado];
     }

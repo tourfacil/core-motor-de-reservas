@@ -1,20 +1,22 @@
-<?php namespace TourFacil\Core\Services\Snowland;
+<?php 
+
+namespace TourFacil\Core\Services\Integracao\NovaXS\Dreams;
 
 use Exception;
 use Illuminate\Support\Str;
 use TourFacil\Core\Enum\IntegracaoEnum;
 use TourFacil\Core\Models\ReservaPedido;
-use TourFacil\Core\Models\SnowlandReservaPedido;
+use TourFacil\Core\Models\DreamsReservaPedido; 
 use Storage;
 
 /**
- * Class SnowlandService
- * @package TourFacil\Core\Services\Snowland
+ * Class DreamsService
+ * @package TourFacil\Core\Services\Integracao\NovaSX\Dreams
  */
-class SnowlandService
+class DreamsService
 {
-    /** @var SnowlandAPI */
-    protected $snowland;
+    /** @var DreamsAPI */
+    protected $dreams;
 
     /** @var array  */
     protected $accessList = [];
@@ -41,16 +43,19 @@ class SnowlandService
     protected $getAccessList;
 
     /** @var string  */
-    protected $path = "/snowland/";
+    protected $path = "integracao/dreams/";
 
     /** @var string */
-    const CRIANCA = "crianca";
+    const CRIANCA = "crian";
 
     /** @var string */
-    const ADULTO = "adulto";
+    const INFANTIL = "infantil";
 
     /** @var string */
-    const MELHOR_IDADE = "melhor idade";
+    const ADULTO = "pa";
+
+    /** @var string */
+    const MELHOR_IDADE = "idade";
 
     /** @var string */
     const SENIOR = "senior";
@@ -61,17 +66,17 @@ class SnowlandService
      * @var array
      */
     const TIPO_PESSOAS = [
-        self::CRIANCA, self::ADULTO, self::MELHOR_IDADE, self::SENIOR
+        self::ADULTO,
     ];
 
     /**
-     * SnowlandService constructor.
+     * DreamsService constructor.
      * @param ReservaPedido $reservaPedido
      */
     public function __construct(ReservaPedido $reservaPedido)
     {
         $this->reserva = $reservaPedido;
-        $this->snowland = new SnowlandAPI();
+        $this->dreams = new DreamsAPI();
         // Nome do log
         $this->path = $this->path . "{$reservaPedido->id}.txt";
         // Cria um arquivo de log
@@ -79,65 +84,65 @@ class SnowlandService
     }
 
     /**
-     * Gera o voucher da Snowland
+     * Gera o voucher da Dreams
      *
      * @throws Exception
      */
-    public function gerarVoucherSnowland()
+    public function gerarVoucherDreams()
     {
         // Recupera os serviços disponível para a data do serviço
-        $this->servicosDisponiveis = $this->snowland->getProductsByDate([
+        $this->servicosDisponiveis = $this->dreams->getProductsByDate([
             'date' => $this->reserva->agendaDataServico->data->format('d/m/Y')
         ]);
 
         // Log
-        Storage::append($this->path, "Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
+        Storage::append($this->path, "#". $this->reserva->id .": Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
 
         // Forma a lista de serviços e separa os IDs de cada serviço por categoria de idade
         $this->productsArray = $this->productsArray();
 
         // Log
-        Storage::append($this->path, "productsArray: " . json_encode($this->productsArray));
+        Storage::append($this->path, "#" . $this->reserva->id . "productsArray: " . json_encode($this->productsArray));
 
         // Retorna os dados do comprador
         $this->personAsString = $this->personAsString($this->reserva->pedido->cliente);
 
         // Bloqueio de compra
-        $this->buyToBillFor = $this->snowland->buyToBillFor([
+        $this->buyToBillFor = $this->dreams->buyToBillFor([
             'productsArray' => json_encode($this->productsArray['productsArray']),
             'personAsString' => json_encode($this->personAsString)
         ]);
 
         // Log
-        Storage::append($this->path, "buyToBillFor: " . json_encode($this->buyToBillFor));
+        Storage::append($this->path, "#" . $this->reserva->id . "buyToBillFor: " . json_encode($this->buyToBillFor));
 
         // Confirmação da compra
-        $this->billFor = $this->snowland->billFor([
+        $this->billFor = $this->dreams->billFor([
             'bill' => $this->buyToBillFor['id']
         ]);
 
         // Log
-        Storage::append($this->path, "billFor: " . json_encode($this->billFor));
+        Storage::append($this->path, "#" . $this->reserva->id . "billFor: " . json_encode($this->billFor));
 
         // Recupera a lista de passageiros
-        $this->getAccessList = $this->snowland->getAccessList([
+        $this->getAccessList = $this->dreams->getAccessList([
             'bill' => $this->buyToBillFor['id']
         ]);
 
         // Log
-        Storage::append($this->path, "getAccessList: " . json_encode($this->getAccessList));
+        Storage::append($this->path, "#" . $this->reserva->id . "getAccessList: " . json_encode($this->getAccessList));
 
         // Cria a lista de passageiros conforme os clientes
         $this->createAccessList();
 
-        // Salva a lista de viajantes para o Snowland
-        $this->snowland->setAccessList([
+        // Salva a lista de viajantes para o olivas
+        $this->dreams->setAccessList([
             'bill' => $this->buyToBillFor['id'],
             'list' => json_encode($this->accessList)
         ]);
 
         // Salva as informações de impressão no banco
-        SnowlandReservaPedido::create([
+        DreamsReservaPedido::create([
             'reserva_pedido_id' => $this->reserva->id,
             'bill_id' => $this->buyToBillFor['id'],
             'data_servico' => $this->reserva->agendaDataServico->data,
@@ -147,11 +152,11 @@ class SnowlandService
         ]);
 
         // Log
-        Storage::append($this->path, "Integração finalizada: " . date('d/m/Y H:i:s'));
+        Storage::append($this->path, "#" . $this->reserva->id . "Integração finalizada: " . date('d/m/Y H:i:s'));
     }
 
     /** Filtra a lista de serviços disponiveis */
-    private function filterServicoSnowlad() {
+    private function filterServicoDreams() {
 
         // Array para armazenar os novos id
         $servicos = [];
@@ -159,23 +164,22 @@ class SnowlandService
         // Percorre todos os serviços disponiveis
         foreach ($this->servicosDisponiveis as $servico) {
             // Verifica se existe a casa shortName pois os combos nao tem shortName
-            if(isset($servico['shortName'])) {
+            // if(isset($servico['shortName'])) {
                 // Procura o serviço pelas categorias
-                $nome_servico = preg_replace("/(ç|Ç)/", "c", mb_strtolower($servico['shortName']));
-                // Diferenca para snowland normal e snowland night
-                if($this->reserva->servico->integracao == IntegracaoEnum::SNOWLAND) {
-                    // Separa o tipo night
-                    if(! strripos($nome_servico,"night")) {
-                        foreach (self::TIPO_PESSOAS as $tipo_pessoa) {
-                            if(strripos($nome_servico, $tipo_pessoa)) {
-                                // Deixa sempre como MELHOR IDADE
-                                $tipo_pessoa = ($tipo_pessoa == self::SENIOR) ? self::MELHOR_IDADE : $tipo_pessoa;
-                                $servicos[Str::slug($tipo_pessoa, "_")] = $servico['path'];
-                            }
-                        }
+                $nome_servico = preg_replace("/(ç|Ç)/", "c", mb_strtolower($servico['name']));
+
+                // Percorre os tipos de pessoas disponiveis
+                foreach (self::TIPO_PESSOAS as $tipo_pessoa) {
+
+                    if(strripos($nome_servico, $tipo_pessoa)) {
+                        // Deixa sempre como MELHOR IDADE
+                        $tipo_pessoa = ($tipo_pessoa == self::SENIOR) ? self::MELHOR_IDADE : $tipo_pessoa;
+                        // Deixa sempre como CRIANCA
+                        $tipo_pessoa = ($tipo_pessoa == self::INFANTIL) ? self::CRIANCA : $tipo_pessoa;
+                        $servicos[Str::slug($tipo_pessoa, "_")] = $servico['path'];
                     }
                 }
-            }
+            // }
         }
 
         // Atualiza a lista de serviços disponiveis
@@ -183,7 +187,7 @@ class SnowlandService
     }
 
     /**
-     * Retorna os serviços para enviar a comprar ao Snowland
+     * Retorna os serviços para enviar a comprar
      * ID,QUANTIDADE,DATA
      *
      * @return array
@@ -192,12 +196,12 @@ class SnowlandService
     private function productsArray() {
 
         // Filtra os serviços disponiveis
-        $this->filterServicoSnowlad();
+        $this->filterServicoDreams();
 
         // Data de utilizacao
         $data_utilizacao = $this->reserva->agendaDataServico->data->format('d/m/Y');
 
-        // Array com os produtos snowland
+        // Array com os produtos
         $productsArray = [];
         $variacoes_id = [];
         $productsIdArray = [];
@@ -207,7 +211,8 @@ class SnowlandService
 
             // Variacao adquirida
             $nome_variacao = preg_replace("/(ç|Ç)/", "c", mb_strtolower($quantidade_reserva->variacaoServico->nome));
-
+            $nome_variacao = str_replace('ê', 'e', $nome_variacao);
+            
             // Somente pessoas pagantes
             if($quantidade_reserva->valor_net > 0) {
 
@@ -240,7 +245,7 @@ class SnowlandService
                 }
 
                 /** Recupera o ID do serviço para melhor idade */
-                if(Str::contains($nome_variacao, self::MELHOR_IDADE)) {
+                if(Str::contains($nome_variacao, self::SENIOR)) {
                     $product_path = $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")];
                     $productsArray[] = [
                         "path" => $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")],
@@ -296,7 +301,11 @@ class SnowlandService
             if(isset($this->productsArray['productsIdArray'][self::ADULTO])) {
                 if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::ADULTO]) {
                     // Cria array conforme o retorno
-                    $this->accessList[] = $this->createPeople($viajante, $adultos->last());
+
+                        if($adultos->last() != null) {
+                            $this->accessList[] = $this->createPeople($viajante, $adultos->last());
+                        }
+                        
                     // Remove o ultimo item do array
                     $adultos->pop();
                     continue;
@@ -355,20 +364,20 @@ class SnowlandService
     }
 
     /**
-     * Cancela o voucher do Snowland
+     * Cancela o voucher
      *
-     * @param SnowlandReservaPedido $snowlandReservaPedido
+     * @param DreamsReservaPedido $olivasReservaPedido
      * @return array
      */
-    public function cancelarVoucher(SnowlandReservaPedido $snowlandReservaPedido)
+    public function cancelarVoucher(DreamsReservaPedido $dreamsReservaPedido)
     {
-        // Solicita o cancelamento ao Snowland
-        $cancelado = $this->snowland->cancelBill([
-            'bill' => $snowlandReservaPedido->bill_id
+        // Solicita o cancelamento ao olivas
+        $cancelado = $this->dreams->cancelBill([
+            'bill' => $dreamsReservaPedido->bill_id
         ]);
 
         // atualiza o status do voucher para cancelado
-        $snowlandReservaPedido->update(['status' => IntegracaoEnum::VOUCHER_CANCELADO]);
+        $dreamsReservaPedido->update(['status' => IntegracaoEnum::VOUCHER_CANCELADO]);
 
         return ['cancelamento' => $cancelado];
     }
