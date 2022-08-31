@@ -16,7 +16,9 @@ abstract class AvaliacaoService
                                 ->get();
     }
 
-    public static function getNotaMedia($avaliacoes) {
+    public static function getNotaMedia($servico) {
+
+        $avaliacoes = self::getAvaliacoesAprovadas($servico, 100);
 
         if($avaliacoes->count() == 0) return 0;
 
