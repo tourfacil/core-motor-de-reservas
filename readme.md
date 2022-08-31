@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *v1.5.0 (31 de Agosto de 2022)*
+- Adicionado novo sistema de avaliações.
+
 ### *v1.4.13 (24 de Agosto de 2022)*
 - Adicionado fillable de título de página de destino.
 
