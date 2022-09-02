@@ -14,6 +14,9 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *SNAPSHOT (02 de Setembro de 2022)*
+- Adicionado possibilidade de alterar nome do serviço na página de informações do mesmo.
+
 ### *v1.4.13 (24 de Agosto de 2022)*
 - Adicionado fillable de título de página de destino.
 
