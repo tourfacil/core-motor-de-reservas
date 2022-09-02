@@ -310,6 +310,10 @@ class Servico extends Model
         return $this->hasMany(Desconto::class);
     }
 
+    public function avaliacoes() {
+        return $this->hasMany(AvaliacaoServico::class);
+    }
+
     /**
      * Retorna o desconto ativo do produto
      * Caso tenha mais de um desconto ativo para a data, ele irá retornar o último
