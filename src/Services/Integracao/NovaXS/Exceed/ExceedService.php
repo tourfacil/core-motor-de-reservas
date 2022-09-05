@@ -44,19 +44,13 @@ class ExceedService
     protected $path = "integracao/exceed/";
 
     /** @var string */
-    const PASSAPORTE = "assaporte Exceed";
+    const ADULTO = "adulto";
 
     /** @var string */
-    const MAX = "assaporte Max";
+    const CRIANCA = "crian";
 
     /** @var string */
-    const SUPER = "assaporte Super";
-
-    /** @var string */
-    const SPECIAL = "assaporte  Special: 3";
-
-    /** @var string */
-    const SENIOR = "senior";
+    const MELHOR_IDADE = "melhor idade";
 
     /**
      * ATENÇÃO NÃO MUDAR A ORDEM
@@ -64,7 +58,7 @@ class ExceedService
      * @var array
      */
     const TIPO_PESSOAS = [
-        self::PASSAPORTE, self::MAX, self::SUPER, self::SPECIAL, self::SENIOR
+        self::ADULTO, self::CRIANCA, self::MELHOR_IDADE
     ];
 
     /**
@@ -213,60 +207,51 @@ class ExceedService
             if($quantidade_reserva->valor_net > 0) {
 
                 /** Recupera os dados para crianca pagamente */
-                if(Str::contains($nome_variacao, strtolower('P' . self::PASSAPORTE))) {
-                    $product_path = $this->servicosDisponiveis[Str::slug(self::PASSAPORTE, "_")];
+                if(Str::contains($nome_variacao, strtolower( self::ADULTO))) {
+
+                    $product_path = $this->servicosDisponiveis[Str::slug(self::ADULTO, "_")];
                     $productsArray[] = [
                         "path" => $product_path,
                         "amount" => (string) $quantidade_reserva->quantidade,
                         "date" => $data_utilizacao,
-                        "name" => self::PASSAPORTE
+                        "name" => self::ADULTO
                     ];
                     // Salva qual é a variacao
-                    $variacoes_id[self::PASSAPORTE] = $quantidade_reserva->variacaoServico->id;
-                    $productsIdArray[self::PASSAPORTE] = $this->onlyNumbers($product_path);
+                    $variacoes_id[self::ADULTO] = $quantidade_reserva->variacaoServico->id;
+                    $productsIdArray[self::ADULTO] = $this->onlyNumbers($product_path);
+
                 }
 
                 /** Recupera os dados para o adulto */
-                if(Str::contains($nome_variacao, strtolower('P' . self::SUPER))) {
-                    $product_path = $this->servicosDisponiveis[Str::slug(self::SUPER, "_")];
+                if(Str::contains($nome_variacao, strtolower("ênior"))) {
+
+                    $product_path = $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")];
                     $productsArray[] = [
                         "path" => $product_path,
                         "amount" => (string) $quantidade_reserva->quantidade,
                         "date" => $data_utilizacao,
-                        "name" => self::SUPER
+                        "name" => self::MELHOR_IDADE
                     ];
                     // Salva qual é a variacao
-                    $variacoes_id[self::SUPER] = $quantidade_reserva->variacaoServico->id;
-                    $productsIdArray[self::SUPER] = $this->onlyNumbers($product_path);
+                    $variacoes_id[self::MELHOR_IDADE] = $quantidade_reserva->variacaoServico->id;
+                    $productsIdArray[self::MELHOR_IDADE] = $this->onlyNumbers($product_path);
                 }
 
                 /** Recupera o ID do serviço para melhor idade */
-                if(Str::contains($nome_variacao, 'special')) {
+                if(Str::contains($nome_variacao, strtolower(self::CRIANCA))) {
 
-                    $product_path = $this->servicosDisponiveis[Str::slug(self::SPECIAL, "_")];
+
+
+                    $product_path = $this->servicosDisponiveis[Str::slug(self::CRIANCA, "_")];
                     $productsArray[] = [
-                        "path" => $this->servicosDisponiveis[Str::slug(self::SPECIAL, "_")],
+                        "path" => $this->servicosDisponiveis[Str::slug(self::CRIANCA, "_")],
                         "amount" => (string) $quantidade_reserva->quantidade,
                         "date" => $data_utilizacao,
-                        "name" => self::SPECIAL
+                        "name" => self::CRIANCA
                     ];
                     // Salva qual é a variacao
-                    $variacoes_id[self::SPECIAL] = $quantidade_reserva->variacaoServico->id;
-                    $productsIdArray[self::SPECIAL] = $this->onlyNumbers($product_path);
-                }
-
-                /** Recupera o ID do serviço para melhor idade */
-                if(Str::contains($nome_variacao, strtolower('P' . self::MAX))) {
-                    $product_path = $this->servicosDisponiveis[Str::slug(self::MAX, "_")];
-                    $productsArray[] = [
-                        "path" => $this->servicosDisponiveis[Str::slug(self::MAX, "_")],
-                        "amount" => (string) $quantidade_reserva->quantidade,
-                        "date" => $data_utilizacao,
-                        "name" => self::MAX
-                    ];
-                    // Salva qual é a variacao
-                    $variacoes_id[self::MAX] = $quantidade_reserva->variacaoServico->id;
-                    $productsIdArray[self::MAX] = $this->onlyNumbers($product_path);
+                    $variacoes_id[self::CRIANCA] = $quantidade_reserva->variacaoServico->id;
+                    $productsIdArray[self::CRIANCA] = $this->onlyNumbers($product_path);
                 }
             }
         }
@@ -297,20 +282,17 @@ class ExceedService
     private function createAccessList(){
 
         // Recupera todos os adultos do pedido
-        $adultos = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::SUPER] ?? null);
-
-        // Recupera todos os senior da reserva
-        $senior = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::SPECIAL] ?? null);
+        $adultos = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::MELHOR_IDADE] ?? null);
 
         // Recupera todas as crianças do pedido
-        $criancas = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::PASSAPORTE] ?? null);
+        $criancas = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::ADULTO] ?? null);
 
         // Percorre a lista retornada pela API
         foreach ($this->getAccessList as $viajante) {
 
             // Se for adulto
-            if(isset($this->productsArray['productsIdArray'][self::SUPER])) {
-                if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::SUPER]) {
+            if(isset($this->productsArray['productsIdArray'][self::MELHOR_IDADE])) {
+                if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::MELHOR_IDADE]) {
                     // Cria array conforme o retorno
                     $this->accessList[] = $this->createPeople($viajante, $adultos->last());
                     // Remove o ultimo item do array
@@ -319,20 +301,9 @@ class ExceedService
                 }
             }
 
-            // Se for senior
-            if(isset($this->productsArray['productsIdArray'][self::SPECIAL])) {
-                if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::SPECIAL]) {
-                    // Cria array conforme o retorno
-                    $this->accessList[] = $this->createPeople($viajante, $senior->last());
-                    // Remove o ultimo item do array
-                    $senior->pop();
-                    continue;
-                }
-            }
-
             // Se for criança
-            if(isset($this->productsArray['productsIdArray'][self::PASSAPORTE])) {
-                if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::PASSAPORTE]) {
+            if(isset($this->productsArray['productsIdArray'][self::ADULTO])) {
+                if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::ADULTO]) {
                     // Cria array conforme o retorno
                     $this->accessList[] = $this->createPeople($viajante, $criancas->last());
                     // Remove o ultimo item do array
