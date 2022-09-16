@@ -6,7 +6,9 @@ use App\Jobs\NovaVendaJob;
 use Carbon\Carbon;
 use TourFacil\Core\Enum\AgendaEnum;
 use TourFacil\Core\Enum\ComissaoStatus;
+use TourFacil\Core\Enum\MeioPagamentoInternoEnum;
 use TourFacil\Core\Enum\MetodoPagamentoEnum;
+use TourFacil\Core\Enum\MetodoPagamentoInternoEnum;
 use TourFacil\Core\Enum\ServicoEnum;
 use TourFacil\Core\Enum\StatusPagamentoEnum;
 use TourFacil\Core\Enum\StatusPedidoEnum;
@@ -301,6 +303,8 @@ class PedidoService
             "status_pagamento" => $aprovado ? StatusPagamentoEnum::AUTORIZADO : StatusPagamentoEnum::NAO_AUTORIZADO,
             "metodo_pagamento" => $tipo_cartao,
             "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
+            "meio_pagamento_interno" => MeioPagamentoInternoEnum::PAGARME,
+            "metodo_pagamento_interno" => MetodoPagamentoInternoEnum::CARTAO_CREDITO,
         ]);
 
         // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
@@ -433,6 +437,8 @@ class PedidoService
             "status_pagamento" => StatusPagamentoEnum::PENDENTE,
             "metodo_pagamento" => MetodoPagamentoEnum::PIX,
             "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
+            "meio_pagamento_interno" => MeioPagamentoInternoEnum::PAGARME,
+            "metodo_pagamento_interno" => MetodoPagamentoInternoEnum::PIX,
         ]);
 
         // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
@@ -536,7 +542,7 @@ class PedidoService
         return $pedido;
     }
 
-    public static function gerarPedidoInterno($pedido_array, $cliente, $canal_venda_id, $origem, $metodo_pagamento) {
+    public static function gerarPedidoInterno($pedido_array, $cliente, $canal_venda_id, $origem, $metodo_pagamento, $pagamento) {
         // Cria o pedido
         $pedido = Pedido::create([
             "cliente_id" => $cliente->id,
@@ -548,6 +554,8 @@ class PedidoService
             "status" => StatusPedidoEnum::PAGO,
             "status_pagamento" => StatusPagamentoEnum::AUTORIZADO,
             "metodo_pagamento" => $metodo_pagamento,
+            "meio_pagamento_interno" => $pagamento['meio_pagamento'],
+            "metodo_pagamento_interno" => $pagamento['metodo_pagamento'],
         ]);
 
         // Salva os dados da transacao
