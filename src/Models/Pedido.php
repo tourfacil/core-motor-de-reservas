@@ -29,6 +29,8 @@ class Pedido extends Model
         'status',
         'status_pagamento',
         'metodo_pagamento',
+        'meio_pagamento_interno',
+        'metodo_pagamento_interno',
         'cupom_desconto_id',
     ];
 
