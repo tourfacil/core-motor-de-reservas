@@ -68,8 +68,17 @@ class Pix
         $reservas = $items['reservas'];
 
         foreach($reservas as $reserva) {
+
+            $amount = 0;
+
+            if(DescontoPIXService::isDescontoPIXAplicavel()) {
+                $amount = DescontoPIXService::calcularValorPixDesconto($reserva['valor_total']);
+            } else {
+                $amount = $reserva['valor_total'];
+            }
+
             $this->payload['items'][] = [
-                'amount'      => $this->toCent(DescontoPIXService::calcularValorPixDesconto($reserva['valor_total'])),
+                'amount'      => $this->toCent($amount),
                 'description' => $reserva['servico'],
                 'quantity'    => 1,
                 'code'        => $reserva['servico_id'],

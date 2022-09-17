@@ -36,6 +36,21 @@ abstract class DescontoPIXService
     }
 
     /**
+     * Retorna o valor ja com o desconto percentual configurado na .ENV Se o PIX estiver ativo
+     * Caso o valor com desconto seja menor que 0, ele ira arredondar para 1
+     * @param $valor
+     * @return int|mixed
+     */
+    public static function calcularValorPixDescontoSeAtivo($valor) {
+
+        if(self::isDescontoPIXAplicavel()) {
+            return evitarValorMenorQueUm(($valor * (100 - self::getPixDesconto())) / 100);
+        }
+
+        return $valor;
+    }
+
+    /**
      * Retorna se o desconto por PIX pode ser aplicado na situação atual
      * Verifica se o Desconto de PIX esta ativo e se ja não há outro cupom de desconto na sessão
      * @return bool
@@ -63,5 +78,20 @@ abstract class DescontoPIXService
      */
     public static function calcularValorPixDescontado($valor) {
         return number_format($valor - self::calcularValorPixDesconto($valor), 2);
+    }
+
+    /**
+     * Retorna o valor que foi descontado.
+     * Ex: Se o total for R$ 1.000,00 e haver um desconto 10%. O valor retornado será de R$ 100,00
+     * @param $valor
+     * @return int|mixed
+     */
+    public static function calcularValorPixDescontadoSeAtivo($valor) {
+
+        if(self::isDescontoPIXAplicavel()) {
+            return number_format($valor - self::calcularValorPixDesconto($valor), 2);
+        }
+
+        return 0;
     }
 }
