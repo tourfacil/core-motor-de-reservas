@@ -18,6 +18,7 @@ Lista de mudanças, melhorias e correções de bugs.
 - Adicionado possibilidade de alterar nome do serviço na página de informações do mesmo.
 - Alterações nas categorias de idade da integração do Exceed.
 - Adicionado Enums para registro de entradas financeiras nas vendas internas.
+- Corrigido BUG nos cálculos de desconto de PIX em caso de desativação do recurso.
 
 ### *v1.5.0 (31 de Agosto de 2022)*
 - Adicionado novo sistema de avaliações.
