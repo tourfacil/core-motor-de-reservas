@@ -99,7 +99,10 @@ abstract class CupomDescontoService
 
         // Pega os servicos do carrinho
         $servicos_carrinho = self::getCarrinho();
-        $servicos_carrinho = $servicos_carrinho->toArray();
+
+        if(is_array($servicos_carrinho) == false) {
+            $servicos_carrinho = $servicos_carrinho->toArray();
+        }
 
         // Roda todos os serviços do carrinho
         foreach($servicos_carrinho as $key => $servico_carrinho) {
@@ -122,7 +125,14 @@ abstract class CupomDescontoService
 
         // Pega os servicos do carrinho
         $servicos_carrinho = self::getCarrinho();
-        $servicos_carrinho = $servicos_carrinho->toArray();
+
+        if($servicos_carrinho == null || $servicos_carrinho == false) {
+            return;
+        }
+
+        if(is_array($servicos_carrinho) == false) {
+            $servicos_carrinho = $servicos_carrinho->toArray();
+        }
 
         // Roda todos os serviços do carrinho
         foreach($servicos_carrinho as $key => $servico_carrinho) {
