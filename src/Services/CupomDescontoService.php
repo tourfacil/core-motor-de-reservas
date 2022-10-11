@@ -54,7 +54,7 @@ abstract class CupomDescontoService
     private static function getIDSProdutosCarrinho() {
 
         // Pega os servicos do carrinho
-        $servicos_carrinho = carrinho()->all();
+        $servicos_carrinho = self::getCarrinho();
 
         // Variavel para guadar os ids
         $ids_servicos = [];
@@ -98,8 +98,11 @@ abstract class CupomDescontoService
     private static function aplicarCupomNoServico($cupom) {
 
         // Pega os servicos do carrinho
-        $servicos_carrinho = carrinho()->all();
-        $servicos_carrinho = $servicos_carrinho->toArray();
+        $servicos_carrinho = self::getCarrinho();
+
+        if(is_array($servicos_carrinho) == false) {
+            $servicos_carrinho = $servicos_carrinho->toArray();
+        }
 
         // Roda todos os serviços do carrinho
         foreach($servicos_carrinho as $key => $servico_carrinho) {
@@ -121,8 +124,15 @@ abstract class CupomDescontoService
     private static function removerCupomServico() {
 
         // Pega os servicos do carrinho
-        $servicos_carrinho = carrinho()->all();
-        $servicos_carrinho = $servicos_carrinho->toArray();
+        $servicos_carrinho = self::getCarrinho();
+
+        if($servicos_carrinho == null || $servicos_carrinho == false) {
+            return;
+        }
+
+        if(is_array($servicos_carrinho) == false) {
+            $servicos_carrinho = $servicos_carrinho->toArray();
+        }
 
         // Roda todos os serviços do carrinho
         foreach($servicos_carrinho as $key => $servico_carrinho) {
@@ -225,7 +235,7 @@ abstract class CupomDescontoService
         } else {
 
             //Busca os serviços do carrinho
-            $servicos_carrinho = carrinho()->all();
+            $servicos_carrinho = self::getCarrinho();
 
             // Diferença de valor
             $diferenca = 0;
@@ -288,5 +298,13 @@ abstract class CupomDescontoService
             return true;
 
         return false;
+    }
+
+    private static function getCarrinho() {
+
+        if(function_exists('carrinho'))
+            return carrinho()->all();
+
+        return session()->get('carrinho');
     }
 }
