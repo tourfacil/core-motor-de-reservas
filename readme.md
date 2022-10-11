@@ -14,7 +14,7 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
-### *SNAPSHOT (02 de Setembro de 2022)*
+### *v1.5.1 (11 de Setembro de 2022)*
 - Adicionado possibilidade de alterar nome do serviço na página de informações do mesmo.
 - Alterações nas categorias de idade da integração do Exceed.
 - Adicionado Enums para registro de entradas financeiras nas vendas internas.
