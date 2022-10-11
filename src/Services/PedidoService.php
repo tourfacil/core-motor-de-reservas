@@ -556,7 +556,17 @@ class PedidoService
             "metodo_pagamento" => $metodo_pagamento,
             "meio_pagamento_interno" => $pagamento['meio_pagamento'],
             "metodo_pagamento_interno" => $pagamento['metodo_pagamento'],
+            "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
         ]);
+
+        // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
+        if(array_key_exists('cupom', $pedido_array)) {
+            $pedido_array['cupom']->vezes_utilizado++;
+            $pedido_array['cupom']->save();
+
+            // Remove o cupom da sessão
+            session()->forget('cupom_desconto');
+        }
 
         // Salva os dados da transacao
         // $pedido->transacaoPedido()->create([
