@@ -24,6 +24,8 @@ abstract class IntegracaoEnum
 
     const FANTASTIC_HOUSE = "FANTASTIC_HOUSE";
 
+    const MATRIA = "MATRIA";
+
     const INTEGRACOES = [
         self::NAO => "Não possui",
         self::SNOWLAND => "Snowland",
@@ -33,6 +35,7 @@ abstract class IntegracaoEnum
         self::DREAMS => "Dreams",
         self::ALPEN => "Alpen Park",
         self::FANTASTIC_HOUSE => "Fantastic House",
+        self::MATRIA => "Matria Park"
     ];
 
     const INTEGRACOES_EXTERNAS = [
