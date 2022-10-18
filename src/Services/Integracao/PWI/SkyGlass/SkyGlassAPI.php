@@ -4,15 +4,28 @@ namespace TourFacil\Core\Services\Integracao\PWI\SkyGlass;
 
 use Exception;
 use GuzzleHttp\Client;
+use TourFacil\Core\Enum\TipoRequisicaoEnum;
 
 class SkyGlassAPI
 {
+    /**
+     * @var int
+     */
     protected $login;
 
+    /**
+     * @var string
+     */
     protected $password;
 
+    /**
+     * @var string
+     */
     protected $base_url;
 
+    /**
+     *
+     */
     public function __construct()
     {
         $this->login = 34242332000102;
@@ -20,7 +33,21 @@ class SkyGlassAPI
         $this->base_url = 'https://integracaovendas.skyglasscanela.com.br/hom/api';
     }
 
-    public function consultaAPI(String $metodo, String $url, Array $dados)
+    public function consultarProdutos() {
+
+        return $this->consultaAPI(TipoRequisicaoEnum::GET, "/produto/lista", []);
+    }
+
+    /**
+     * Responsavel por ativar a API e fazer as chamadas HTTP
+     * Método utilizado por todos outros
+     *
+     * @param String $metodo
+     * @param String $url
+     * @param array $dados
+     * @return array
+     */
+    private function consultaAPI(String $metodo, String $url, Array $dados)
     {
         $token = $this->getAcessToken();
 
@@ -29,6 +56,11 @@ class SkyGlassAPI
         return $this->req($metodo, $url, $dados, $token);
     }
 
+    /**
+     * Método responsavel por fazer chamada ao parque e recuperar o token necessário para as demais requisições
+     *
+     * @return mixed
+     */
     private function getAcessToken()
     {
         // Url para consultar o token
@@ -41,16 +73,24 @@ class SkyGlassAPI
         ];
 
         // Resposta
-        $response = $this->req("POST", $url, $dados);
+        $response = $this->req(TipoRequisicaoEnum::POST, $url, $dados);
 
         // Retorna a resposta
         return $response['data']['access_token'];
     }
 
+    /**
+     * Método responsavel por todas as requisições.
+     * Todos os demais métodos usam este para fazer chamadas para a API
+     *
+     * @param String $metodo
+     * @param String $url
+     * @param array $dados
+     * @param $authorization
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     private function req(String $metodo, String $url, Array $dados, $authorization = '') {
-
-
-
 
         try {
 
