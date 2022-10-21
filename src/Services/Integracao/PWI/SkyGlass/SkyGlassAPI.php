@@ -33,9 +33,14 @@ class SkyGlassAPI
         $this->base_url = 'https://integracaovendas.skyglasscanela.com.br/hom/api';
     }
 
-    public function consultarProdutos() {
-
+    public function consultarProdutos()
+    {
         return $this->consultaAPI(TipoRequisicaoEnum::GET, "/produto/lista", []);
+    }
+
+    public function consultarSaldo()
+    {
+        return $this->consultaAPI(TipoRequisicaoEnum::POST, '/credito/saldo', []);
     }
 
     /**
@@ -74,6 +79,8 @@ class SkyGlassAPI
 
         // Resposta
         $response = $this->req(TipoRequisicaoEnum::POST, $url, $dados);
+
+        dd($response);
 
         // Retorna a resposta
         return $response['data']['access_token'];
