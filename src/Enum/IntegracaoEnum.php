@@ -26,6 +26,8 @@ abstract class IntegracaoEnum
 
     const MATRIA = "MATRIA";
 
+    const VILA_DA_MONICA = "VILA_DA_MONICA";
+
     const INTEGRACOES = [
         self::NAO => "Não possui",
         self::SNOWLAND => "Snowland",
@@ -35,7 +37,8 @@ abstract class IntegracaoEnum
         self::DREAMS => "Dreams",
         self::ALPEN => "Alpen Park",
         self::FANTASTIC_HOUSE => "Fantastic House",
-        self::MATRIA => "Matria Park"
+        self::MATRIA => "Matria Park",
+        self::VILA_DA_MONICA => "Vila da Monica",
     ];
 
     const INTEGRACOES_EXTERNAS = [
