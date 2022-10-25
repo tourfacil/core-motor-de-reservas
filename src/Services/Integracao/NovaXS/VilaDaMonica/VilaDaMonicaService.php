@@ -47,6 +47,7 @@ class VilaDaMonicaService
     /** @var string */
     const ADULTO = "adulto";
 
+    const SENIOR = "senior";
 
     /**
      * ATENÇÃO NÃO MUDAR A ORDEM
@@ -54,7 +55,7 @@ class VilaDaMonicaService
      * @var array
      */
     const TIPO_PESSOAS = [
-        self::CRIANCA, self::ADULTO
+        self::CRIANCA, self::ADULTO, self::SENIOR
     ];
 
     /**
@@ -83,23 +84,17 @@ class VilaDaMonicaService
             'date' => $this->reserva->agendaDataServico->data->format('d/m/Y')
         ]);
 
-
-
         // Log
         Storage::append($this->path, "#". $this->reserva->id .": Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
 
         // Forma a lista de serviços e separa os IDs de cada serviço por categoria de idade
         $this->productsArray = $this->productsArray();
 
-        dd($this->productsArray);
-
         // Log
         Storage::append($this->path, "#" . $this->reserva->id . "productsArray: " . json_encode($this->productsArray));
 
         // Retorna os dados do comprador
         $this->personAsString = $this->personAsString($this->reserva->pedido->cliente);
-
-        dd('Não passar');
 
         // Bloqueio de compra
         $this->buyToBillFor = $this->vila_da_monica->buyToBillFor([
@@ -165,15 +160,7 @@ class VilaDaMonicaService
                 // Percorre os tipos de pessoas disponiveis
                 foreach (self::TIPO_PESSOAS as $tipo_pessoa) {
 
-//                    if($nome_servico != 'ingresso individual site adulto') {
-//                        dd($tipo_pessoa, $nome_servico);
-//                    }
-
                     if(strripos($nome_servico, $tipo_pessoa)) {
-                        // Deixa sempre como MELHOR IDADE
-                        $tipo_pessoa = ($tipo_pessoa == self::SENIOR) ? self::MELHOR_IDADE : $tipo_pessoa;
-                        // Deixa sempre como CRIANCA
-                        $tipo_pessoa = ($tipo_pessoa == self::INFANTIL) ? self::CRIANCA : $tipo_pessoa;
                         $servicos[Str::slug($tipo_pessoa, "_")] = $servico['path'];
                     }
                 }
@@ -215,7 +202,7 @@ class VilaDaMonicaService
             if($quantidade_reserva->valor_net > 0) {
 
                 /** Recupera os dados para crianca pagamente */
-                if(Str::contains($nome_variacao, self::CRIANCA)) {
+                if(Str::contains($nome_variacao, "pagante")) {
                     $product_path = $this->servicosDisponiveis[Str::slug(self::CRIANCA, "_")];
                     $productsArray[] = [
                         "path" => $product_path,
@@ -243,18 +230,18 @@ class VilaDaMonicaService
                 }
 
                 /** Recupera o ID do serviço para melhor idade */
-                if(Str::contains($nome_variacao, self::SENIOR)) {
-                    $product_path = $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")];
-                    $productsArray[] = [
-                        "path" => $this->servicosDisponiveis[Str::slug(self::MELHOR_IDADE, "_")],
-                        "amount" => (string) $quantidade_reserva->quantidade,
-                        "date" => $data_utilizacao,
-                        "name" => self::MELHOR_IDADE
-                    ];
-                    // Salva qual é a variacao
-                    $variacoes_id[self::MELHOR_IDADE] = $quantidade_reserva->variacaoServico->id;
-                    $productsIdArray[self::MELHOR_IDADE] = $this->onlyNumbers($product_path);
-                }
+//                if(Str::contains($nome_variacao, self::SENIOR)) {
+//                    $product_path = $this->servicosDisponiveis[Str::slug(self::SENIOR, "_")];
+//                    $productsArray[] = [
+//                        "path" => $this->servicosDisponiveis[Str::slug(self::SENIOR, "_")],
+//                        "amount" => (string) $quantidade_reserva->quantidade,
+//                        "date" => $data_utilizacao,
+//                        "name" => self::SENIOR
+//                    ];
+//                    // Salva qual é a variacao
+//                    $variacoes_id[self::SENIOR] = $quantidade_reserva->variacaoServico->id;
+//                    $productsIdArray[self::SENIOR] = $this->onlyNumbers($product_path);
+//                }
             }
         }
 
@@ -287,7 +274,7 @@ class VilaDaMonicaService
         $adultos = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::ADULTO] ?? null);
 
         // Recupera todos os senior da reserva
-        $senior = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::MELHOR_IDADE] ?? null);
+        $senior = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::SENIOR] ?? null);
 
         // Recupera todas as crianças do pedido
         $criancas = $this->reserva->dadoClienteReservaPedido->where('variacao_servico_id', $this->productsArray['variationsId'][self::CRIANCA] ?? null);
@@ -307,8 +294,8 @@ class VilaDaMonicaService
             }
 
             // Se for senior
-            if(isset($this->productsArray['productsIdArray'][self::MELHOR_IDADE])) {
-                if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::MELHOR_IDADE]) {
+            if(isset($this->productsArray['productsIdArray'][self::SENIOR])) {
+                if($viajante['customData']['productId'] == $this->productsArray['productsIdArray'][self::SENIOR]) {
                     // Cria array conforme o retorno
                     $this->accessList[] = $this->createPeople($viajante, $senior->last());
                     // Remove o ultimo item do array

@@ -47,7 +47,7 @@ class VilaDaMonicaReservaPedido extends Model
      */
     public function getUrlVoucherAttribute()
     {
-        return config('integracao.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
+        return config('integracao.vila_da_monica.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}";
     }
 
     /**
@@ -57,6 +57,6 @@ class VilaDaMonicaReservaPedido extends Model
      */
     public function getVoucherAsByteAttribute()
     {
-        return config('integracao.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
+        return config('integracao.vila_da_monica.base_url') . "/voucher?voucher={$this->attributes['voucher_impressao']}&token={$this->attributes['token_impressao']}&method=receiptAsByte";
     }
 }

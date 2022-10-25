@@ -179,6 +179,14 @@ class ReservaPedido extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function vilaDaMonicaVoucher()
+    {
+        return $this->hasOne(VilaDaMonicaReservaPedido::class);
+    }
+
+    /**
      * @return mixed
      */
     public function getStatusReservaAttribute()
