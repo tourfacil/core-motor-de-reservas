@@ -10,6 +10,7 @@ use TourFacil\Core\Models\AgendaDataServico;
 use TourFacil\Core\Models\AgendaServico;
 use TourFacil\Core\Models\ReservaPedido;
 use TourFacil\Core\Models\Servico;
+use TourFacil\Core\Services\RegraServico\ValorExcecaoDiaService;
 
 /**
  * Class AgendaService
@@ -185,6 +186,10 @@ class AgendaService
         $servico = Servico::with('variacaoServicoAtivas', 'agendaServico', 'camposAdicionaisAtivos')
             ->where('uuid', $uuid)->select(['id', 'uuid', 'nome', 'info_clientes', 'antecedencia_venda'])->first();
 
+        // Busca se o produto tem alguma regra de antecedencia
+        // Não é a antecedencia de quantos dias para frente pode vender e sim a que muda os valores
+        $regra_antecedencia = ValorExcecaoDiaService::getRegraAtecedenciaServicoAtiva($servico);
+
         if (is_object($servico)) {
 
             // Pega o desconto caso tenha
@@ -317,6 +322,9 @@ class AgendaService
                 }
             }
 
+            $retorno['events'] = ValorExcecaoDiaService::aplicarValorRegraAntecedenciaArrayEvents($regra_antecedencia, $retorno['events']);
+            $retorno['disponibilidade'] = ValorExcecaoDiaService::aplicarValorRegraAntecedenciaArrayDisponibilidade($regra_antecedencia, $retorno['disponibilidade']);
+
             return $retorno;
         }
 
@@ -425,6 +433,8 @@ class AgendaService
             'text' => "R$ " . formataValor($valor_venda_data),
             'text_original' => "R$ " . formataValor($valor_venda_data_original),
         ];
+
+
 
 
         return $retorno;

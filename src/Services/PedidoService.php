@@ -20,6 +20,7 @@ use TourFacil\Core\Models\Desconto;
 use TourFacil\Core\Models\Pedido;
 use TourFacil\Core\Models\Servico;
 use TourFacil\Core\Services\Pagamento\DescontoPIXService;
+use TourFacil\Core\Services\RegraServico\ValorExcecaoDiaService;
 
 /**
  * Class PedidoService
@@ -133,6 +134,11 @@ class PedidoService
                 if ($variacao_servico->percentual == 0 && $variacao_servico->markup == AgendaEnum::MARKUP_UM_REAL) {
                     $valor_venda_variacao = 1;
                 }
+
+                // Calcula o aumento por regra de antecedencia
+                $regra = ValorExcecaoDiaService::getRegraAtecedenciaServicoAtiva($servico);
+                $valor_net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra, $data_servico->data, $valor_net_variacao);
+                $valor_venda_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra, $data_servico->data, $valor_venda_variacao);
 
                 // Multiplaca o valor net pela quantidade selecionada
                 $valor_net_variacao = $valor_net_variacao * $variacao_carrinho['quantidade'];
