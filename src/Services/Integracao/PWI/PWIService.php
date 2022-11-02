@@ -36,11 +36,15 @@ abstract class PWIService
             return false;
         }
 
+        sleep(3);
+
+        $retorno_delay = $api->consultarVenda($retorno['data']['id']);
+
         IntegracaoPWI::create([
             'reserva_pedido_id' => $reserva->id,
             'integracao' => $reserva->servico->integracao,
             'status' => StatusReservaEnum::ATIVA    ,
-            'dados' => json_encode($retorno),
+            'dados' => json_encode($retorno_delay),
             'data_utilizacao' => $reserva->agendaDataServico->data
         ]);
 
@@ -56,6 +60,11 @@ abstract class PWIService
         }
 
         $dados = $integracao->dados;
+
+        if(is_string($integracao->dados)) {
+            $dados = json_decode($dados, true);
+        }
+
         $itens = $dados['data']['itens'];
 
         $retorno = [];

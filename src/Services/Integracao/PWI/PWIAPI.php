@@ -49,6 +49,11 @@ class PWIAPI
         return $this->consultaAPI(TipoRequisicaoEnum::GET, "/produto/lista", []);
     }
 
+    public function consultarVenda($id)
+    {
+        return $this->consultaAPI(TipoRequisicaoEnum::GET, "/venda/$id", []);
+    }
+
     public function consultarVendas(String $data_inicial, String $data_final)
     {
         return $this->consultaAPI(TipoRequisicaoEnum::GET, "/venda/lista/$data_inicial/$data_final", []);
