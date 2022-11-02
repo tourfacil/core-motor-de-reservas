@@ -29,7 +29,7 @@ class ValorExcecaoDiaService
      * @param $valor_atual
      * @return int|mixed
      */
-    public static function aplicarValorRegraAntecedencia(RegraServico $regra, $data_utilizacao, $valor_atual) {
+    public static function aplicarValorRegraAntecedencia($regra, $data_utilizacao, $valor_atual) {
 
         // Retorna o valor original caso a regra seja null
         if($regra == null) {
@@ -61,7 +61,7 @@ class ValorExcecaoDiaService
      * @param array $datas
      * @return array
      */
-    public static function aplicarValorRegraAntecedenciaArrayEvents(RegraServico $regra, Array $datas) {
+    public static function aplicarValorRegraAntecedenciaArrayEvents($regra, Array $datas) {
 
         // Caso a regra seja null, só retorna o array
         if($regra == null) {
@@ -93,7 +93,7 @@ class ValorExcecaoDiaService
      * @param array $datas
      * @return array
      */
-    public static function aplicarValorRegraAntecedenciaArrayDisponibilidade(RegraServico $regra, Array $datas) {
+    public static function aplicarValorRegraAntecedenciaArrayDisponibilidade($regra, Array $datas) {
 
         // Caso a regra seja null, retorna o array original
         if($regra == null) {
@@ -132,7 +132,7 @@ class ValorExcecaoDiaService
      * @param $valor
      * @return int|mixed
      */
-    private static function calcularValor(RegraServico $regra, $valor) {
+    private static function calcularValor($regra, $valor) {
 
         if($regra->regras['tipo_valor_servico'] == self::$VALOR_FIXO) {
 

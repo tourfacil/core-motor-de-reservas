@@ -222,7 +222,7 @@ class AgendaService
                 'campos_adicionais' => $servico->camposAdicionaisAtivos,
                 'necessita_identificacao' => ($servico->info_clientes == ServicoEnum::SOLICITA_INFO_CLIENTES)
             ];
-
+            $cont = 0;
             // Monta o array com as datas
             foreach ($agenda_servico->datasServico as $data_agenda) {
 
@@ -244,6 +244,10 @@ class AgendaService
                             $net_variacao = ($substitui_net[$net_variacao]) ?? $net_variacao;
                         }
 
+//                        dd($net_variacao);
+//                        $net_variacao = number_format(ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra_antecedencia, $data_agenda->data, $net_variacao), 2, '.', '');
+//                        dd($net_variacao);
+
                         // Valor de venda da variacao
                         $venda_variacao = $net_variacao * $variacao->markup;
 
@@ -263,6 +267,7 @@ class AgendaService
 
                         // Verifica se possui valores da venda para substituir
                         if(is_array($substitui_venda)) {
+                            dd("oi", $substitui_venda);
                             $venda_variacao = (string) number_format($venda_variacao, 2, ".", "");
                             $venda_variacao = $substitui_venda[$venda_variacao] ?? $venda_variacao;
                         }
@@ -322,10 +327,11 @@ class AgendaService
                 }
             }
 
-            $retorno['events'] = ValorExcecaoDiaService::aplicarValorRegraAntecedenciaArrayEvents($regra_antecedencia, $retorno['events']);
-            $retorno['disponibilidade'] = ValorExcecaoDiaService::aplicarValorRegraAntecedenciaArrayDisponibilidade($regra_antecedencia, $retorno['disponibilidade']);
-
+//            $retorno['events'] = ValorExcecaoDiaService::aplicarValorRegraAntecedenciaArrayEvents($regra_antecedencia, $retorno['events']);
+//            $retorno['disponibilidade'] = ValorExcecaoDiaService::aplicarValorRegraAntecedenciaArrayDisponibilidade($regra_antecedencia, $retorno['disponibilidade']);
+//            dd($retorno);
             return $retorno;
+
         }
 
         return ['events' => []];
