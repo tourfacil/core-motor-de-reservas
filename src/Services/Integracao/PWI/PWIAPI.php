@@ -1,12 +1,19 @@
 <?php
+/*
+ * Copyright (c) 2022. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+ * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
+ * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
+ * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
+ * Vestibulum commodo. Ut rhoncus gravida arcu.
+ */
 
-namespace TourFacil\Core\Services\Integracao\PWI\SkyGlass;
+namespace TourFacil\Core\Services\Integracao\PWI;
 
 use Exception;
 use GuzzleHttp\Client;
 use TourFacil\Core\Enum\TipoRequisicaoEnum;
 
-class SkyGlassAPI
+class PWIAPI
 {
     /**
      * @var int
@@ -33,9 +40,18 @@ class SkyGlassAPI
         $this->base_url = 'https://integracaovendas.skyglasscanela.com.br/hom/api';
     }
 
+    public function efetuarCompra(Array $dados) {
+        return $this->consultaAPI(TipoRequisicaoEnum::POST, '/venda/incluir', $dados);
+    }
+
     public function consultarProdutos()
     {
         return $this->consultaAPI(TipoRequisicaoEnum::GET, "/produto/lista", []);
+    }
+
+    public function consultarVendas(String $data_inicial, String $data_final)
+    {
+        return $this->consultaAPI(TipoRequisicaoEnum::GET, "/venda/lista/$data_inicial/$data_final", []);
     }
 
     public function consultarSaldo()
@@ -79,8 +95,6 @@ class SkyGlassAPI
 
         // Resposta
         $response = $this->req(TipoRequisicaoEnum::POST, $url, $dados);
-
-        dd($response);
 
         // Retorna a resposta
         return $response['data']['access_token'];
