@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class IntegracaoPWI extends Model
 {
+    protected $table = 'integracao_p_w_is';
+
     protected $fillable = [
         'reserva_pedido_id',
         'integracao',
