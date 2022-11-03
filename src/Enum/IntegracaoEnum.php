@@ -28,6 +28,8 @@ abstract class IntegracaoEnum
 
     const VILA_DA_MONICA = "VILA_DA_MONICA";
 
+    const SKYGLASS = "SKYGLASS";
+
     const INTEGRACOES = [
         self::NAO => "Não possui",
         self::SNOWLAND => "Snowland",
@@ -39,6 +41,11 @@ abstract class IntegracaoEnum
         self::FANTASTIC_HOUSE => "Fantastic House",
         self::MATRIA => "Matria Park",
         self::VILA_DA_MONICA => "Vila da Monica",
+        self::SKYGLASS => "Skyglass",
+    ];
+
+    const INTEGRACOES_PWI = [
+        self::SKYGLASS => "Skyglass",
     ];
 
     const INTEGRACOES_EXTERNAS = [

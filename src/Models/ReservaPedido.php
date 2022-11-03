@@ -187,6 +187,14 @@ class ReservaPedido extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function integracaoPWI()
+    {
+        return $this->hasOne(IntegracaoPWI::class);
+    }
+
+    /**
      * @return mixed
      */
     public function getStatusReservaAttribute()
