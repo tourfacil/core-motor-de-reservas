@@ -244,9 +244,9 @@ class AgendaService
                             $net_variacao = ($substitui_net[$net_variacao]) ?? $net_variacao;
                         }
 
-//                        dd($net_variacao);
-//                        $net_variacao = number_format(ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra_antecedencia, $data_agenda->data, $net_variacao), 2, '.', '');
-//                        dd($net_variacao);
+                        // Verifica se há uma regra de antecedencia para valor diferenciado e aplica
+                        // Se não houver mantem o memso valor
+                        $net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra_antecedencia, $data_agenda->data, $net_variacao);
 
                         // Valor de venda da variacao
                         $venda_variacao = $net_variacao * $variacao->markup;
@@ -267,7 +267,6 @@ class AgendaService
 
                         // Verifica se possui valores da venda para substituir
                         if(is_array($substitui_venda)) {
-                            dd("oi", $substitui_venda);
                             $venda_variacao = (string) number_format($venda_variacao, 2, ".", "");
                             $venda_variacao = $substitui_venda[$venda_variacao] ?? $venda_variacao;
                         }
@@ -288,6 +287,7 @@ class AgendaService
                         // Aplica o desconto caso tenha
                         $venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
 
+
                         // Dados para o array
                         $variacaoes[] = [
                             'variacao_id' => $variacao->id,
@@ -301,10 +301,19 @@ class AgendaService
                         ];
                     }
 
-                    $data_agenda_valor_venda_original = $data_agenda->valor_venda;
-                    $valor_venda_data_original = $valor_venda_data;
-                    $data_agenda_valor_venda = DescontoService::aplicarDescontoValor($desconto, $data_agenda->valor_venda);
-                    $valor_venda_data = DescontoService::aplicarDescontoValor($desconto, $valor_venda_data);
+                    // Obtem a variação com o valor de venda mais alto para exibir no calendario
+                    $valor_venda_mais_alto = 0;
+                    foreach($variacaoes as $variacao) {
+
+                        if($valor_venda_mais_alto < $variacao['valor_venda']) {
+                            $valor_venda_mais_alto = $variacao['valor_venda'];
+                        }
+                    }
+
+                    $data_agenda_valor_venda_original = $valor_venda_mais_alto;
+                    $valor_venda_data_original = $valor_venda_mais_alto;
+                    $data_agenda_valor_venda = $valor_venda_mais_alto;
+                    $valor_venda_data = $valor_venda_mais_alto;
 
                     // Dados da agenda
                     $retorno['disponibilidade'][] = [
@@ -327,9 +336,6 @@ class AgendaService
                 }
             }
 
-//            $retorno['events'] = ValorExcecaoDiaService::aplicarValorRegraAntecedenciaArrayEvents($regra_antecedencia, $retorno['events']);
-//            $retorno['disponibilidade'] = ValorExcecaoDiaService::aplicarValorRegraAntecedenciaArrayDisponibilidade($regra_antecedencia, $retorno['disponibilidade']);
-//            dd($retorno);
             return $retorno;
 
         }
