@@ -101,6 +101,9 @@ class PedidoService
                 // Valor net de cada variacao caso seja gratis coloca como 0
                 $valor_net_variacao = ($variacao_servico->percentual > 0) ? ($variacao_servico->percentual / 100) * $data_servico->valor_net : 0;
 
+                $regra = ValorExcecaoDiaService::getRegraAtecedenciaServicoAtiva($servico);
+                $valor_net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra, $data_servico->data, $valor_net_variacao);
+
                 // Verifica se possui valores no NET para substituir
                 if (is_array($substitui_net)) {
                     $valor_net_variacao = (string) number_format($valor_net_variacao, 2, ".", "");
@@ -134,11 +137,6 @@ class PedidoService
                 if ($variacao_servico->percentual == 0 && $variacao_servico->markup == AgendaEnum::MARKUP_UM_REAL) {
                     $valor_venda_variacao = 1;
                 }
-
-                // Calcula o aumento por regra de antecedencia
-                $regra = ValorExcecaoDiaService::getRegraAtecedenciaServicoAtiva($servico);
-                $valor_net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra, $data_servico->data, $valor_net_variacao);
-                $valor_venda_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra, $data_servico->data, $valor_venda_variacao);
 
                 // Multiplaca o valor net pela quantidade selecionada
                 $valor_net_variacao = $valor_net_variacao * $variacao_carrinho['quantidade'];
