@@ -20,6 +20,7 @@ use TourFacil\Core\Models\Desconto;
 use TourFacil\Core\Models\Pedido;
 use TourFacil\Core\Models\Servico;
 use TourFacil\Core\Services\Pagamento\DescontoPIXService;
+use TourFacil\Core\Services\RegraServico\ValorExcecaoDiaService;
 
 /**
  * Class PedidoService
@@ -99,6 +100,9 @@ class PedidoService
 
                 // Valor net de cada variacao caso seja gratis coloca como 0
                 $valor_net_variacao = ($variacao_servico->percentual > 0) ? ($variacao_servico->percentual / 100) * $data_servico->valor_net : 0;
+
+                $regra = ValorExcecaoDiaService::getRegraAtecedenciaServicoAtiva($servico);
+                $valor_net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra, $data_servico->data, $valor_net_variacao);
 
                 // Verifica se possui valores no NET para substituir
                 if (is_array($substitui_net)) {

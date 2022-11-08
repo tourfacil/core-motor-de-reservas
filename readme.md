@@ -17,6 +17,8 @@ Lista de mudanças, melhorias e correções de bugs.
 ### *SNAPSHOT (11 de Setembro de 2022)*
 - Adicionado integração com Parque Vila da Monica Gramado.
 - Adicionado integração com o Matria.
+- Adicionado integração com PWI (Até o momento SKYGLASS).
+- Adicionado Regras de Serviços.
 
 ### *v1.5.1 (11 de Setembro de 2022)*
 - Adicionado possibilidade de alterar nome do serviço na página de informações do mesmo.

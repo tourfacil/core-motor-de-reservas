@@ -10,6 +10,7 @@ use TourFacil\Core\Models\AgendaDataServico;
 use TourFacil\Core\Models\AgendaServico;
 use TourFacil\Core\Models\ReservaPedido;
 use TourFacil\Core\Models\Servico;
+use TourFacil\Core\Services\RegraServico\ValorExcecaoDiaService;
 
 /**
  * Class AgendaService
@@ -185,6 +186,10 @@ class AgendaService
         $servico = Servico::with('variacaoServicoAtivas', 'agendaServico', 'camposAdicionaisAtivos')
             ->where('uuid', $uuid)->select(['id', 'uuid', 'nome', 'info_clientes', 'antecedencia_venda'])->first();
 
+        // Busca se o produto tem alguma regra de antecedencia
+        // Não é a antecedencia de quantos dias para frente pode vender e sim a que muda os valores
+        $regra_antecedencia = ValorExcecaoDiaService::getRegraAtecedenciaServicoAtiva($servico);
+
         if (is_object($servico)) {
 
             // Pega o desconto caso tenha
@@ -217,7 +222,7 @@ class AgendaService
                 'campos_adicionais' => $servico->camposAdicionaisAtivos,
                 'necessita_identificacao' => ($servico->info_clientes == ServicoEnum::SOLICITA_INFO_CLIENTES)
             ];
-
+            $cont = 0;
             // Monta o array com as datas
             foreach ($agenda_servico->datasServico as $data_agenda) {
 
@@ -238,6 +243,10 @@ class AgendaService
                             $net_variacao = (string) number_format($net_variacao, 2, ".", "");
                             $net_variacao = ($substitui_net[$net_variacao]) ?? $net_variacao;
                         }
+
+                        // Verifica se há uma regra de antecedencia para valor diferenciado e aplica
+                        // Se não houver mantem o memso valor
+                        $net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra_antecedencia, $data_agenda->data, $net_variacao);
 
                         // Valor de venda da variacao
                         $venda_variacao = $net_variacao * $variacao->markup;
@@ -278,6 +287,7 @@ class AgendaService
                         // Aplica o desconto caso tenha
                         $venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
 
+
                         // Dados para o array
                         $variacaoes[] = [
                             'variacao_id' => $variacao->id,
@@ -291,10 +301,19 @@ class AgendaService
                         ];
                     }
 
-                    $data_agenda_valor_venda_original = $data_agenda->valor_venda;
-                    $valor_venda_data_original = $valor_venda_data;
-                    $data_agenda_valor_venda = DescontoService::aplicarDescontoValor($desconto, $data_agenda->valor_venda);
-                    $valor_venda_data = DescontoService::aplicarDescontoValor($desconto, $valor_venda_data);
+                    // Obtem a variação com o valor de venda mais alto para exibir no calendario
+                    $valor_venda_mais_alto = 0;
+                    foreach($variacaoes as $variacao) {
+
+                        if($valor_venda_mais_alto < $variacao['valor_venda']) {
+                            $valor_venda_mais_alto = $variacao['valor_venda'];
+                        }
+                    }
+
+                    $data_agenda_valor_venda_original = $valor_venda_mais_alto;
+                    $valor_venda_data_original = $valor_venda_mais_alto;
+                    $data_agenda_valor_venda = $valor_venda_mais_alto;
+                    $valor_venda_data = $valor_venda_mais_alto;
 
                     // Dados da agenda
                     $retorno['disponibilidade'][] = [
@@ -318,6 +337,7 @@ class AgendaService
             }
 
             return $retorno;
+
         }
 
         return ['events' => []];
@@ -335,6 +355,10 @@ class AgendaService
         $substitui_net = $configuracoes_agenda[AgendaEnum::SUBSTITUI_NET] ?? null;
         $substitui_venda = $configuracoes_agenda[AgendaEnum::SUBSTITUI_VENDA] ?? null;
 
+        // Busca se o produto tem alguma regra de antecedencia
+        // Não é a antecedencia de quantos dias para frente pode vender e sim a que muda os valores
+        $regra_antecedencia = ValorExcecaoDiaService::getRegraAtecedenciaServicoAtiva($servico);
+
         $variacaoes = [];
         $valor_venda_data = 0;
 
@@ -349,6 +373,10 @@ class AgendaService
                 $net_variacao = (string) number_format($net_variacao, 2, ".", "");
                 $net_variacao = ($substitui_net[$net_variacao]) ?? $net_variacao;
             }
+
+            // Verifica se há uma regra de antecedencia para valor diferenciado e aplica
+            // Se não houver mantem o memso valor
+            $net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra_antecedencia, $data_agenda->data, $net_variacao);
 
             // Valor de venda da variacao
             $venda_variacao = $net_variacao * $variacao->markup;
@@ -402,10 +430,19 @@ class AgendaService
             ];
         }
 
-        $data_agenda_valor_venda_original = $data_agenda->valor_venda;
-        $valor_venda_data_original = $valor_venda_data;
-        $data_agenda_valor_venda = DescontoService::aplicarDescontoValor($desconto, $data_agenda->valor_venda);
-        $valor_venda_data = DescontoService::aplicarDescontoValor($desconto, $valor_venda_data);
+        // Obtem a variação com o valor de venda mais alto para exibir no calendario
+        $valor_venda_mais_alto = 0;
+        foreach($variacaoes as $variacao) {
+
+            if($valor_venda_mais_alto < $variacao['valor_venda']) {
+                $valor_venda_mais_alto = $variacao['valor_venda'];
+            }
+        }
+
+        $data_agenda_valor_venda_original = $valor_venda_mais_alto;
+        $valor_venda_data_original = $valor_venda_mais_alto;
+        $data_agenda_valor_venda = $valor_venda_mais_alto;
+        $valor_venda_data = $valor_venda_mais_alto;
 
         // Dados da agenda
         $retorno['disponibilidade'][] = [
@@ -425,6 +462,8 @@ class AgendaService
             'text' => "R$ " . formataValor($valor_venda_data),
             'text_original' => "R$ " . formataValor($valor_venda_data_original),
         ];
+
+
 
 
         return $retorno;
