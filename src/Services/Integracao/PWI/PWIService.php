@@ -26,6 +26,7 @@ abstract class PWIService
         foreach($variacoes as $variacao) {
             $dados['Itens'][] = [
                 'IdProduto' => $variacao['variacao_pwi_id'],
+                'DataPrevisaoVisita' => $reserva->agendaDataServico->data->toDateTimeLocalString(),
                 'Qtde' => $variacao['quantidade'],
             ];
         }
