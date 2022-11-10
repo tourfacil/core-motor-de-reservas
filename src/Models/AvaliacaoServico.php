@@ -19,6 +19,7 @@ class AvaliacaoServico extends Model
         'avaliacao',
         'nome',
         'status',
+        'reserva_pedido_id',
         'cliente_id',
     ];
 

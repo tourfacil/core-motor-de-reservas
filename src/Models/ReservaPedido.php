@@ -195,6 +195,14 @@ class ReservaPedido extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function avaliacaoServico()
+    {
+        return $this->hasOne(AvaliacaoServico::class);
+    }
+
+    /**
      * @return mixed
      */
     public function getStatusReservaAttribute()
