@@ -32,6 +32,7 @@ class Pedido extends Model
         'meio_pagamento_interno',
         'metodo_pagamento_interno',
         'cupom_desconto_id',
+        'email_avaliacao',
     ];
 
     /**
