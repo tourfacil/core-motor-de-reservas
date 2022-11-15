@@ -84,6 +84,14 @@ class Pedido extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function pedidoAvaliacaoMailHashLogin()
+    {
+        return $this->hasOne(PedidoAvaliacaoMailHashLogin::class);
+    }
+
+    /**
      * Forma de pagamento do pedido
      *
      * @return mixed
