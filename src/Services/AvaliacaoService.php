@@ -5,13 +5,15 @@ namespace TourFacil\Core\Services;
 use App\Mail\AvaliacaoServicoMail;
 use Carbon\Carbon;
 use TourFacil\Core\Enum\StatusAvaliacaoServicoEnum;
+use TourFacil\Core\Enum\StatusEmailAvaliacaoEnum;
 use TourFacil\Core\Models\AvaliacaoServico;
 use TourFacil\Core\Models\Pedido;
-use TourFacil\Core\Models\ReservaPedido;
 use TourFacil\Core\Models\Servico;
+use Illuminate\Support\Facades\Mail;
 
 class AvaliacaoService
 {
+
     public static function getAvaliacoesAprovadas(Servico $servico, $limite = 2) {
         return AvaliacaoServico::where('servico_id', $servico->id)
                                 ->where('status', StatusAvaliacaoServicoEnum::APROVADO)
@@ -40,8 +42,9 @@ class AvaliacaoService
     public function dispararEmailsAvaliacao() {
 
         $this->log("Iniciando envio de e-mails para avaliação de clientes");
+        $relatorio = "";
 
-        $pedidos = Pedido::where('email_avaliacao', 'NAO_ENVIADO')
+        $pedidos = Pedido::where('email_avaliacao', StatusEmailAvaliacaoEnum::NAO_ENVIADO)
                          ->with(['reservas'])
                          ->whereHas('reservas', function($query) {
                              $query->whereHas('agendaDataServico', function($query2) {
@@ -52,11 +55,27 @@ class AvaliacaoService
 
         $this->log($pedidos->count() . ' aptos para envio do e-mail');
 
-        foreach($pedidos as $pedido) {
+        foreach($pedidos as $key => $pedido) {
 
-            (new AvaliacaoServicoMail())->send();
+            $this->log("Enviando e-mail de avaliação para o cliente " . $pedido->cliente->nome);
 
+            Mail::to($pedido->cliente->email)->send(new AvaliacaoServicoMail($pedido));
+
+            $pedido->update([
+                'email_avaliacao' => StatusEmailAvaliacaoEnum::ENVIADO
+            ]);
+
+            $relatorio .= "#{$pedido->codigo} - {$pedido->created_at->format('d/m/Y')} - {$pedido->cliente->nome} - {$pedido->cliente->email} \n";
+
+            sleep(1);
         }
+
+        simpleMail(
+        "E-mails de avaliação disparados",
+        "Foram disparados " .  $pedidos->count() . " emails solicitando avaliação.\n{$relatorio}",
+       "dev@tourfacil.com.br"
+    );
+
     }
 
     private function log($texto) {
