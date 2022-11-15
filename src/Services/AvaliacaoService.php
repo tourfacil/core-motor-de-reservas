@@ -4,12 +4,14 @@ namespace TourFacil\Core\Services;
 
 use App\Mail\AvaliacaoServicoMail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use TourFacil\Core\Enum\StatusAvaliacaoServicoEnum;
 use TourFacil\Core\Enum\StatusEmailAvaliacaoEnum;
 use TourFacil\Core\Models\AvaliacaoServico;
 use TourFacil\Core\Models\Pedido;
+use TourFacil\Core\Models\PedidoAvaliacaoMailHashLogin;
 use TourFacil\Core\Models\Servico;
-use Illuminate\Support\Facades\Mail;
 
 class AvaliacaoService
 {
@@ -64,6 +66,14 @@ class AvaliacaoService
             $pedido->update([
                 'email_avaliacao' => StatusEmailAvaliacaoEnum::ENVIADO
             ]);
+
+            if($pedido->pedidoAvaliacaoMailHashLogin == null) {
+                PedidoAvaliacaoMailHashLogin::create([
+                    'pedido_id' => $pedido->id,
+                    'uuid' => Str::uuid(),
+                    'hash' => \Hash::make(Str::uuid())
+                ]);
+            }
 
             $relatorio .= "#{$pedido->codigo} - {$pedido->created_at->format('d/m/Y')} - {$pedido->cliente->nome} - {$pedido->cliente->email} \n";
 
