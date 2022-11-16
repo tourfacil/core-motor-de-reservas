@@ -10,6 +10,7 @@ use TourFacil\Core\Enum\MeioPagamentoInternoEnum;
 use TourFacil\Core\Enum\MetodoPagamentoEnum;
 use TourFacil\Core\Enum\MetodoPagamentoInternoEnum;
 use TourFacil\Core\Enum\ServicoEnum;
+use TourFacil\Core\Enum\StatusEmailAvaliacaoEnum;
 use TourFacil\Core\Enum\StatusPagamentoEnum;
 use TourFacil\Core\Enum\StatusPedidoEnum;
 use TourFacil\Core\Enum\StatusReservaEnum;
@@ -309,6 +310,7 @@ class PedidoService
             "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
             "meio_pagamento_interno" => MeioPagamentoInternoEnum::PAGARME,
             "metodo_pagamento_interno" => MetodoPagamentoInternoEnum::CARTAO_CREDITO,
+            "email_avaliacao" => StatusEmailAvaliacaoEnum::NAO_ENVIADO,
         ]);
 
         // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
@@ -443,6 +445,7 @@ class PedidoService
             "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
             "meio_pagamento_interno" => MeioPagamentoInternoEnum::PAGARME,
             "metodo_pagamento_interno" => MetodoPagamentoInternoEnum::PIX,
+            "email_avaliacao" => StatusEmailAvaliacaoEnum::NAO_ENVIADO,
         ]);
 
         // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
@@ -561,6 +564,7 @@ class PedidoService
             "meio_pagamento_interno" => $pagamento['meio_pagamento'],
             "metodo_pagamento_interno" => $pagamento['metodo_pagamento'],
             "cupom_desconto_id" => $pedido_array['cupom_desconto_id'] ?? null,
+            "email_avaliacao" => StatusEmailAvaliacaoEnum::NAO_ENVIADO,
         ]);
 
         // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
