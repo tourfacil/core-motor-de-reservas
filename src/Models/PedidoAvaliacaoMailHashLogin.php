@@ -11,20 +11,15 @@ namespace TourFacil\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AvaliacaoServico extends Model
+class PedidoAvaliacaoMailHashLogin extends Model
 {
     protected $fillable = [
-        'servico_id',
-        'nota',
-        'avaliacao',
-        'nome',
-        'status',
-        'reserva_pedido_id',
-        'cliente_id',
-        'reserva_pedido_id'
+        'pedido_id',
+        'uuid',
+        'hash'
     ];
 
-    public function servico() {
-        return $this->belongsTo(Servico::class);
+    public function pedido() {
+        return $this->belongsTo(Pedido::class);
     }
 }

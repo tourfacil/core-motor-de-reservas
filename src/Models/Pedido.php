@@ -32,6 +32,7 @@ class Pedido extends Model
         'meio_pagamento_interno',
         'metodo_pagamento_interno',
         'cupom_desconto_id',
+        'email_avaliacao',
     ];
 
     /**
@@ -80,6 +81,14 @@ class Pedido extends Model
     public function historicoPedido()
     {
         return $this->hasMany(HistoricoReservaPedido::class)->latest();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function pedidoAvaliacaoMailHashLogin()
+    {
+        return $this->hasOne(PedidoAvaliacaoMailHashLogin::class);
     }
 
     /**
