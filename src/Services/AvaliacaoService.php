@@ -61,19 +61,26 @@ class AvaliacaoService
 
             $this->log("Enviando e-mail de avaliação para o cliente " . $pedido->cliente->nome);
 
+            if($pedido->pedidoAvaliacaoMailHashLogin == null) {
+
+                $uuid = Str::uuid();
+                $hash = \Hash::make(Str::uuid());
+
+                $uuid = $this->removerCaracteresUUIDHash($uuid);
+                $hash = $this->removerCaracteresUUIDHash($hash);
+
+                PedidoAvaliacaoMailHashLogin::create([
+                    'pedido_id' => $pedido->id,
+                    'uuid' => $uuid,
+                    'hash' => $hash
+                ]);
+            }
+
             Mail::to($pedido->cliente->email)->send(new AvaliacaoServicoMail($pedido));
 
             $pedido->update([
                 'email_avaliacao' => StatusEmailAvaliacaoEnum::ENVIADO
             ]);
-
-            if($pedido->pedidoAvaliacaoMailHashLogin == null) {
-                PedidoAvaliacaoMailHashLogin::create([
-                    'pedido_id' => $pedido->id,
-                    'uuid' => Str::uuid(),
-                    'hash' => \Hash::make(Str::uuid())
-                ]);
-            }
 
             $relatorio .= "#{$pedido->codigo} - {$pedido->created_at->format('d/m/Y')} - {$pedido->cliente->nome} - {$pedido->cliente->email} \n";
 
@@ -86,6 +93,13 @@ class AvaliacaoService
        "dev@tourfacil.com.br"
     );
 
+    }
+
+    private function removerCaracteresUUIDHash(String $codigo) {
+        $codigo = str_replace("/", "b", $codigo);
+        $codigo = str_replace("&", "e", $codigo);
+        $codigo = str_replace("?", "i", $codigo);
+        return $codigo;
     }
 
     private function log($texto) {

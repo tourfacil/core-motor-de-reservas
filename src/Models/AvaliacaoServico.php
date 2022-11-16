@@ -20,6 +20,7 @@ class AvaliacaoServico extends Model
         'nome',
         'status',
         'cliente_id',
+        'reserva_pedido_id'
     ];
 
     public function servico() {

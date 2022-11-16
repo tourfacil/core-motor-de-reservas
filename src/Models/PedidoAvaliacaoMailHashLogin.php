@@ -18,4 +18,8 @@ class PedidoAvaliacaoMailHashLogin extends Model
         'uuid',
         'hash'
     ];
+
+    public function pedido() {
+        return $this->belongsTo(Pedido::class);
+    }
 }
