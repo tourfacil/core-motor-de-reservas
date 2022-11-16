@@ -19,6 +19,8 @@ Lista de mudanças, melhorias e correções de bugs.
 - Adicionado integração com o Matria.
 - Adicionado integração com PWI (Até o momento SKYGLASS).
 - Adicionado Regras de Serviços.
+- Adicionado sistema de avaliações pelo cliente.
+- Adicionado sistema de envio de e-mails para cliente solicitando avaliação.
 
 ### *v1.5.1 (11 de Setembro de 2022)*
 - Adicionado possibilidade de alterar nome do serviço na página de informações do mesmo.
