@@ -30,6 +30,8 @@ abstract class IntegracaoEnum
 
     const SKYGLASS = "SKYGLASS";
 
+    const ACQUA_MOTION = 'AQUA_MOTION';
+
     const INTEGRACOES = [
         self::NAO => "Não possui",
         self::SNOWLAND => "Snowland",
@@ -42,6 +44,7 @@ abstract class IntegracaoEnum
         self::MATRIA => "Matria Park",
         self::VILA_DA_MONICA => "Vila da Monica",
         self::SKYGLASS => "Skyglass",
+        self::ACQUA_MOTION => "Acqua Motion",
     ];
 
     const INTEGRACOES_PWI = [

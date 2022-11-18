@@ -189,6 +189,14 @@ class ReservaPedido extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
+    public function acquaMotionVoucher()
+    {
+        return $this->hasOne(AcquaMotionReservaPedido::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function integracaoPWI()
     {
         return $this->hasOne(IntegracaoPWI::class);
