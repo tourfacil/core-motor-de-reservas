@@ -30,7 +30,7 @@ abstract class IntegracaoEnum
 
     const SKYGLASS = "SKYGLASS";
 
-    const ACQUA_MOTION = 'AQUA_MOTION';
+    const ACQUA_MOTION = 'ACQUA_MOTION';
 
     const INTEGRACOES = [
         self::NAO => "Não possui",
