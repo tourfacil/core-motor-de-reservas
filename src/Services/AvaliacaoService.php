@@ -47,6 +47,7 @@ class AvaliacaoService
         $relatorio = "";
 
         $pedidos = Pedido::where('email_avaliacao', StatusEmailAvaliacaoEnum::NAO_ENVIADO)
+                         ->whereIn('status', ['PAGO', 'UTILIZADO'])
                          ->with(['reservas'])
                          ->whereHas('reservas', function($query) {
                              $query->whereHas('agendaDataServico', function($query2) {
