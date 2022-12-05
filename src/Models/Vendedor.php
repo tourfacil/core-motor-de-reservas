@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vendedor extends Model
 {
+    protected $table = 'vendedores';
+
     protected $fillable = [
         'nome_fantasia',
         'razao_social',
