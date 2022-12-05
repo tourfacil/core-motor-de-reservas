@@ -351,6 +351,7 @@ class PedidoService
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
                 "status" => $aprovado ? StatusReservaEnum::ATIVA : StatusReservaEnum::NEGADO,
                 "afiliado_id" => $afiliado_reserva,
+                "vendedor_id" => session()->get('vendedor')->id ?? null,
                 "desconto_id" => $reserva_carrinho["desconto_id"],
             ]);
 
@@ -485,6 +486,7 @@ class PedidoService
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
                 "status" => StatusReservaEnum::AGUARDANDO,
                 "afiliado_id" => $afiliado_reserva,
+                "vendedor_id" => session()->get('vendedor')->id ?? null,
                 "desconto_id" => $reserva_carrinho["desconto_id"],
             ]);
 
