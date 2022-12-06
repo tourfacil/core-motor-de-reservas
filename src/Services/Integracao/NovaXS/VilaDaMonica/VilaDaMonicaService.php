@@ -47,7 +47,7 @@ class VilaDaMonicaService
     /** @var string */
     const ADULTO = "adulto";
 
-    const SENIOR = "senior";
+    const SENIOR = "melhor";
 
     /**
      * ATENÇÃO NÃO MUDAR A ORDEM
@@ -230,18 +230,18 @@ class VilaDaMonicaService
                 }
 
                 /** Recupera o ID do serviço para melhor idade */
-//                if(Str::contains($nome_variacao, self::SENIOR)) {
-//                    $product_path = $this->servicosDisponiveis[Str::slug(self::SENIOR, "_")];
-//                    $productsArray[] = [
-//                        "path" => $this->servicosDisponiveis[Str::slug(self::SENIOR, "_")],
-//                        "amount" => (string) $quantidade_reserva->quantidade,
-//                        "date" => $data_utilizacao,
-//                        "name" => self::SENIOR
-//                    ];
-//                    // Salva qual é a variacao
-//                    $variacoes_id[self::SENIOR] = $quantidade_reserva->variacaoServico->id;
-//                    $productsIdArray[self::SENIOR] = $this->onlyNumbers($product_path);
-//                }
+                if(Str::contains($nome_variacao, "nior")) {
+                    $product_path = $this->servicosDisponiveis[Str::slug(self::SENIOR, "_")];
+                    $productsArray[] = [
+                        "path" => $this->servicosDisponiveis[Str::slug(self::SENIOR, "_")],
+                        "amount" => (string) $quantidade_reserva->quantidade,
+                        "date" => $data_utilizacao,
+                        "name" => self::SENIOR
+                    ];
+                    // Salva qual é a variacao
+                    $variacoes_id[self::SENIOR] = $quantidade_reserva->variacaoServico->id;
+                    $productsIdArray[self::SENIOR] = $this->onlyNumbers($product_path);
+                }
             }
         }
 
