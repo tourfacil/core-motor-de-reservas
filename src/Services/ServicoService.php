@@ -9,6 +9,7 @@ use TourFacil\Core\Enum\ServicoEnum;
 use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Models\Afiliado;
 use TourFacil\Core\Models\Servico;
+use TourFacil\Core\Models\Vendedor;
 use TourFacil\Core\Services\Cache\DefaultCacheService;
 
 /**
@@ -138,6 +139,25 @@ class ServicoService extends DefaultCacheService
                 ->leftJoin('reserva_pedidos', 'reserva_pedidos.servico_id', '=', 'servicos.id')
                 ->groupBy('servicos.nome')->where(['canal_venda_id' => $canal_venda_id, 'servicos.status' => ServicoEnum::ATIVO])
                 ->where('reserva_pedidos.afiliado_id', $afiliado->id)
+                ->whereIn('reserva_pedidos.status', [StatusReservaEnum::ATIVA, StatusReservaEnum::FINALIZAR, StatusReservaEnum::UTILIZADO])
+                ->orderBy('vendas', 'DESC')->limit($limit)->get();
+        });
+    }
+
+    /**
+     * Servicos mais vendidos do canal de venda
+     *
+     * @param $canal_venda_id
+     * @param int $limit
+     * @return mixed
+     */
+    public static function servicosMaisVendidosVendedor($canal_venda_id, $limit = 20, Vendedor $vendedor)
+    {
+        return Cache::remember("mais_vendidos_{$canal_venda_id}_{$limit}_{$vendedor->id}", now()->addMinutes(30), function () use ($canal_venda_id, $limit, $vendedor) {
+            return Servico::select("nome", DB::raw("SUM(reserva_pedidos.quantidade) AS `vendas`"))
+                ->leftJoin('reserva_pedidos', 'reserva_pedidos.servico_id', '=', 'servicos.id')
+                ->groupBy('servicos.nome')->where(['canal_venda_id' => $canal_venda_id, 'servicos.status' => ServicoEnum::ATIVO])
+                ->where('reserva_pedidos.vendedor_id', $vendedor->id)
                 ->whereIn('reserva_pedidos.status', [StatusReservaEnum::ATIVA, StatusReservaEnum::FINALIZAR, StatusReservaEnum::UTILIZADO])
                 ->orderBy('vendas', 'DESC')->limit($limit)->get();
         });

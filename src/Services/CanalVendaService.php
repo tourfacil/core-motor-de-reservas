@@ -51,7 +51,7 @@ class CanalVendaService
      * @param $canal_venda
      * @return array
      */
-    public static function dashboardCanal($canal_venda, Afiliado $afiliado = null)
+    public static function dashboardCanal($canal_venda, $afiliado = null, $vendedor = null)
     {
         $vendas_hoje = 0;
         $vendas_mes = 0;
@@ -70,6 +70,12 @@ class CanalVendaService
                     $query->where('afiliado_id', $afiliado->id);
                 });
             }
+            if($vendedor) {
+                $qtd_vendas->whereHas('reservas', function($query) use ($vendedor) {
+                    $query->where('vendedor_id', $vendedor->id);
+                });
+            }
+
             $qtd_vendas = $qtd_vendas->get()->count();
 
         // Vendas do canal
@@ -92,6 +98,12 @@ class CanalVendaService
         if($afiliado) {
             $vendas->whereHas('reservas', function($query) use ($afiliado) {
                 $query->where('afiliado_id', $afiliado->id);
+            });
+        }
+
+        if($vendedor) {
+            $vendas->whereHas('reservas', function($query) use ($vendedor) {
+                $query->where('vendedor_id', $vendedor->id);
             });
         }
 
