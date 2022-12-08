@@ -231,6 +231,10 @@ class ReservaPedido extends Model
         return $this->belongsTo(Afiliado::class);
     }
 
+    public function vendedor() {
+        return $this->belongsTo(Vendedor::class);
+    }
+
     public function conferenciaReserva() {
         return $this->hasOne(ConferenciaReserva::class);
     }
