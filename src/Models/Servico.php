@@ -42,6 +42,7 @@ class Servico extends Model
         'valor_venda',
         'comissao_afiliado',
         'antecedencia_venda',
+        'hora_maxima_antecedencia',
         'tipo_corretagem',
         'corretagem',
         'horario',
