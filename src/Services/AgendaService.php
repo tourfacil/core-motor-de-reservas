@@ -194,6 +194,23 @@ class AgendaService
 
             // Pega o desconto caso tenha
             $desconto = $servico->descontoAtivo;
+            
+            // Caso o serviço tenha uma hora máxima para a venda no dia
+            if($servico->hora_maxima_antecedencia) {
+
+                // Logica para quebrar a hora máximo do produto na venda
+                $hora_servico_array = explode(':', $servico->hora_maxima_antecedencia);
+                $hora_antecedencia = $hora_servico_array[0];
+                $minuto_antecedencia = $hora_servico_array[1];
+
+                // Monta a data de hoje com hora de antecedencia e momento atual
+                $hora_antecedencia = Carbon::today()->hour($hora_antecedencia)->minute($minuto_antecedencia);
+                $hora_agora = Carbon::now();
+
+                // Verifica se Agora ja é maior que a antecedencia de horas do serviço
+                // Caso seja, aumenta a antecedencia para 1
+                if($hora_agora->isAfter($hora_antecedencia)) $servico->antecedencia_venda++;
+            }
 
             // Adiciona a antecedencia de venda para buscar a agenda
             $today->addDays($servico->antecedencia_venda)->startOfDay();
