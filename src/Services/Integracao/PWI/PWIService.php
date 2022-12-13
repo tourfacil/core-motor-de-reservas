@@ -3,6 +3,8 @@
 namespace TourFacil\Core\Services\Integracao\PWI;
 
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Support\Facades\Log;
 use TourFacil\Core\Enum\StatusReservaEnum;
 use TourFacil\Core\Models\IntegracaoPWI;
 use TourFacil\Core\Models\ReservaPedido;
@@ -11,45 +13,71 @@ abstract class PWIService
 {
     public static function integrarReserva(ReservaPedido  $reserva) {
 
-        $api = new PWIAPI();
 
-        $variacoes = self::getVariacoesResolvidas($reserva);
+        try {
 
-        $dados = [
-            'TerminalVenda' => 'Tour Facil',
-            'Usuario' => 'Tour Facil',
-            'IdVendaOrigem' => $reserva->id,
-            'DataHoraVenda' => $reserva->created_at->toDateTimeLocalString(),
-            'Itens' => [],
-        ];
+            $api = new PWIAPI();
 
-        foreach($variacoes as $variacao) {
-            $dados['Itens'][] = [
-                'IdProduto' => $variacao['variacao_pwi_id'],
-                'DataPrevisaoVisita' => $reserva->agendaDataServico->data->toDateTimeLocalString(),
-                'Qtde' => $variacao['quantidade'],
+            $variacoes = self::getVariacoesResolvidas($reserva);
+
+            $dados = [
+                'TerminalVenda' => 'Tour Facil',
+                'Usuario' => 'Tour Facil',
+                'IdVendaOrigem' => $reserva->id,
+                'DataHoraVenda' => $reserva->created_at->toDateTimeLocalString(),
+                'Itens' => [],
             ];
-        }
 
-        $retorno = $api->efetuarCompra($dados);
+            foreach($variacoes as $variacao) {
+                $dados['Itens'][] = [
+                    'IdProduto' => $variacao['variacao_pwi_id'],
+                    'DataPrevisaoVisita' => $reserva->agendaDataServico->data->toDateTimeLocalString(),
+                    'Qtde' => $variacao['quantidade'],
+                ];
+            }
 
-        if($retorno['error'] == true) {
+            $retorno = $api->efetuarCompra($dados);
+
+            if($retorno['error'] == true) {
+
+                self::alertarErroIntegracao(
+                    $reserva, 
+                    "Erro de retorno da API do {$reserva->servico->fornecedor->nome_fantasia}", 
+                    "Este é um erro que ocorre devido a API do parceiro estar retornando uma resposta inválida. Contatar o parceiro",
+                    "Se necessário, enviar o erro abaixo para o parceiro",
+                    $retorno['message']
+                    
+                );
+                return false;
+            }
+
+            sleep(3);
+
+            $retorno_delay = $api->consultarVenda($retorno['data']['id']);
+
+            IntegracaoPWI::create([
+                'reserva_pedido_id' => $reserva->id,
+                'integracao' => $reserva->servico->integracao,
+                'status' => StatusReservaEnum::ATIVA    ,
+                'dados' => json_encode($retorno_delay),
+                'data_utilizacao' => $reserva->agendaDataServico->data
+            ]);
+
+            return true;
+
+        } catch (Exception $e) {
+
+            self::alertarErroIntegracao(
+                $reserva, 
+                'Erro de lógica.', 
+                'Este é um erro que ocorre devido a uma falha no nosso sitema.',
+                'Se necessário, contatar TI. Erro abaixo',
+                $e->getMessage(),
+                $e->getTraceAsString()
+            );
+
             return false;
         }
-
-        sleep(3);
-
-        $retorno_delay = $api->consultarVenda($retorno['data']['id']);
-
-        IntegracaoPWI::create([
-            'reserva_pedido_id' => $reserva->id,
-            'integracao' => $reserva->servico->integracao,
-            'status' => StatusReservaEnum::ATIVA    ,
-            'dados' => json_encode($retorno_delay),
-            'data_utilizacao' => $reserva->agendaDataServico->data
-        ]);
-
-        return true;
     }
 
     public static function getNumerosPassaporte(ReservaPedido $reserva) {
@@ -117,5 +145,22 @@ abstract class PWIService
         }
 
         return $retorno;
+    }
+
+    private static function alertarErroIntegracao(ReservaPedido $reserva, ... $erros) {
+
+        $titulo = "ERRO - INTEGRAÇÃO PWI - " . strtoupper($reserva->servico->nome) . " - #" . $reserva->voucher;
+        $texto = '';
+        $destino = config('site.email_alertas');
+
+        foreach($erros as $key => $erro) {
+
+            $texto .= $key + 1 . ' - ' . $erro . "\n\n";
+
+        }
+
+        Log::alert($texto);
+        
+        simpleMail($titulo, $texto, $destino);
     }
 }
