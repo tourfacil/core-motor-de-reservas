@@ -184,7 +184,7 @@ class AgendaService
 
         // Dados do serviço
         $servico = Servico::with('variacaoServicoAtivas', 'agendaServico', 'camposAdicionaisAtivos')
-            ->where('uuid', $uuid)->select(['id', 'uuid', 'nome', 'info_clientes', 'antecedencia_venda'])->first();
+            ->where('uuid', $uuid)->select(['id', 'uuid', 'nome', 'info_clientes', 'antecedencia_venda', 'hora_maxima_antecedencia'])->first();
 
         // Busca se o produto tem alguma regra de antecedencia
         // Não é a antecedencia de quantos dias para frente pode vender e sim a que muda os valores
@@ -194,7 +194,7 @@ class AgendaService
 
             // Pega o desconto caso tenha
             $desconto = $servico->descontoAtivo;
-            
+
             // Caso o serviço tenha uma hora máxima para a venda no dia
             if($servico->hora_maxima_antecedencia) {
 
