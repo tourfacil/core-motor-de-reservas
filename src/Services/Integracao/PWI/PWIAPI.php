@@ -105,6 +105,28 @@ class PWIAPI
         return $response['data']['access_token'];
     }
 
+    private function checkoutAPI()
+    {
+        // Url para checkout
+        $url = $this->base_url . '/auth/logout';
+
+        // Dados para fazer checkout
+        $dados = [
+            'usuario' => $this->login,
+            'senha' => $this->password,
+        ];
+
+        try {
+
+            // Resposta
+            $response = $this->req(TipoRequisicaoEnum::POST, $url, $dados);
+            return true;
+
+        } catch ( Exception $exception) {
+            return false;
+        }
+    }
+
     /**
      * Método responsavel por todas as requisições.
      * Todos os demais métodos usam este para fazer chamadas para a API
