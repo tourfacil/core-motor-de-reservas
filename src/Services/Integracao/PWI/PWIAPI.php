@@ -38,6 +38,7 @@ class PWIAPI
         $this->login = 34242332000102;
         $this->password = 'B27H$^fw%ZvRsyS*R@';
         $this->base_url = 'https://integracaovendas.skyglasscanela.com.br/prod/api';
+        $this->timeout_connect = 5;
     }
 
     public function efetuarCompra(Array $dados) {
@@ -154,7 +155,7 @@ class PWIAPI
             }
 
             // Instancia o cliente HTTP Guzzle
-            $client = new Client();
+            $client = new Client(['timeout' => $this->timeout_connect]);
 
             // Monta e faz a requisição
             $response = $client->request($metodo, $url, [
