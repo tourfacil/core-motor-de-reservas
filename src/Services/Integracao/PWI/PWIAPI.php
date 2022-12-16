@@ -165,7 +165,7 @@ class PWIAPI
             // Salva os dados de retorno em array associativo
             $data = json_decode($response->getBody()->getContents(), true);
 
-            $this->checkoutAPI();
+            //$this->checkoutAPI();
 
             // Caso a requisição não retorne erros, retorna a resposta
             if(count($data['errors']) == 0) {
