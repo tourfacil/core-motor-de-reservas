@@ -15,11 +15,13 @@ abstract class DescontoService
      * @param $valor_original
      * @return float|int|mixed
      */
-    public static function aplicarDescontoValor($desconto, $valor_original) {
+    public static function aplicarDescontoValor($desconto, $valor_original, $data) {
 
         // Caso não tenha desconto ativo ele retorna o mesmo valor
-        if($desconto == null) {
+        if($desconto == null || self::isDataEntreUtilizacaoValida($desconto, $data) == false) {
+
             return $valor_original;
+
         } else {
 
             // Caso o desconto seja aplicado de forma percentual
@@ -65,5 +67,18 @@ abstract class DescontoService
 
             return $valor;
         }
+    }
+
+    private static function isDataEntreUtilizacaoValida($desconto, $data)
+    {
+
+        $inicio_utilizacao = $desconto->inicio_utilizacao;
+        $final_utilizacao = $desconto->final_utilizacao;
+
+        if($data->data->between($inicio_utilizacao, $final_utilizacao)) {
+            return true;
+        }
+
+        return false;
     }
 }
