@@ -50,7 +50,7 @@ abstract class DescontoService
      * @param $valor
      * @return float|int|mixed|void
      */
-    public static function aplicarDescontoValorNet($desconto, $valor) {
+    public static function aplicarDescontoValorNet($desconto, $valor, $data) {
 
         // Caso não tenha desconto ativo ele retorna o mesmo valor
         if($desconto == null) {
@@ -60,7 +60,7 @@ abstract class DescontoService
         // Caso o desconto seja também para o fornecedor ele calcula o desconto e retorna
         if($desconto->tipo_desconto_fornecedor == TipoDesconto::NET) {
 
-            return self::aplicarDescontoValor($desconto, $valor);
+            return self::aplicarDescontoValor($desconto, $valor, $data);
 
         // Caso o desconto seja somente no venda ele retorna o net original
         } else if($desconto->tipo_desconto_fornecedor == TipoDesconto::VENDA) {
