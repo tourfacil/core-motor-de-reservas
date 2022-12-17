@@ -272,11 +272,6 @@ class AgendaService
                         // Se não houver mantem o memso valor
                         $net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra_antecedencia, $data_agenda->data, $net_variacao);
 
-//                        // Aplica o desconto caso tenha
-//                        if(DescontoService::isDataEntreUtilizacaoValida($desconto, $data_agenda)) {
-//                            $net_variacao = DescontoService::aplicarDescontoValorNet($desconto, $net_variacao);
-//                        }
-
                         // Valor de venda da variacao
                         $venda_variacao = $net_variacao * $variacao->markup;
 
@@ -299,10 +294,6 @@ class AgendaService
                             $venda_variacao = (string) number_format($venda_variacao, 2, ".", "");
                             $venda_variacao = $substitui_venda[$venda_variacao] ?? $venda_variacao;
                         }
-
-//                        if(DescontoService::isDataEntreUtilizacaoValida($desconto, $data_agenda)) {
-//                            //$venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
-//                        }
 
                         // Salva o maior valor de venda ou salva o valor da variacao destaque
                         $valor_venda_data = (
@@ -379,8 +370,6 @@ class AgendaService
                     ];
                 }
             }
-
-            dd($retorno, $desconto);
 
             return $retorno;
 
