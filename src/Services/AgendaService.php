@@ -8,6 +8,7 @@ use TourFacil\Core\Enum\ServicoEnum;
 use TourFacil\Core\Enum\VariacaoServicoEnum;
 use TourFacil\Core\Models\AgendaDataServico;
 use TourFacil\Core\Models\AgendaServico;
+use TourFacil\Core\Models\Desconto;
 use TourFacil\Core\Models\ReservaPedido;
 use TourFacil\Core\Models\Servico;
 use TourFacil\Core\Services\RegraServico\ValorExcecaoDiaService;
@@ -239,6 +240,12 @@ class AgendaService
                 'campos_adicionais' => $servico->camposAdicionaisAtivos,
                 'necessita_identificacao' => ($servico->info_clientes == ServicoEnum::SOLICITA_INFO_CLIENTES)
             ];
+
+            // Caso tenha um desconto ativo. Coloca dentro do array principal de retorno
+            if($desconto) {
+                $retorno['desconto'] = $desconto;
+            }
+
             $cont = 0;
             // Monta o array com as datas
             foreach ($agenda_servico->datasServico as $data_agenda) {
@@ -265,6 +272,11 @@ class AgendaService
                         // Se não houver mantem o memso valor
                         $net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra_antecedencia, $data_agenda->data, $net_variacao);
 
+//                        // Aplica o desconto caso tenha
+//                        if(DescontoService::isDataEntreUtilizacaoValida($desconto, $data_agenda)) {
+//                            $net_variacao = DescontoService::aplicarDescontoValorNet($desconto, $net_variacao);
+//                        }
+
                         // Valor de venda da variacao
                         $venda_variacao = $net_variacao * $variacao->markup;
 
@@ -288,6 +300,10 @@ class AgendaService
                             $venda_variacao = $substitui_venda[$venda_variacao] ?? $venda_variacao;
                         }
 
+//                        if(DescontoService::isDataEntreUtilizacaoValida($desconto, $data_agenda)) {
+//                            //$venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
+//                        }
+
                         // Salva o maior valor de venda ou salva o valor da variacao destaque
                         $valor_venda_data = (
                             $venda_variacao > $valor_venda_data || $variacao->destaque == VariacaoServicoEnum::VARIACAO_DESTAQUE
@@ -301,9 +317,15 @@ class AgendaService
                         // Guarda o valor sem desconto
                         $valor_original = $venda_variacao;
 
-                        // Aplica o desconto caso tenha
-                        $venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
+                        // Variaveis univamente para o array de variações abaixo
+                        // Somente para não causar problemas no resto da lógica abaixo enquanto se aplica cupom
 
+                        // Valor de venda
+                        $var_valor_venda = DescontoService::aplicarDescontoValor($desconto, $venda_variacao, $data_agenda);
+                        $var_valor_venda = (float) number_format($var_valor_venda, 2, '.', '');
+
+                        // Valor de venda original
+                        $var_valor_venda_original = (float) number_format($valor_original, 2, ".", "");
 
                         // Dados para o array
                         $variacaoes[] = [
@@ -311,24 +333,29 @@ class AgendaService
                             'variacao' => $variacao->nome,
                             'descricao' => $variacao->descricao,
                             'bloqueio' => $variacao->consome_bloqueio,
-                            'valor_venda' => (float) number_format($venda_variacao, 2, ".", ""),
-                            'valor_venda_original' => (float) number_format($valor_original, 2, ".", ""),
-                            'valor_venda_brl' => formataValor($venda_variacao),
-                            'valor_venda_brl_original' => formataValor($valor_original),
+                            'valor_venda' => $var_valor_venda,
+                            'valor_venda_original' => $var_valor_venda_original,
+                            'valor_venda_brl' => formataValor($var_valor_venda),
+                            'valor_venda_brl_original' => formataValor($var_valor_venda_original),
                         ];
                     }
 
                     // Obtem a variação com o valor de venda mais alto para exibir no calendario
                     $valor_venda_mais_alto = 0;
+                    $valor_venda_original_mais_alto = 0;
                     foreach($variacaoes as $variacao) {
 
                         if($valor_venda_mais_alto < $variacao['valor_venda']) {
                             $valor_venda_mais_alto = $variacao['valor_venda'];
                         }
+
+                        if($valor_venda_original_mais_alto < $variacao['valor_venda_original']) {
+                            $valor_venda_original_mais_alto = $variacao['valor_venda_original'];
+                        }
                     }
 
-                    $data_agenda_valor_venda_original = $valor_venda_mais_alto;
-                    $valor_venda_data_original = $valor_venda_mais_alto;
+                    $data_agenda_valor_venda_original = $valor_venda_original_mais_alto;
+                    $valor_venda_data_original = $valor_venda_original_mais_alto;
                     $data_agenda_valor_venda = $valor_venda_mais_alto;
                     $valor_venda_data = $valor_venda_mais_alto;
 
@@ -352,6 +379,8 @@ class AgendaService
                     ];
                 }
             }
+
+            dd($retorno, $desconto);
 
             return $retorno;
 
@@ -432,7 +461,7 @@ class AgendaService
             $valor_original = $venda_variacao;
 
             // Aplica o desconto caso tenha
-            $venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
+            //$venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
 
             // Dados para o array
             $variacaoes[] = [
