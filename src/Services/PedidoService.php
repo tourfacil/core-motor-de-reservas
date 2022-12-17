@@ -105,6 +105,9 @@ class PedidoService
                 $regra = ValorExcecaoDiaService::getRegraAtecedenciaServicoAtiva($servico);
                 $valor_net_variacao = ValorExcecaoDiaService::aplicarValorRegraAntecedencia($regra, $data_servico->data, $valor_net_variacao);
 
+                // Verifica se o serviço esta com um desconto ativo
+                $desconto = $servico->descontoAtivo;
+
                 // Verifica se possui valores no NET para substituir
                 if (is_array($substitui_net)) {
                     $valor_net_variacao = (string) number_format($valor_net_variacao, 2, ".", "");
@@ -112,7 +115,7 @@ class PedidoService
                 }
 
                 // Calcula o valor de venda da variacao
-                $valor_venda_variacao = ($valor_net_variacao * $variacao_servico->markup);
+                $valor_venda_variacao = ( $valor_net_variacao * $variacao_servico->markup);
 
                 // Verifica se o servico possui corretagem de valor
                 if ($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($valor_venda_variacao > 0)) {
@@ -139,6 +142,8 @@ class PedidoService
                     $valor_venda_variacao = 1;
                 }
 
+                $valor_venda_variacao = DescontoService::aplicarDescontoValor($desconto, $valor_venda_variacao, $data_servico);
+
                 // Multiplaca o valor net pela quantidade selecionada
                 $valor_net_variacao = $valor_net_variacao * $variacao_carrinho['quantidade'];
 
@@ -160,13 +165,6 @@ class PedidoService
                     "valor_total" => (float) number_format($valor_venda_variacao, 2, ".", ""),
                 ];
             }
-
-            // Verifica se o serviço esta com um desconto ativo
-            $desconto = $servico->descontoAtivo;
-
-            // Caso o serviço tenha um desconto ativo aplica
-            $total_reserva = DescontoService::aplicarDescontoValor($desconto, $total_reserva);
-            $total_net_reserva = DescontoService::aplicarDescontoValorNet($desconto, $total_net_reserva);
 
             $cupom = null;
 
@@ -191,7 +189,6 @@ class PedidoService
 
             // Soma ao valor total do pedido
             self::$pedido['valor_total'] += (float) number_format($total_reserva, 2, ".", "");
-            self::$pedido['valor_total'] = DescontoService::aplicarDescontoValor($desconto, self::$pedido['valor_total']);
 
             // Dados da reserva
             self::$pedido['reservas'][] = [
