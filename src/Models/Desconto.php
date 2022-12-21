@@ -14,8 +14,11 @@ class Desconto extends Model
         'nome_publico',
         'nome_interno',
         'desconto',
+        'desconto_net',
         'servico_id',
         'status',
+        'valor_de',
+        'valor_por',
         'tipo_desconto_valor',
         'tipo_desconto_fornecedor' ,
     ];
