@@ -4,6 +4,8 @@ namespace TourFacil\Core\Services;
 
 use TourFacil\Core\Enum\Descontos\TipoDesconto;
 use TourFacil\Core\Enum\Descontos\TipoDescontoValor;
+use TourFacil\Core\Models\AgendaDataServico;
+use TourFacil\Core\Models\Servico;
 
 abstract class DescontoService
 {
@@ -85,7 +87,7 @@ abstract class DescontoService
         }
     }
 
-    private static function isDataEntreUtilizacaoValida($desconto, $data)
+    public static function isDataEntreUtilizacaoValida($desconto, $data)
     {
 
         $inicio_utilizacao = $desconto->inicio_utilizacao;
@@ -96,5 +98,42 @@ abstract class DescontoService
         }
 
         return false;
+    }
+
+    public static function getServicosComDescontoCarrinho()
+    {
+        $carrinho = carrinho()->all();
+
+        if($carrinho->count() == 0) {
+            return false;
+        }
+
+        $servicos_com_desconto = [];
+
+        foreach($carrinho as $servico_carrinho) {
+
+            $servico = Servico::find($servico_carrinho['gtin']);
+
+            $desconto = $servico->descontoAtivo;
+
+            if($desconto == null) {
+                continue;
+            }
+
+            $agenda = AgendaDataServico::find($servico_carrinho['agenda_selecionada']['data_servico_id']);
+
+            if(DescontoService::isDataEntreUtilizacaoValida($desconto, $agenda)){
+                $servicos_com_desconto[] = [
+                    'id' => $servico->id,
+                    'nome' => $servico->nome,
+                ];
+            }
+        }
+
+        if(count($servicos_com_desconto) == 0) {
+            return false;
+        }
+
+        return $servicos_com_desconto;
     }
 }
