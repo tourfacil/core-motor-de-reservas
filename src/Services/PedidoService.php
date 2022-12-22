@@ -350,7 +350,7 @@ class PedidoService
                 "status" => $aprovado ? StatusReservaEnum::ATIVA : StatusReservaEnum::NEGADO,
                 "afiliado_id" => $afiliado_reserva,
                 "vendedor_id" => session()->get('vendedor')->id ?? null,
-                "desconto_id" => $reserva_carrinho["desconto_id"],
+                "desconto_id" => $reserva_carrinho["desconto_id"] ?? null,
             ]);
 
             // Percorre as variacoes compradas
@@ -593,7 +593,8 @@ class PedidoService
                 "valor_net" => $reserva_carrinho["valor_net"],
                 "quantidade" => $reserva_carrinho["quantidade"],
                 "bloqueio_consumido" => $reserva_carrinho["bloqueio_consumido"],
-                "status" => StatusReservaEnum::ATIVA
+                "status" => StatusReservaEnum::ATIVA,
+                "desconto_id" => $reserva_carrinho["desconto_id"] ?? null,
             ]);
 
             // Percorre as variacoes compradas
