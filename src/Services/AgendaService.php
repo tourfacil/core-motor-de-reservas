@@ -449,8 +449,12 @@ class AgendaService
             // Guarda o valor sem desconto
             $valor_original = $venda_variacao;
 
-            // Aplica o desconto caso tenha
-            //$venda_variacao = DescontoService::aplicarDescontoValor($desconto, $venda_variacao);
+            /// Valor de venda
+            $var_valor_venda = DescontoService::aplicarDescontoValor($desconto, $venda_variacao, $data_agenda);
+            $var_valor_venda = (float) number_format($var_valor_venda, 2, '.', '');
+
+            // Valor de venda original
+            $var_valor_venda_original = (float) number_format($valor_original, 2, ".", "");
 
             // Dados para o array
             $variacaoes[] = [
@@ -458,24 +462,28 @@ class AgendaService
                 'variacao' => $variacao->nome,
                 'descricao' => $variacao->descricao,
                 'bloqueio' => $variacao->consome_bloqueio,
-                'valor_venda' => (float) number_format($venda_variacao, 2, ".", ""),
-                'valor_venda_original' => (float) number_format($valor_original, 2, ".", ""),
-                'valor_venda_brl' => formataValor($venda_variacao),
-                'valor_venda_brl_original' => formataValor($valor_original),
+                'valor_venda' => $var_valor_venda,
+                'valor_venda_original' => $var_valor_venda_original,
+                'valor_venda_brl' => formataValor($var_valor_venda),
+                'valor_venda_brl_original' => formataValor($var_valor_venda_original),
             ];
         }
-
         // Obtem a variação com o valor de venda mais alto para exibir no calendario
         $valor_venda_mais_alto = 0;
+        $valor_venda_original_mais_alto = 0;
         foreach($variacaoes as $variacao) {
 
             if($valor_venda_mais_alto < $variacao['valor_venda']) {
                 $valor_venda_mais_alto = $variacao['valor_venda'];
             }
+
+            if($valor_venda_original_mais_alto < $variacao['valor_venda_original']) {
+                $valor_venda_original_mais_alto = $variacao['valor_venda_original'];
+            }
         }
 
-        $data_agenda_valor_venda_original = $valor_venda_mais_alto;
-        $valor_venda_data_original = $valor_venda_mais_alto;
+        $data_agenda_valor_venda_original = $valor_venda_original_mais_alto;
+        $valor_venda_data_original = $valor_venda_original_mais_alto;
         $data_agenda_valor_venda = $valor_venda_mais_alto;
         $valor_venda_data = $valor_venda_mais_alto;
 
@@ -498,107 +506,7 @@ class AgendaService
             'text_original' => "R$ " . formataValor($valor_venda_data_original),
         ];
 
-
-
-
         return $retorno;
-    }
-
-    /**
-     * Cadastrar datas na agenda
-     *
-     * @param $agenda
-     * @param array $dados_lancamento
-     * @return array
-     */
-    public static function storeDatasAgenda($agenda, array $dados_lancamento)
-    {
-        // Array com as linhas que ira inserir no banco
-        $rows = [];
-
-        // Data de inicio da agenda
-        $date_start = Carbon::createFromFormat("d/m/Y H:i:s", $dados_lancamento['date_start'] . " 00:00:00");
-
-        // Data de termino da agenda
-        $date_end = Carbon::createFromFormat("d/m/Y H:i:s", $dados_lancamento['date_end'] . " 23:59:59");
-
-        // Dias da semana para lançar
-        $dias_semana = $dados_lancamento['dias_semana'];
-
-        // Quantidade para lançar
-        $quantidade = (int) $dados_lancamento['quantidade'];
-
-        // Valor net do periodo
-        $valor_net = str_replace(",", ".", str_replace(".", "", $dados_lancamento['valor_net']));
-
-        // Recupera as datas do periodo informado
-        $period = CarbonPeriod::create($date_start, $date_end);
-
-        // Recupera as datas já cadastradas na agenda
-        $has_agenda = AgendaDataServico::whereBetween('data', [$date_start, $date_end])
-            ->where('agenda_servico_id', $agenda->id)->orderBy('data')->get();
-
-        // Recupera o principal servico com a variacao mais cara
-        $servico = AgendaServico::with(['servicos' => function($query) {
-            return $query->with(['variacaoServico' => function ($q) {
-                return $q->orderBy('destaque', 'ASC')->limit(1);
-            }])->oldest()->limit(1);
-        }])->find($agenda->id);
-
-        // Variacao mais cara do servico principal da agenda
-        $variacao_servico = $servico->servicos->first()->variacaoServico->first();
-
-        // Valor net da variacao SOMENTE COMO REFERENCIA
-        $net_variacao =  ($variacao_servico->percentual / 100) * $valor_net;
-
-        // Valor de venda da variacao SOMENTE COMO REFERENCIA
-        $venda_variacao = $net_variacao * $variacao_servico->markup;
-
-        // Verifica se o servico possui corretagem de valor
-        if($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
-
-            // Verifica se a corretagem é em percentual
-            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
-                $venda_variacao += ($venda_variacao / 100 * $servico->corretagem);
-            }
-
-            // Verifica se a corretagem é em valor fixo
-            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
-                $venda_variacao += $servico->corretagem;
-            }
-        }
-
-        // Monta o array com as datas para inserir no banco
-        foreach ($period as $id => $date) {
-            // Verifica se o dia da semana está selecionado
-            if(in_array($date->dayOfWeekIso, $dias_semana)) {
-                // Verifica se a data já está cadastrada
-                $has_data = $has_agenda->first(function ($data) use ($date) {
-                    return ($data->data == $date);
-                });
-                // Caso não encontre a data
-                if(is_null($has_data)) {
-                    $rows[] = [
-                        'agenda_servico_id' => $agenda->id,
-                        'data' => $date->format('Y-m-d'),
-                        'valor_net' => $valor_net,
-                        'valor_venda' => $venda_variacao,
-                        'disponivel' => $quantidade,
-                        'status' => AgendaEnum::ATIVO,
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'updated_at' => date('Y-m-d H:i:s'),
-                    ];
-                }
-            }
-        }
-
-        // Atualiza o status da agenda
-        $agenda->update(['status' => AgendaEnum::COM_DISPONIBILIDADE]);
-
-        // Insere no banco de dados
-        $created = AgendaDataServico::insert($rows);
-
-        return ['agenda' => $created];
     }
 
     /**
@@ -861,5 +769,102 @@ class AgendaService
         }
 
         return $retorno;
+    }
+
+    /**
+     * Cadastrar datas na agenda
+     *
+     * @param $agenda
+     * @param array $dados_lancamento
+     * @return array
+     */
+    public static function storeDatasAgenda($agenda, array $dados_lancamento)
+    {
+        // Array com as linhas que ira inserir no banco
+        $rows = [];
+
+        // Data de inicio da agenda
+        $date_start = Carbon::createFromFormat("d/m/Y H:i:s", $dados_lancamento['date_start'] . " 00:00:00");
+
+        // Data de termino da agenda
+        $date_end = Carbon::createFromFormat("d/m/Y H:i:s", $dados_lancamento['date_end'] . " 23:59:59");
+
+        // Dias da semana para lançar
+        $dias_semana = $dados_lancamento['dias_semana'];
+
+        // Quantidade para lançar
+        $quantidade = (int) $dados_lancamento['quantidade'];
+
+        // Valor net do periodo
+        $valor_net = str_replace(",", ".", str_replace(".", "", $dados_lancamento['valor_net']));
+
+        // Recupera as datas do periodo informado
+        $period = CarbonPeriod::create($date_start, $date_end);
+
+        // Recupera as datas já cadastradas na agenda
+        $has_agenda = AgendaDataServico::whereBetween('data', [$date_start, $date_end])
+            ->where('agenda_servico_id', $agenda->id)->orderBy('data')->get();
+
+        // Recupera o principal servico com a variacao mais cara
+        $servico = AgendaServico::with(['servicos' => function($query) {
+            return $query->with(['variacaoServico' => function ($q) {
+                return $q->orderBy('destaque', 'ASC')->limit(1);
+            }])->oldest()->limit(1);
+        }])->find($agenda->id);
+
+        // Variacao mais cara do servico principal da agenda
+        $variacao_servico = $servico->servicos->first()->variacaoServico->first();
+
+        // Valor net da variacao SOMENTE COMO REFERENCIA
+        $net_variacao =  ($variacao_servico->percentual / 100) * $valor_net;
+
+        // Valor de venda da variacao SOMENTE COMO REFERENCIA
+        $venda_variacao = $net_variacao * $variacao_servico->markup;
+
+        // Verifica se o servico possui corretagem de valor
+        if($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
+
+            // Verifica se a corretagem é em percentual
+            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
+                $venda_variacao += ($venda_variacao / 100 * $servico->corretagem);
+            }
+
+            // Verifica se a corretagem é em valor fixo
+            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
+                $venda_variacao += $servico->corretagem;
+            }
+        }
+
+        // Monta o array com as datas para inserir no banco
+        foreach ($period as $id => $date) {
+            // Verifica se o dia da semana está selecionado
+            if(in_array($date->dayOfWeekIso, $dias_semana)) {
+                // Verifica se a data já está cadastrada
+                $has_data = $has_agenda->first(function ($data) use ($date) {
+                    return ($data->data == $date);
+                });
+                // Caso não encontre a data
+                if(is_null($has_data)) {
+                    $rows[] = [
+                        'agenda_servico_id' => $agenda->id,
+                        'data' => $date->format('Y-m-d'),
+                        'valor_net' => $valor_net,
+                        'valor_venda' => $venda_variacao,
+                        'disponivel' => $quantidade,
+                        'status' => AgendaEnum::ATIVO,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ];
+                }
+            }
+        }
+
+        // Atualiza o status da agenda
+        $agenda->update(['status' => AgendaEnum::COM_DISPONIBILIDADE]);
+
+        // Insere no banco de dados
+        $created = AgendaDataServico::insert($rows);
+
+        return ['agenda' => $created];
     }
 }
