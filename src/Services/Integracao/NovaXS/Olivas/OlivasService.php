@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace TourFacil\Core\Services\Integracao\NovaXS\Olivas;
 
@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Support\Str;
 use TourFacil\Core\Enum\IntegracaoEnum;
 use TourFacil\Core\Models\ReservaPedido;
-use TourFacil\Core\Models\OlivasReservaPedido; 
+use TourFacil\Core\Models\OlivasReservaPedido;
 use Storage;
 
 /**
@@ -95,17 +95,21 @@ class OlivasService
             'date' => $this->reserva->agendaDataServico->data->format('d/m/Y')
         ]);
 
+
+
         // Log
         Storage::append($this->path, "#". $this->reserva->id .": Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
 
         // Forma a lista de serviços e separa os IDs de cada serviço por categoria de idade
         $this->productsArray = $this->productsArray();
 
+
         // Log
         Storage::append($this->path, "#" . $this->reserva->id . "productsArray: " . json_encode($this->productsArray));
 
         // Retorna os dados do comprador
         $this->personAsString = $this->personAsString($this->reserva->pedido->cliente);
+
 
         // Bloqueio de compra
         $this->buyToBillFor = $this->olivas->buyToBillFor([
@@ -128,6 +132,8 @@ class OlivasService
         $this->getAccessList = $this->olivas->getAccessList([
             'bill' => $this->buyToBillFor['id']
         ]);
+
+
 
         // Log
         Storage::append($this->path, "#" . $this->reserva->id . "getAccessList: " . json_encode($this->getAccessList));
@@ -211,7 +217,7 @@ class OlivasService
             // Variacao adquirida
             $nome_variacao = preg_replace("/(ç|Ç)/", "c", mb_strtolower($quantidade_reserva->variacaoServico->nome));
             $nome_variacao = str_replace('ê', 'e', $nome_variacao);
-            
+
             // Somente pessoas pagantes
             if($quantidade_reserva->valor_net > 0) {
 
@@ -339,23 +345,25 @@ class OlivasService
      */
     private function createPeople($reference, $cliente)
     {
-        return [
-            "id" => $reference["id"],
-            "internalId" => $reference["internalId"],
-            "trash" => $reference["trash"],
-            "frozen" => $reference["frozen"],
-            "inHistory" => $reference["inHistory"],
-            "lastVersion" => $reference["lastVersion"],
-            "lazy" => $reference["lazy"],
-            "customData" => $reference["customData"],
-            "accessPersons" => [[
-                "internalId" => $cliente->id,
-                "name" => $this->formataNomeBuyer($this->clearString($cliente->nome)),
-                "document" => $cliente->documento,
-                "birth" => $cliente->nascimento->format('d/m/Y'),
-                "itemIdentificator" => $reference["accessPersons"][0]["itemIdentificator"]
-            ]],
-        ];
+        if($cliente != null) {
+            return [
+                "id" => $reference["id"],
+                "internalId" => $reference["internalId"],
+                "trash" => $reference["trash"],
+                "frozen" => $reference["frozen"],
+                "inHistory" => $reference["inHistory"],
+                "lastVersion" => $reference["lastVersion"],
+                "lazy" => $reference["lazy"],
+                "customData" => $reference["customData"],
+                "accessPersons" => [[
+                    "internalId" => $cliente->id,
+                    "name" => $this->formataNomeBuyer($this->clearString($cliente->nome)),
+                    "document" => $cliente->documento,
+                    "birth" => $cliente->nascimento->format('d/m/Y'),
+                    "itemIdentificator" => $reference["accessPersons"][0]["itemIdentificator"]
+                ]],
+            ];
+        }
     }
 
     /**
