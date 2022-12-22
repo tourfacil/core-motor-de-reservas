@@ -142,16 +142,17 @@ class PedidoService
                     $valor_venda_variacao = 1;
                 }
 
+                $valor_net_variacao_final = DescontoService::aplicarDescontoValorNet($desconto, $valor_net_variacao, $data_servico);
                 $valor_venda_variacao = DescontoService::aplicarDescontoValor($desconto, $valor_venda_variacao, $data_servico);
 
                 // Multiplaca o valor net pela quantidade selecionada
-                $valor_net_variacao = $valor_net_variacao * $variacao_carrinho['quantidade'];
+                $valor_net_variacao = $valor_net_variacao_final * $variacao_carrinho['quantidade'];
 
                 // Multiplaca de venda pela quantidade selecionada
                 $valor_venda_variacao = $valor_venda_variacao * $variacao_carrinho['quantidade'];
 
                 // Soma ao valor net da reserva
-                $total_net_reserva += $valor_net_variacao;
+                $total_net_reserva += $valor_net_variacao_final;
 
                 // Soma ao valor total de venda da reserva
                 $total_reserva += $valor_venda_variacao;
@@ -161,7 +162,7 @@ class PedidoService
                     "nome_variacao" => $variacao_servico->nome,
                     "variacao_servico_id" => $variacao_servico->id,
                     "quantidade" => $variacao_carrinho['quantidade'],
-                    "valor_net" => (float) number_format($valor_net_variacao, 2, ".", ""),
+                    "valor_net" => (float) number_format($valor_net_variacao_final, 2, ".", ""),
                     "valor_total" => (float) number_format($valor_venda_variacao, 2, ".", ""),
                 ];
             }
