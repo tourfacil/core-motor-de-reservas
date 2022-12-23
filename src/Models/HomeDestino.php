@@ -88,4 +88,17 @@ class HomeDestino extends Model
     {
         return $this->attributes['descricao'] = ucfirst($descricao);
     }
+
+    public function getDescontoAtivoAttribute()
+    {
+        $servico = Servico::find($this->attributes['servico_id']);
+
+        $servico = $servico->descontoAtivo;
+
+        if($servico) {
+            return $servico->descontoAtivo;
+        }
+
+        return false;
+    }
 }
