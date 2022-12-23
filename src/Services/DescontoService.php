@@ -2,6 +2,8 @@
 
 namespace TourFacil\Core\Services;
 
+use Carbon\Carbon;
+use TourFacil\Core\Enum\Descontos\StatusDesconto;
 use TourFacil\Core\Enum\Descontos\TipoDesconto;
 use TourFacil\Core\Enum\Descontos\TipoDescontoValor;
 use TourFacil\Core\Models\AgendaDataServico;
@@ -100,6 +102,19 @@ abstract class DescontoService
         return false;
     }
 
+    public static function isDataEntreVendaValida($desconto, $data)
+    {
+
+        $inicio = $desconto->inicio;
+        $final = $desconto->final;
+
+        if($data->data->between($inicio, $final)) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static function getServicosComDescontoCarrinho()
     {
         $carrinho = carrinho()->all();
@@ -135,5 +150,37 @@ abstract class DescontoService
         }
 
         return $servicos_com_desconto;
+    }
+
+    public static function getStatusAtual($desconto)
+    {
+        if($desconto->status == StatusDesconto::INATIVO) {
+            return [
+                'texto' => 'Inativo',
+                'cor' => 'danger',
+            ];
+        }
+
+        $data = new AgendaDataServico();
+        $data->data = Carbon::now();
+
+        if(self::isDataEntreUtilizacaoValida($desconto, $data) && self::isDataEntreVendaValida($desconto, $data)) {
+            return [
+                'texto' => 'Ativo agora',
+                'cor' => 'success',
+            ];
+        }
+
+        if($data->data->isAfter($desconto->final)) {
+            return [
+                'texto' => 'Expirado',
+                'cor' => 'info',
+            ];
+        }
+
+        return [
+            'texto' => 'Agendado',
+            'cor' => 'warning',
+        ];
     }
 }
