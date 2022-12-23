@@ -152,7 +152,7 @@ class PedidoService
                 $valor_venda_variacao = $valor_venda_variacao * $variacao_carrinho['quantidade'];
 
                 // Soma ao valor net da reserva
-                $total_net_reserva += $valor_net_variacao_final;
+                $total_net_reserva += $valor_net_variacao_final * $variacao_carrinho['quantidade'];
 
                 // Soma ao valor total de venda da reserva
                 $total_reserva += $valor_venda_variacao;
