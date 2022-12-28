@@ -91,6 +91,11 @@ class Pedido extends Model
         return $this->hasOne(PedidoAvaliacaoMailHashLogin::class);
     }
 
+    public function cupom()
+    {
+        return $this->belongsTo(CupomDesconto::class, 'cupom_desconto_id');
+    }
+
     /**
      * Forma de pagamento do pedido
      *
