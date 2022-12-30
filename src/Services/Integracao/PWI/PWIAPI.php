@@ -38,7 +38,7 @@ class PWIAPI
         $this->login = 34242332000102;
         $this->password = 'B27H$^fw%ZvRsyS*R@';
         $this->base_url = 'https://integracaovendas.skyglasscanela.com.br/prod/api';
-        $this->timeout_connect = 5;
+        $this->timeout_connect = 15;
     }
 
     public function efetuarCompra(Array $dados) {
