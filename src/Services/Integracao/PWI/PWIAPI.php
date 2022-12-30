@@ -110,7 +110,7 @@ class PWIAPI
         return $response['data']['access_token'];
     }
 
-    private function checkoutAPI()
+    public function checkoutAPI()
     {
         // Url para checkout
         $url = $this->base_url . '/auth/logout';
