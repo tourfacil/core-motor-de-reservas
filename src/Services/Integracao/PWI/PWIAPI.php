@@ -57,7 +57,7 @@ class PWIAPI
 
     public function consultarVendas(String $data_inicial, String $data_final)
     {
-        return $this->consultaAPI(TipoRequisicaoEnum::GET, "/venda/lista/$data_inicial/$data_final", []);
+        return $this->consultaAPI(TipoRequisicaoEnum::GET, "/venda/lista/$data_inicial/$data_final/1", []);
     }
 
     public function consultarSaldo()
@@ -80,14 +80,18 @@ class PWIAPI
 
         $url = $this->base_url . $url;
 
-        return $this->req($metodo, $url, $dados, $token);
+        $response = $this->req($metodo, $url, $dados, $token);
+
+        $this->checkoutAPI();
+
+        return $response;
     }
 
     /**
      * Método responsavel por fazer chamada ao parque e recuperar o token necessário para as demais requisições
      *
      * @return mixed
-     */
+     */ 
     private function getAcessToken()
     {
         // Url para consultar o token
