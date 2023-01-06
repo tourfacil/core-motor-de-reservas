@@ -122,7 +122,7 @@ abstract class VendedorService
         // Carrega as relações de agenda e vendedore
         $reservas = $reservas->with([
             'agendaDataServico',
-            'vendedore'
+            'vendedor'
         ]);
 
         // Busca as reservas
@@ -134,21 +134,21 @@ abstract class VendedorService
         $dados['vendedores'] = [];
 
         foreach($reservas as $reserva) {
-            $comissao_vendedore = vendedoreService::getComissaoVendedor($reserva);
+            $comissao_vendedor = VendedorService::getComissaoVendedor($reserva);
 
             $dados['total_vendido'] += $reserva->valor_total;
-            $dados['total_comissionado'] += $comissao_vendedore;
+            $dados['total_comissionado'] += $comissao_vendedor;
             $dados['total_quantidade'] += $reserva->quantidade;
 
-            if(!array_key_exists($reserva->vendedore->nome_fantasia, $dados['vendedores'])) {
-                $dados['vendedores'][$reserva->vendedore->nome_fantasia]['valor_venda'] = $reserva->valor_total;
-                $dados['vendedores'][$reserva->vendedore->nome_fantasia]['valor_comissao'] = $comissao_vendedore;
-                $dados['vendedores'][$reserva->vendedore->nome_fantasia]['quantidade'] = $reserva->quantidade;
-                $dados['vendedores'][$reserva->vendedore->nome_fantasia]['vendedore'] = $reserva->vendedore;
+            if(!array_key_exists($reserva->vendedor->nome_fantasia, $dados['vendedores'])) {
+                $dados['vendedores'][$reserva->vendedor->nome_fantasia]['valor_venda'] = $reserva->valor_total;
+                $dados['vendedores'][$reserva->vendedor->nome_fantasia]['valor_comissao'] = $comissao_vendedor;
+                $dados['vendedores'][$reserva->vendedor->nome_fantasia]['quantidade'] = $reserva->quantidade;
+                $dados['vendedores'][$reserva->vendedor->nome_fantasia]['vendedor'] = $reserva->vendedor;
             } else {
-                $dados['vendedores'][$reserva->vendedore->nome_fantasia]['valor_venda'] += $reserva->valor_total;
-                $dados['vendedores'][$reserva->vendedore->nome_fantasia]['valor_comissao'] += $comissao_vendedore;
-                $dados['vendedores'][$reserva->vendedore->nome_fantasia]['quantidade'] += $reserva->quantidade;
+                $dados['vendedores'][$reserva->vendedor->nome_fantasia]['valor_venda'] += $reserva->valor_total;
+                $dados['vendedores'][$reserva->vendedor->nome_fantasia]['valor_comissao'] += $comissao_vendedor;
+                $dados['vendedores'][$reserva->vendedor->nome_fantasia]['quantidade'] += $reserva->quantidade;
             }
         }
 
