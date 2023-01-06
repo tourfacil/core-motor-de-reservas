@@ -163,4 +163,44 @@ abstract class PWIService
         
         simpleMail($titulo, $texto, $destino);
     }
+
+    public static function consultarVendaIntegracao(ReservaPedido $reserva)
+    {
+
+        if($reserva->integracaoPWI == null) {
+            return false;
+        }
+
+        $id_pwi = json_decode($reserva->integracaoPWI->dados, true)['data']['id'];
+
+        $api = new PWIAPI();
+
+        return $api->consultarVenda($id_pwi);        
+    }
+
+    public static function cancelarIntegracao(ReservaPedido $reserva)
+    {
+        if($reserva->integracaoPWI == null) {
+            return false;
+        }
+
+        $id_pwi = json_decode($reserva->integracaoPWI->dados, true)['data']['id'];
+
+        $result = (new PWIAPI())->cancelarVenda($id_pwi);
+
+        if(isset($result['data']['codigo']) == false) {
+            return false;
+        }
+
+        if($result['data']['codigo'] == 1)
+        {
+            sleep(1);
+
+            $novos_dados = self::consultarVendaIntegracao($reserva);
+
+            $reserva->integracaoPWI->update(['status' => 'CANCELADO', 'dados' => $novos_dados]);
+        
+            return true;
+        }
+    }
 }

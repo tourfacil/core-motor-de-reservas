@@ -65,6 +65,11 @@ class PWIAPI
         return $this->consultaAPI(TipoRequisicaoEnum::POST, '/credito/saldo', []);
     }
 
+    public function cancelarVenda($id)
+    {
+        return $this->consultaAPI(TipoRequisicaoEnum::PUT, "/venda/cancelar/$id", []);
+    }
+
     /**
      * Responsavel por ativar a API e fazer as chamadas HTTP
      * Método utilizado por todos outros
