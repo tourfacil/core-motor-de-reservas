@@ -203,6 +203,21 @@ class ReservaPedido extends Model
         return $this->hasOne(IntegracaoPWI::class);
     }
 
+    public function getintegracaoPWIDadosAttribute()
+    {
+        if(is_array($this->integracaoPWI->dados) == false) {
+            return json_decode($this->integracaoPWI->dados, true)['data'];
+        } else {
+            return $this->integracaoPWI->dados['data'];
+        }
+        
+    }
+
+    public function getidPWIAttribute()
+    {
+        return $this->integracaoPWIDados['id'];
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
