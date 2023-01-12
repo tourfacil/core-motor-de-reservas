@@ -11,7 +11,7 @@ use Carbon\Carbon;
 
 class FaturaService
 {
-    private $dia_fechamento_mensal = 1;
+    private $dia_fechamento_mensal = 12;
 
     private $dia_fechamento_semanal = 1;
 
@@ -40,9 +40,23 @@ class FaturaService
             $faturas['semanais'] = $this->fecharFaturasSemanais();
 
         }
+
+        $texto = "Realizado fechamento de faturas \n Segue abaixo relação de faturas geradas \n\n";
+        $cont = 0;
+
+        foreach($faturas as $tipo_fatura => $fatura) {
+
+            foreach($fatura as $fatura_o) {
+
+                $texto .= "ID: " . $fatura_o->id . " \n Fornecedor: " . $fatura_o->fornecedor->nome_fantasia . " \n Tipo: " . $fatura_o->tipo . " \n Periodo: " . $fatura_o->tipo_periodo . " \n Valor: R$" . formataValor($fatura_o->valor) . "\n";
+                $texto .= "\n\n";
+                $cont++;
+
+            }
+        }  
     }
 
-    public function fecharFaturasMensais()
+    private function fecharFaturasMensais()
     {
         $fornecedores = Fornecedor::where('tipo_fatura', TipoFaturaEnum::MENSAL)->get();
         $faturas = [];
@@ -57,7 +71,7 @@ class FaturaService
         return $faturas;
     }
 
-    public function fecharFaturasQuinzenais()
+    private function fecharFaturasQuinzenais()
     {
         $fornecedores = Fornecedor::where('tipo_fatura', TipoFaturaEnum::QUINZENAL)->get();
         $faturas = [];
@@ -70,7 +84,7 @@ class FaturaService
         return $faturas;
     }
 
-    public function fecharFaturasSemanais()
+    private function fecharFaturasSemanais()
     {
         $fornecedores = Fornecedor::where('tipo_fatura', TipoFaturaEnum::SEMANAL)->get();
         $faturas = [];

@@ -21,4 +21,14 @@ class Fatura extends Model
         'quantidade_reservas',
         'observacao'
     ];
+
+    public function fornecedor()
+    {
+        return $this->belongsTo(Fornecedor::class);
+    }
+
+    public function reservas()
+    {
+        return $this->hasMany(ReservaPedido::class);
+    }
 }
