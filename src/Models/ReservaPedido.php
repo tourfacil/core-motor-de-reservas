@@ -32,6 +32,7 @@ class ReservaPedido extends Model
         "vendedor_id",
         "desconto_id",
         "finalizada",
+        "fatura_id",
     ];
 
     /**

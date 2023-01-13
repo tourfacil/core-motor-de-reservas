@@ -22,6 +22,12 @@ class Fatura extends Model
         'observacao'
     ];
 
+    protected $dates = [
+        'inicio',
+        'final',
+        'data_pagamento'
+    ];
+
     public function fornecedor()
     {
         return $this->belongsTo(Fornecedor::class);

@@ -201,6 +201,10 @@ class FaturaService
 
         $fatura = Fatura::create($fatura);
 
+        foreach($reservas_e_datas['reservas'] as $reserva) {
+            $reserva->update(['fatura_id' => $fatura->id]);
+        }
+
         return $fatura;
     }
 
