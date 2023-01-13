@@ -91,6 +91,8 @@ class SnowlandService
             'date' => $this->reserva->agendaDataServico->data->format('d/m/Y')
         ]);
 
+        $this->servicosDisponiveis = array_reverse($this->servicosDisponiveis);
+
         // Log
         Storage::append($this->path, "Servicos disponiveis: " . json_encode($this->servicosDisponiveis));
 
