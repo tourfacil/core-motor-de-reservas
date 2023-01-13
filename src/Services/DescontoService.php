@@ -42,7 +42,13 @@ abstract class DescontoService
                 // Retorna o novo valor já com o desconto percentual aplicado
                 $valor_desconto =  ($valor_original * $desconto_valor) / 100;
 
-                return $valor_original - $valor_desconto;
+                $valor_final = $valor_original - $valor_desconto;
+
+                if($valor_final < 0) {
+                    $valor_final = 0;
+                }
+
+                return $valor_final;
 
             // Caso o desconto seja aplciado de forma fixa. Exemplo (Desconto de R$10,00)
             } else if ($desconto->tipo_desconto_valor == TipoDescontoValor::FIXO) {
@@ -55,8 +61,14 @@ abstract class DescontoService
                     $desconto_valor = $desconto->desconto_net;
                 }
 
+                $valor_final = $valor_original - $desconto_valor;
+
+                if($valor_final < 0) {
+                    $valor_final = 0;
+                }
+
                 // Retorna o novo valor já com o desconto fixo aplicado
-                return $valor_original - $desconto_valor;
+                return $valor_final;
 
             } else {
                 // Para evitar BUGS, caso o valor do TipoDescontoValor for inválido... Ele retorna o valor original
