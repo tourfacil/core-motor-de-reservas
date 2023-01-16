@@ -19,8 +19,15 @@ class FaturaService
 
     private $dia_fechamento_quinzenal_final = 16;
 
+    private $status_inicial = StatusFaturaEnum::PENDENTE_PAGAMENTO;
+
+    private $dias_prazo_pagamento = 10;
+
     public function fecharFaturas()
     {
+
+        $this->log("Iniciando fechamento de faturas\n");
+
         $faturas = [];
 
         if(Carbon::today()->day == $this->dia_fechamento_mensal) {
@@ -41,24 +48,28 @@ class FaturaService
 
         }
 
-        $texto = "Realizado fechamento de faturas \n Segue abaixo relação de faturas geradas \n\n";
         $cont = 0;
 
         foreach($faturas as $tipo_fatura => $fatura) {
 
             foreach($fatura as $fatura_o) {
-
-                $texto .= "ID: " . $fatura_o->id . " \n Fornecedor: " . $fatura_o->fornecedor->nome_fantasia . " \n Tipo: " . $fatura_o->tipo . " \n Periodo: " . $fatura_o->tipo_periodo . " \n Valor: R$" . formataValor($fatura_o->valor) . "\n";
-                $texto .= "\n\n";
                 $cont++;
-
             }
         }  
+
+        $texto = Carbon::today()->format('d/m/Y H:i') . ': ' . $cont . " fatura(s) gerada(s)";
+
+        simpleMail("Fechamento de faturas - Tour Fácil", $texto, config('site.email_alertas'));
+
+        $this->log("Finalizado o fechamento de {$cont} fatura(s)\n");
+
     }
 
     private function fecharFaturasMensais()
     {
-        $fornecedores = Fornecedor::where('tipo_fatura', TipoFaturaEnum::MENSAL)->get();
+        $fornecedores = Fornecedor::where('tipo_fatura', TipoFaturaEnum::MENSAL)
+        ->whereNotNull('tipo_periodo_fatura')
+        ->get();
         $faturas = [];
 
         foreach($fornecedores as $fornecedor) 
@@ -73,7 +84,9 @@ class FaturaService
 
     private function fecharFaturasQuinzenais()
     {
-        $fornecedores = Fornecedor::where('tipo_fatura', TipoFaturaEnum::QUINZENAL)->get();
+        $fornecedores = Fornecedor::where('tipo_fatura', TipoFaturaEnum::QUINZENAL)
+        ->whereNotNull('tipo_periodo_fatura')
+        ->get();
         $faturas = [];
 
         foreach($fornecedores as $fornecedor) 
@@ -86,7 +99,9 @@ class FaturaService
 
     private function fecharFaturasSemanais()
     {
-        $fornecedores = Fornecedor::where('tipo_fatura', TipoFaturaEnum::SEMANAL)->get();
+        $fornecedores = Fornecedor::where('tipo_fatura', TipoFaturaEnum::SEMANAL)
+        ->whereNotNull('tipo_periodo_fatura')
+        ->get();
         $faturas = [];
 
         foreach($fornecedores as $fornecedor) 
@@ -111,7 +126,7 @@ class FaturaService
 
             case TipoFaturaEnum::MENSAL:
                 $data_inicial = Carbon::today()->subDays(1)->startOfMonth();
-                $data_final = Carbon::today()->subDays(1)->endOfMonth()->addDays(1);
+                $data_final = Carbon::today()->subDays(1)->endOfMonth();
 
                 $data_inicial_retorno = Carbon::today()->subDays(1)->startOfMonth();
                 $data_final_retorno = Carbon::today()->subDays(1)->endOfMonth();
@@ -123,7 +138,7 @@ class FaturaService
                 if(Carbon::today()->day == $this->dia_fechamento_quinzenal_inicial) {
 
                     $data_inicial = Carbon::today()->subDays(1)->day(16);
-                    $data_final = Carbon::today()->subDays(1)->endOfMonth()->addDays(1);
+                    $data_final = Carbon::today()->subDays(1)->endOfMonth();
 
                     $data_inicial_retorno = Carbon::today()->subDays(1)->day(16);
                     $data_final_retorno = Carbon::today()->subDays(1)->endOfMonth();
@@ -132,7 +147,7 @@ class FaturaService
                 else if(Carbon::today()->day == $this->dia_fechamento_quinzenal_final) {
 
                     $data_inicial = Carbon::today()->startOfMonth();
-                    $data_final = Carbon::today()->day(15)->addDays(1);
+                    $data_final = Carbon::today()->day(15);
 
                     $data_inicial_retorno = Carbon::today()->startOfMonth();
                     $data_final_retorno = Carbon::today()->day(15);
@@ -143,7 +158,7 @@ class FaturaService
             case TipoFaturaEnum::SEMANAL:
 
                 $data_inicial = Carbon::today()->subDays(1)->startOfWeek();
-                $data_final = Carbon::today()->subDays(1)->endOfWeek()->addDays(1);
+                $data_final = Carbon::today()->subDays(1)->endOfWeek();
 
                 $data_inicial_retorno = Carbon::today()->subDays(1)->startOfWeek();
                 $data_final_retorno = Carbon::today()->subDays(1)->endOfWeek();
@@ -158,7 +173,7 @@ class FaturaService
         if($tipo_periodo == TipoPeriodoFaturaEnum::VENDA){
 
             $reservas->where('created_at', '>=', $data_inicial);
-            $reservas->where('created_at', '<=', $data_final);
+            $reservas->where('created_at', '<=', $data_final->addDays(1));
 
         } else {
 
@@ -181,7 +196,7 @@ class FaturaService
 
         $data_inicial = $reservas_e_datas['data_inicial'];
         $data_final = $reservas_e_datas['data_final'];
-        $data_pagamento = Carbon::today()->addDays(10);
+        $data_pagamento = Carbon::today()->addDays($this->dias_prazo_pagamento);
         $valor = $reservas_e_datas['reservas']->sum('valor_net');
         $quantidade = $reservas_e_datas['reservas']->sum('quantidade');
         $quantidade_reservas = $reservas_e_datas['reservas']->count();
@@ -191,7 +206,7 @@ class FaturaService
             'inicio' => $data_inicial,
             'final' => $data_final,
             'data_pagamento' => $data_pagamento,
-            'status' => StatusFaturaEnum::PENDENTE_APROVACAO,
+            'status' => $this->status_inicial,
             'tipo' => $fornecedor->tipo_fatura,
             'tipo_periodo' => $fornecedor->tipo_periodo_fatura,
             'valor' => $valor,
@@ -204,6 +219,8 @@ class FaturaService
         foreach($reservas_e_datas['reservas'] as $reserva) {
             $reserva->update(['fatura_id' => $fatura->id]);
         }
+
+        $this->log("Fatura de {$fatura->fornecedor->nome_fantasia} gerada - ID: {$fatura->id} \n");
 
         return $fatura;
     }
