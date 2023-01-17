@@ -8,6 +8,7 @@ use TourFacil\Core\Models\Fatura;
 use TourFacil\Core\Models\ReservaPedido;
 use TourFacil\Core\Models\Fornecedor;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class FaturaService
 {
@@ -228,5 +229,99 @@ class FaturaService
     private function log($texto)
     {
         echo $texto;
+    }
+
+    public function previsaoDeFatura(Fornecedor $fornecedor, Carbon $inicio, Carbon $final)
+    {
+        
+    }
+
+    private function getWeeksPrevisaoFatura(Carbon $inicio, Carbon $final)
+    {
+        $primeiro_dia_primeira_semana = Carbon::parse($inicio)->startOfWeek();
+        $ultimo_dia_ultima_semana = Carbon::parse($final)->endOfWeek();
+
+        $datas_periodo_c = CarbonPeriod::create($primeiro_dia_primeira_semana, $ultimo_dia_ultima_semana);
+        $semanas_periodo = [];
+
+        foreach ($datas_periodo_c as $date) {
+
+            $inicio_semana = Carbon::parse($date)->startOfWeek();
+            $ultimo_semana = Carbon::parse($date)->endOfWeek();
+
+            $index = $inicio_semana->format('Y-m-d') . ' - ' . $ultimo_semana->format('Y-m-d');
+
+            $semanas_periodo[$index] = [
+                'inicio' => Carbon::parse($date)->startOfWeek(),
+                'final' => Carbon::parse($date)->endOfWeek()
+            ];
+        }
+
+        return $semanas_periodo;
+    }
+
+    private function getQuinzenasPrevisaoFatura(Carbon $inicio, Carbon $final)
+    {
+        $primeiro_dia_primeiro_mes = Carbon::parse($inicio);
+        $ultimo_dia_ultimo_mes = Carbon::parse($final);
+
+        $datas_periodo_c = CarbonPeriod::create($primeiro_dia_primeiro_mes, $ultimo_dia_ultimo_mes);
+        $quinzenas_periodo = [];
+
+        foreach ($datas_periodo_c as $date) {
+
+            $dia_dezesseis_mes = Carbon::parse($date)->day(16);
+
+            if ($dia_dezesseis_mes->isAfter($date)) {
+
+                $inicio_quinzena = Carbon::parse($date)->day(1);
+                $final_quinzena = Carbon::parse($date)->day(15);
+
+                $index = $inicio_quinzena->format('Y-m-d') . ' - ' . $final_quinzena->format('Y-m-d');
+
+                $quinzenas_periodo[$index] = [
+                    'inicio' => Carbon::parse($date)->day(1),
+                    'final' => Carbon::parse($date)->day(15),
+                ];
+
+            } else {
+
+                $inicio_quinzena = Carbon::parse($date)->day(16);
+                $final_quinzena = Carbon::parse($date)->endOfMonth();
+
+                $index = $inicio_quinzena->format('Y-m-d') . ' - ' . $final_quinzena->format('Y-m-d');
+
+                $quinzenas_periodo[$index] = [
+                    'inicio' => Carbon::parse($date)->day(16),
+                    'final' => Carbon::parse($date)->endOfMonth(),
+                ];
+
+            }
+        }
+
+        return $quinzenas_periodo;
+    }
+
+    private function getMesesPrevisaoFatura(Carbon $inicio, Carbon $final)
+    {
+        $primeiro_dia_primeiro_mes = Carbon::parse($inicio)->startOfMonth();
+        $ultimo_dia_ultimo_mes = Carbon::parse($final)->endOfMonth();
+
+        $datas_periodo_c = CarbonPeriod::create($primeiro_dia_primeiro_mes, $ultimo_dia_ultimo_mes);
+        $meses_periodo = [];
+
+        foreach($datas_periodo_c as $date) {
+
+            $inicio_mes = Carbon::parse($date)->startOfMonth();
+            $final_mes = Carbon::parse($date)->endOfMonth();
+
+            $index = $inicio_mes->format('Y-m-d') . ' - ' . $final_mes->format('Y-m-d');
+            $meses_periodo[$index] = [
+                'inicio' => Carbon::parse($date)->startOfMonth(),
+                'final' => Carbon::parse($date)->endOfMonth(),
+            ];
+        }
+
+        return $meses_periodo;
     }
 }
