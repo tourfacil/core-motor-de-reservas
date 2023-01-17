@@ -236,14 +236,17 @@ class FaturaService
         $periodos = $this->getPeriodoPrevisaoFaturaFornecedor($fornecedor, $inicio, $final);
         $faturas = [];
 
-        foreach($periodos as $perido) {
+        foreach($periodos as $periodo) {
+            
+            $inicio_periodo = $periodo['inicio'];
+            $final_periodo = $periodo['final'];
 
-            $reservas = $this->getReservasFornecedorPorPeriodo($fornecedor, $inicio, $final);
+            $reservas = $this->getReservasFornecedorPorPeriodo($fornecedor, $inicio_periodo, $final_periodo);
 
             $fatura = Fatura::make([
                 'fornecedor_id' => $fornecedor->id,
-                'inicio' => $inicio,
-                'final' => $final,
+                'inicio' => $inicio_periodo,
+                'final' => $final_periodo,
                 'data_pagamento' => Carbon::parse($final)->addDays($this->dias_prazo_pagamento),
                 'status' => $this->status_inicial,
                 'tipo' => $fornecedor->tipo_fatura,
