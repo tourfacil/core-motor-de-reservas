@@ -231,12 +231,50 @@ class FaturaService
         echo $texto;
     }
 
-    public function previsaoDeFatura(Fornecedor $fornecedor, Carbon $inicio, Carbon $final)
+    public function previsaoDeFaturaFornecedor(Fornecedor $fornecedor, Carbon $inicio, Carbon $final)
     {
-        
+        $periodos = $this->getPeriodoPrevisaoFaturaFornecedor($fornecedor, $inicio, $final);
+        $faturas = [];
+
+        foreach($periodos as $perido) {
+
+            $reservas = $this->getReservasFornecedorPorPeriodo($fornecedor, $inicio, $final);
+
+            $fatura = Fatura::make([
+                'fornecedor_id' => $fornecedor->id,
+                'inicio' => $inicio,
+                'final' => $final,
+                'data_pagamento' => Carbon::parse($final)->addDays($this->dias_prazo_pagamento),
+                'status' => $this->status_inicial,
+                'tipo' => $fornecedor->tipo_fatura,
+                'tipo_periodo' => $fornecedor->tipo_periodo_fatura,
+                'valor' => $reservas->sum('valor_net'),
+                'quantidade' => $reservas->sum('quantidade'),
+                'quantidade_reservas' => $reservas->count(),
+            ]);
+
+            $faturas[] = $fatura;
+        }
+
+        return $faturas;
     }
 
-    private function getWeeksPrevisaoFatura(Carbon $inicio, Carbon $final)
+    public function previsaoDeFaturaFornecedores(Carbon $inicio, Carbon $final)
+    {
+        $fornecedores = Fornecedor::whereNotNull('tipo_periodo_fatura')->get();
+        $faturas = [];
+
+        foreach($fornecedores as $fornecedor) {
+
+            $faturas_c = $this->previsaoDeFaturaFornecedor($fornecedor, $inicio, $final);
+            $faturas = array_merge($faturas, $faturas_c);
+
+        }
+
+        return $faturas;
+    }
+
+    private function getSemanasPrevisaoFatura(Carbon $inicio, Carbon $final)
     {
         $primeiro_dia_primeira_semana = Carbon::parse($inicio)->startOfWeek();
         $ultimo_dia_ultima_semana = Carbon::parse($final)->endOfWeek();
@@ -323,5 +361,45 @@ class FaturaService
         }
 
         return $meses_periodo;
+    }
+
+    private function getPeriodoPrevisaoFaturaFornecedor(Fornecedor $fornecedor, Carbon $inicio, Carbon $final)
+    {
+        switch($fornecedor->tipo_fatura) {
+
+            case TipoFaturaEnum::MENSAL:
+                return $this->getMesesPrevisaoFatura($inicio, $final);
+
+            case TipoFaturaEnum::QUINZENAL:
+                return $this->getQuinzenasPrevisaoFatura($inicio, $final);
+
+            case TipoFaturaEnum::SEMANAL:
+                return $this->getSemanasPrevisaoFatura($inicio, $final);
+        }
+    }
+
+    private function getReservasFornecedorPorPeriodo(Fornecedor $fornecedor, Carbon $inicio, Carbon $final)
+    {
+
+        $reservas = ReservaPedido::whereNull('fatura_id')
+        ->with('agendaDataServico')
+        ->whereIn('status', ['ATIVA', 'UTILIZADO'])
+        ->where('fornecedor_id', $fornecedor->id);
+
+        if($fornecedor->tipo_fatura == TipoPeriodoFaturaEnum::VENDA){
+
+            $reservas->where('created_at', '>=', $inicio);
+            $reservas->where('created_at', '<=', $final->addDays(1));
+
+        } else {
+
+            $reservas->whereHas('agendaDataServico', function ($agenda) use ($inicio, $final) {
+                $agenda->where('data', '>=', $inicio);
+                $agenda->where('data', '<=', $final);
+            });
+
+        }
+
+        return $reservas->get();
     }
 }
