@@ -381,7 +381,7 @@ class FaturaService
         }
     }
 
-    private function getReservasFornecedorPorPeriodo(Fornecedor $fornecedor, Carbon $inicio, Carbon $final)
+    public function getReservasFornecedorPorPeriodo(Fornecedor $fornecedor, Carbon $inicio, Carbon $final)
     {
 
         $reservas = ReservaPedido::whereNull('fatura_id')
