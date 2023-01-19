@@ -35,6 +35,8 @@ class Fornecedor extends Model
         "telefone",
         "site",
         "termos",
+        'tipo_fatura',
+        'tipo_periodo_fatura',
     ];
 
     /**
