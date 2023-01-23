@@ -228,6 +228,12 @@ class Servico extends Model
         return null;
     }
 
+
+    public function getFotoPrincipalAPIAttribute()
+    {
+        return $this->fotoPrincipal->foto['MEDIUM'];
+    }
+
     /**
      * Agenda do servico
      *
