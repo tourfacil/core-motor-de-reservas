@@ -26,6 +26,10 @@ class PagarmeCheckout
             // Validade do cartao de credito
             $validade_ano = $dados_pagamento['validade_ano_cartao'];
 
+            if(strlen($validade_ano) > 2) {
+                $validade_ano = $validade_ano[2] . $validade_ano[3];
+            }
+
             // Nova instancia do CreditCard Getnet
             $sale = new CreditCard();
 
@@ -54,7 +58,7 @@ class PagarmeCheckout
             $sale->setNumberInstallments((int) $dados_pagamento['parcelas']);
             $sale->setNumberCard($dados_pagamento['numero_cartao']);
             $sale->setExpirationMonth($dados_pagamento['validade_mes_cartao']);
-            $sale->setExpirationYear($validade_ano[2] . $validade_ano[3]);
+            $sale->setExpirationYear($validade_ano);
             $sale->setCardholderName($dados_pagamento['nome_cartao']);
             $sale->setCardholderDocument($cliente->cpf);
             $sale->setSecurityCode($dados_pagamento['codigo_cartao']);
