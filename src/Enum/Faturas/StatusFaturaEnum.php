@@ -21,8 +21,8 @@ abstract class StatusFaturaEnum
 
     const CORES = [
         self::PENDENTE_APROVACAO => 'warning',
-        self::PENDENTE_PAGAMENTO => 'danger',
+        self::PENDENTE_PAGAMENTO => 'warning',
         self::PAGA => 'success',
-        self::CANCELADA => '',
+        self::CANCELADA => 'danger',
     ];
 }
