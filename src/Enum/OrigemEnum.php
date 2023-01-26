@@ -16,11 +16,14 @@ abstract class OrigemEnum
 
     const APLICATIVO = "APLICATIVO";
 
+    const API = "API";
+
     const ORIGENS = [
         self::APLICATIVO => "Aplicativo",
         self::DESKTOP => "Desktop",
         self::TERMINAL => "Terminal",
         self::WEBSITE => "Website",
-        self::MOBILE => "Celular"
+        self::MOBILE => "Celular",
+        self::API => "Api",
     ];
 }
