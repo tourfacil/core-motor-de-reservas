@@ -27,6 +27,7 @@ class Categoria extends Model
         'valor_minimo',
         'posicao_menu',
         'tipo',
+        'status'
     ];
 
     /**
@@ -50,7 +51,8 @@ class Categoria extends Model
         'descricao',
         'titulo_pagina',
         'posicao_menu',
-        'tipo'
+        'tipo',
+        'status'
     ];
 
     /**
@@ -112,7 +114,7 @@ class Categoria extends Model
      */
     public function getStatusAttribute()
     {
-        return ($this->attributes['deleted_at'] == null);
+        return $this->attributes['status'];
     }
 
     /**
