@@ -12,7 +12,7 @@ use Carbon\CarbonPeriod;
 
 class FaturaService
 {
-    private $dia_fechamento_mensal = 12;
+    private $dia_fechamento_mensal = 1;
 
     private $dia_fechamento_semanal = 1;
 
