@@ -389,10 +389,11 @@ class FaturaService
         ->whereIn('status', ['ATIVA', 'UTILIZADO'])
         ->where('fornecedor_id', $fornecedor->id);
 
-        if($fornecedor->tipo_fatura == TipoPeriodoFaturaEnum::VENDA){
+        if($fornecedor->tipo_periodo_fatura == TipoPeriodoFaturaEnum::VENDA){
 
+            $final_query = Carbon::parse($final);
             $reservas->where('created_at', '>=', $inicio);
-            $reservas->where('created_at', '<=', $final->addDays(1));
+            $reservas->where('created_at', '<=', $final_query->addDays(1));
 
         } else {
 
