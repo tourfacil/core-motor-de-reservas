@@ -1,5 +1,6 @@
 <?php namespace TourFacil\Core\Models;
 
+use App\FaqServico;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -278,6 +279,11 @@ class Servico extends Model
     public function setCidadeAttribute($cidade)
     {
         return $this->attributes['cidade'] = formatarNome($cidade);
+    }
+
+    public function faqServico()
+    {
+        return $this->hasMany(FaqServico::class);
     }
 
     /**
