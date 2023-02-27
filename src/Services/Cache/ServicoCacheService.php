@@ -153,7 +153,8 @@ class ServicoCacheService extends DefaultCacheService
                         'categorias.id',
                         'categorias.slug',
                     ]);
-                }
+                },
+                'faqServico'
             ])->where([
                 'slug' => $servico_slug,
                 'canal_venda_id' => $canal_id
