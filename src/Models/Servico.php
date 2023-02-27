@@ -1,6 +1,6 @@
 <?php namespace TourFacil\Core\Models;
 
-use App\FaqServico;
+use TourFacil\Core\Models\FaqServico;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
