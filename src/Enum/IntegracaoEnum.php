@@ -32,6 +32,8 @@ abstract class IntegracaoEnum
 
     const ACQUA_MOTION = 'ACQUA_MOTION';
 
+    const NBA_PARK = 'NBA_PARK';
+
     const INTEGRACOES = [
         self::NAO => "Não possui",
         self::SNOWLAND => "Snowland",
@@ -45,6 +47,7 @@ abstract class IntegracaoEnum
         self::VILA_DA_MONICA => "Vila da Monica",
         self::SKYGLASS => "Skyglass",
         self::ACQUA_MOTION => "Acqua Motion",
+        self::NBA_PARK => 'NBA Park',
     ];
 
     const INTEGRACOES_PWI = [

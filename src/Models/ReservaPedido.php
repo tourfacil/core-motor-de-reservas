@@ -199,6 +199,14 @@ class ReservaPedido extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
+    public function nbaParkVoucher()
+    {
+        return $this->hasOne(NBAParkReservaPedido::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function integracaoPWI()
     {
         return $this->hasOne(IntegracaoPWI::class);
@@ -211,7 +219,7 @@ class ReservaPedido extends Model
         } else {
             return $this->integracaoPWI->dados['data'];
         }
-        
+
     }
 
     public function getidPWIAttribute()
