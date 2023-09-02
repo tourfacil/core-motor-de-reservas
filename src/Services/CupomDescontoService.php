@@ -157,7 +157,7 @@ abstract class CupomDescontoService
      * @param $valor_original
      * @return int|mixed
      */
-    public static function aplicarDescontoValor($cupom, $valor_original) {
+    public static function aplicarDescontoValor($cupom, $valor_original, $numero_reservas = null) {
 
         // Caso o cupom seja null. Retorna o valor original
         if($cupom == null) {
@@ -176,7 +176,11 @@ abstract class CupomDescontoService
         // Caso o desconto seja aplciado de forma fixa. Exemplo (Desconto de R$10,00)
         } else if($cupom->tipo_desconto_valor == TipoDescontoValor::FIXO) {
 
-            return self::evitarValorMenorQueUm($valor_original - $cupom->desconto);
+            if($numero_reservas != null && $numero_reservas != 0 && $cupom->servico_id == null) {
+                return self::evitarValorMenorQueUm($valor_original - ($cupom->desconto / $numero_reservas));
+            } else {
+                return self::evitarValorMenorQueUm($valor_original - $cupom->desconto);
+            }
 
         } else {
             // Para evitar BUGS, caso o valor do TipoDescontoValor for inválido... Ele retorna o valor original
@@ -197,13 +201,13 @@ abstract class CupomDescontoService
      * @param $valor_original
      * @return int|mixed
      */
-    public static function aplicarDescontoValorNet($cupom, $valor_original) {
+    public static function aplicarDescontoValorNet($cupom, $valor_original, $numero_reservas = null) {
 
         // Verifica se o cupom aplica no venda ou venda e net
         // Caso aplique no NET ele calcula, se não, retorna o valor original
         if($cupom->tipo_desconto_fornecedor == TipoDesconto::NET) {
 
-            return self::aplicarDescontoValor($cupom, $valor_original);
+            return self::aplicarDescontoValor($cupom, $valor_original, $numero_reservas);
 
         } else if($cupom->tipo_desconto_fornecedor == TipoDesconto::VENDA) {
             return $valor_original;
