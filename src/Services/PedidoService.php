@@ -181,11 +181,15 @@ class PedidoService
                     // Caso seja cupom de serviço especifico. Verifica se é o serviço de fato
                     if($cupom->servico_id == null || $cupom->servico_id == $servico->id) {
 
+                        $servicos_count = 0;
+                        if(is_array($servicos)) {
+                            $servicos_count = count($servicos);
+                        } else {
+                            $servicos_count = $servicos->count();
+                        }
 
-
-
-                        $total_reserva = CupomDescontoService::aplicarDescontoValor($cupom, $total_reserva, $servicos->count());
-                        $total_net_reserva = CupomDescontoService::aplicarDescontoValorNet($cupom, $total_net_reserva, $servicos->count());
+                        $total_reserva = CupomDescontoService::aplicarDescontoValor($cupom, $total_reserva, $servicos_count);
+                        $total_net_reserva = CupomDescontoService::aplicarDescontoValorNet($cupom, $total_net_reserva, $servicos_count);
                         self::$pedido['cupom_desconto_id'] = $cupom->id ?? null;
                         self::$pedido['cupom'] = $cupom;
 
