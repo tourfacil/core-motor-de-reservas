@@ -23,7 +23,6 @@ use TourFacil\Core\Models\Servico;
 use TourFacil\Core\Services\Pagamento\DescontoPIXService;
 use TourFacil\Core\Services\RegraServico\ValorExcecaoDiaService;
 
-
 /**
  * Class PedidoService
  * @package TourFacil\Core\Services
