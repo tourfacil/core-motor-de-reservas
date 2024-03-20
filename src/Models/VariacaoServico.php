@@ -1,4 +1,6 @@
-<?php namespace TourFacil\Core\Models;
+<?php
+
+namespace TourFacil\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,6 +25,7 @@ class VariacaoServico extends Model
         'markup',
         'destaque',
         'consome_bloqueio',
+        'min_pax',
     ];
 
     /**

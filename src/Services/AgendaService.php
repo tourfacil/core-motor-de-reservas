@@ -1,4 +1,6 @@
-<?php namespace TourFacil\Core\Services;
+<?php
+
+namespace TourFacil\Core\Services;
 
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -31,7 +33,7 @@ class AgendaService
 
         // Recupera a agenda com as datas e os servicos
         $agenda = AgendaServico::with([
-            'datasServico' => function($query) use ($last_30) {
+            'datasServico' => function ($query) use ($last_30) {
                 return $query->where('data', '>=', $last_30);
             }
         ])->find($agenda_id);
@@ -47,7 +49,7 @@ class AgendaService
         // Retorna a classe de acordo com a disponiblidade
         $class_names = function ($quantidade) use ($dispo_media, $dispo_baixa) {
             // Classes de acordo com a disponibilidade
-            if($quantidade <= $dispo_baixa) {
+            if ($quantidade <= $dispo_baixa) {
                 return "fc-bg-red-cad";
             } elseif ($quantidade <= $dispo_media) {
                 return 'fc-bg-orange-cad';
@@ -117,7 +119,7 @@ class AgendaService
                 $net_variacao =  ($variacao->percentual / 100) * $data->valor_net;
 
                 // Verifica se possui valores no NET para substituir
-                if(is_array($substitui_net)) {
+                if (is_array($substitui_net)) {
                     $net_variacao = (string) number_format($net_variacao, 2, ".", "");
                     $net_variacao = (isset($substitui_net[$net_variacao])) ? (float) $substitui_net[$net_variacao] : (float) $net_variacao;
                 }
@@ -126,27 +128,27 @@ class AgendaService
                 $venda_variacao = $net_variacao * $variacao->markup;
 
                 // Verifica se o servico possui corretagem de valor
-                if($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
+                if ($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
 
                     // Verifica se a corretagem é em percentual
-                    if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
+                    if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
                         $venda_variacao += ($venda_variacao / 100 * $servico->corretagem);
                     }
 
                     // Verifica se a corretagem é em valor fixo
-                    if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
+                    if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
                         $venda_variacao += $servico->corretagem;
                     }
                 }
 
                 // Verifica se possui valores da venda para substituir
-                if(is_array($substitui_venda)) {
+                if (is_array($substitui_venda)) {
                     $venda_variacao = (string) number_format($venda_variacao, 2, ".", "");
                     $venda_variacao = (isset($substitui_venda[$venda_variacao])) ? (float) $substitui_venda[$venda_variacao] : (float) $venda_variacao;
                 }
 
                 // Caso a variacao deva ser vendida por 1 real
-                if($variacao->percentual == 0 && $variacao->markup == AgendaEnum::MARKUP_UM_REAL) {
+                if ($variacao->percentual == 0 && $variacao->markup == AgendaEnum::MARKUP_UM_REAL) {
                     $venda_variacao = 1;
                 }
 
@@ -197,7 +199,7 @@ class AgendaService
             $desconto = $servico->descontoAtivo;
 
             // Caso o serviço tenha uma hora máxima para a venda no dia
-            if($servico->hora_maxima_antecedencia) {
+            if ($servico->hora_maxima_antecedencia) {
 
                 // Logica para quebrar a hora máximo do produto na venda
                 $hora_servico_array = explode(':', $servico->hora_maxima_antecedencia);
@@ -210,7 +212,7 @@ class AgendaService
 
                 // Verifica se Agora ja é maior que a antecedencia de horas do serviço
                 // Caso seja, aumenta a antecedencia para 1
-                if($hora_agora->isAfter($hora_antecedencia)) $servico->antecedencia_venda++;
+                if ($hora_agora->isAfter($hora_antecedencia)) $servico->antecedencia_venda++;
             }
 
             // Adiciona a antecedencia de venda para buscar a agenda
@@ -242,7 +244,7 @@ class AgendaService
             ];
 
             // Caso tenha um desconto ativo. Coloca dentro do array principal de retorno
-            if($desconto) {
+            if ($desconto) {
                 $retorno['desconto'] = $desconto;
             }
 
@@ -263,7 +265,7 @@ class AgendaService
                         $net_variacao =  ($variacao->percentual / 100) * $data_agenda->valor_net;
 
                         // Verifica se possui valores no NET para substituir
-                        if(is_array($substitui_net)) {
+                        if (is_array($substitui_net)) {
                             $net_variacao = (string) number_format($net_variacao, 2, ".", "");
                             $net_variacao = ($substitui_net[$net_variacao]) ?? $net_variacao;
                         }
@@ -276,21 +278,21 @@ class AgendaService
                         $venda_variacao = $net_variacao * $variacao->markup;
 
                         // Verifica se o servico possui corretagem de valor
-                        if($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
+                        if ($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
 
                             // Verifica se a corretagem é em percentual
-                            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
+                            if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
                                 $venda_variacao += ($venda_variacao / 100 * $servico->corretagem);
                             }
 
                             // Verifica se a corretagem é em valor fixo
-                            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
+                            if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
                                 $venda_variacao += $servico->corretagem;
                             }
                         }
 
                         // Verifica se possui valores da venda para substituir
-                        if(is_array($substitui_venda)) {
+                        if (is_array($substitui_venda)) {
                             $venda_variacao = (string) number_format($venda_variacao, 2, ".", "");
                             $venda_variacao = $substitui_venda[$venda_variacao] ?? $venda_variacao;
                         }
@@ -301,7 +303,7 @@ class AgendaService
                         ) ? $venda_variacao : $valor_venda_data;
 
                         // Caso a variacao deva ser vendida por 1 real
-                        if($variacao->percentual == 0 && $variacao->markup == AgendaEnum::MARKUP_UM_REAL) {
+                        if ($variacao->percentual == 0 && $variacao->markup == AgendaEnum::MARKUP_UM_REAL) {
                             $venda_variacao = 1;
                         }
 
@@ -328,19 +330,20 @@ class AgendaService
                             'valor_venda_original' => $var_valor_venda_original,
                             'valor_venda_brl' => formataValor($var_valor_venda),
                             'valor_venda_brl_original' => formataValor($var_valor_venda_original),
+                            'min_pax' => $variacao->min_pax,
                         ];
                     }
 
                     // Obtem a variação com o valor de venda mais alto para exibir no calendario
                     $valor_venda_mais_alto = 0;
                     $valor_venda_original_mais_alto = 0;
-                    foreach($variacaoes as $variacao) {
+                    foreach ($variacaoes as $variacao) {
 
-                        if($valor_venda_mais_alto < $variacao['valor_venda']) {
+                        if ($valor_venda_mais_alto < $variacao['valor_venda']) {
                             $valor_venda_mais_alto = $variacao['valor_venda'];
                         }
 
-                        if($valor_venda_original_mais_alto < $variacao['valor_venda_original']) {
+                        if ($valor_venda_original_mais_alto < $variacao['valor_venda_original']) {
                             $valor_venda_original_mais_alto = $variacao['valor_venda_original'];
                         }
                     }
@@ -372,13 +375,13 @@ class AgendaService
             }
 
             return $retorno;
-
         }
 
         return ['events' => []];
     }
 
-    public static function disponibilidadeDia(AgendaDataServico $data_agenda, Servico $servico) {
+    public static function disponibilidadeDia(AgendaDataServico $data_agenda, Servico $servico)
+    {
 
         // Pega o desconto caso tenha
         $desconto = $servico->descontoAtivo;
@@ -404,7 +407,7 @@ class AgendaService
             $net_variacao =  ($variacao->percentual / 100) * $data_agenda->valor_net;
 
             // Verifica se possui valores no NET para substituir
-            if(is_array($substitui_net)) {
+            if (is_array($substitui_net)) {
                 $net_variacao = (string) number_format($net_variacao, 2, ".", "");
                 $net_variacao = ($substitui_net[$net_variacao]) ?? $net_variacao;
             }
@@ -417,21 +420,21 @@ class AgendaService
             $venda_variacao = $net_variacao * $variacao->markup;
 
             // Verifica se o servico possui corretagem de valor
-            if($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
+            if ($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
 
                 // Verifica se a corretagem é em percentual
-                if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
+                if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
                     $venda_variacao += ($venda_variacao / 100 * $servico->corretagem);
                 }
 
                 // Verifica se a corretagem é em valor fixo
-                if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
+                if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
                     $venda_variacao += $servico->corretagem;
                 }
             }
 
             // Verifica se possui valores da venda para substituir
-            if(is_array($substitui_venda)) {
+            if (is_array($substitui_venda)) {
                 $venda_variacao = (string) number_format($venda_variacao, 2, ".", "");
                 $venda_variacao = $substitui_venda[$venda_variacao] ?? $venda_variacao;
             }
@@ -442,7 +445,7 @@ class AgendaService
             ) ? $venda_variacao : $valor_venda_data;
 
             // Caso a variacao deva ser vendida por 1 real
-            if($variacao->percentual == 0 && $variacao->markup == AgendaEnum::MARKUP_UM_REAL) {
+            if ($variacao->percentual == 0 && $variacao->markup == AgendaEnum::MARKUP_UM_REAL) {
                 $venda_variacao = 1;
             }
 
@@ -471,13 +474,13 @@ class AgendaService
         // Obtem a variação com o valor de venda mais alto para exibir no calendario
         $valor_venda_mais_alto = 0;
         $valor_venda_original_mais_alto = 0;
-        foreach($variacaoes as $variacao) {
+        foreach ($variacaoes as $variacao) {
 
-            if($valor_venda_mais_alto < $variacao['valor_venda']) {
+            if ($valor_venda_mais_alto < $variacao['valor_venda']) {
                 $valor_venda_mais_alto = $variacao['valor_venda'];
             }
 
-            if($valor_venda_original_mais_alto < $variacao['valor_venda_original']) {
+            if ($valor_venda_original_mais_alto < $variacao['valor_venda_original']) {
                 $valor_venda_original_mais_alto = $variacao['valor_venda_original'];
             }
         }
@@ -543,15 +546,15 @@ class AgendaService
         // Monta o array com as datas para atualizar
         foreach ($datas_agenda as $date_agenda) {
             // Verifica se o dia da semana está selecionado
-            if(in_array($date_agenda->data->dayOfWeekIso, $dias_semana)) {
+            if (in_array($date_agenda->data->dayOfWeekIso, $dias_semana)) {
                 $ids_agenda[] = $date_agenda->id;
             }
         }
 
         // Caso seja para atualizar a quantidade
-        if(! is_null($quantidade)) {
+        if (!is_null($quantidade)) {
             // Verifica a quantidade informada caso for maior que zero altera o status da agenda e da data
-            if($quantidade > 0) {
+            if ($quantidade > 0) {
                 // Atualiza o status da agenda
                 $agenda->update(['status' => AgendaEnum::COM_DISPONIBILIDADE]);
                 // Status da data
@@ -564,16 +567,16 @@ class AgendaService
                 ->where('agenda_servico_id', $agenda->id)
                 ->update(['disponivel' => $quantidade, 'status' => $status]);
 
-            if($update) return ['update' => true, 'message' => 'Quantidade disponível atualizada!'];
+            if ($update) return ['update' => true, 'message' => 'Quantidade disponível atualizada!'];
 
             return ['update' => false, 'message' => 'Não foi possível atualizar a quantidade, tente novamente!'];
         }
 
         // Caso seja para atualizar o valor net
-        if(! is_null($valor_net)) {
+        if (!is_null($valor_net)) {
 
             // Recupera o principal servico com a variacao mais cara
-            $servico = AgendaServico::with(['servicos' => function($query) {
+            $servico = AgendaServico::with(['servicos' => function ($query) {
                 return $query->with(['variacaoServico' => function ($q) {
                     return $q->orderBy('percentual')->limit(1);
                 }])->oldest()->limit(1);
@@ -589,15 +592,15 @@ class AgendaService
             $valor_venda = $net_variacao * $variacao_servico->markup;
 
             // Verifica se o servico possui corretagem de valor
-            if($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($valor_venda > 0)) {
+            if ($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($valor_venda > 0)) {
 
                 // Verifica se a corretagem é em percentual
-                if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
+                if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
                     $valor_venda += ($valor_venda / 100 * $servico->corretagem);
                 }
 
                 // Verifica se a corretagem é em valor fixo
-                if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
+                if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
                     $valor_venda += $servico->corretagem;
                 }
             }
@@ -607,7 +610,7 @@ class AgendaService
                 ->where('agenda_servico_id', $agenda->id)
                 ->update(['valor_venda' => $valor_venda, 'valor_net' => $valor_net]);
 
-            if($update) return ['update' => true, 'message' => 'A tarifa net foi atualizada com sucesso!'];
+            if ($update) return ['update' => true, 'message' => 'A tarifa net foi atualizada com sucesso!'];
 
             return ['update' => false, 'message' => 'Não foi possível atualizar a tarifa net, tente novamente!'];
         }
@@ -643,7 +646,7 @@ class AgendaService
         // Monta o array com as datas para remover
         foreach ($datas_agenda as $date_agenda) {
             // Verifica se o dia da semana está selecionado
-            if(in_array($date_agenda->data->dayOfWeekIso, $dias_semana)) {
+            if (in_array($date_agenda->data->dayOfWeekIso, $dias_semana)) {
                 $ids_agenda[] = $date_agenda->id;
             }
         }
@@ -677,7 +680,7 @@ class AgendaService
         $status = ($quantidade == 0) ? AgendaEnum::INDISPONIVEL : AgendaEnum::ATIVO;
 
         // Recupera o principal servico com a variacao mais cara
-        $servico = AgendaServico::with(['servicos' => function($query) {
+        $servico = AgendaServico::with(['servicos' => function ($query) {
             return $query->with(['variacaoServico' => function ($q) {
                 return $q->orderBy('percentual')->limit(1);
             }])->oldest()->limit(1);
@@ -693,15 +696,15 @@ class AgendaService
         $valor_venda = $net_variacao * $variacao_servico->markup;
 
         // Verifica se o servico possui corretagem de valor
-        if($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($valor_venda > 0)) {
+        if ($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($valor_venda > 0)) {
 
             // Verifica se a corretagem é em percentual
-            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
+            if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
                 $valor_venda += ($valor_venda / 100 * $servico->corretagem);
             }
 
             // Verifica se a corretagem é em valor fixo
-            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
+            if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
                 $valor_venda += $servico->corretagem;
             }
         }
@@ -806,7 +809,7 @@ class AgendaService
             ->where('agenda_servico_id', $agenda->id)->orderBy('data')->get();
 
         // Recupera o principal servico com a variacao mais cara
-        $servico = AgendaServico::with(['servicos' => function($query) {
+        $servico = AgendaServico::with(['servicos' => function ($query) {
             return $query->with(['variacaoServico' => function ($q) {
                 return $q->orderBy('destaque', 'ASC')->limit(1);
             }])->oldest()->limit(1);
@@ -822,15 +825,15 @@ class AgendaService
         $venda_variacao = $net_variacao * $variacao_servico->markup;
 
         // Verifica se o servico possui corretagem de valor
-        if($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
+        if ($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($venda_variacao > 0)) {
 
             // Verifica se a corretagem é em percentual
-            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
+            if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_PORCENTUAL) {
                 $venda_variacao += ($venda_variacao / 100 * $servico->corretagem);
             }
 
             // Verifica se a corretagem é em valor fixo
-            if($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
+            if ($servico->tipo_corretagem == ServicoEnum::CORRETAGEM_FIXA) {
                 $venda_variacao += $servico->corretagem;
             }
         }
@@ -838,13 +841,13 @@ class AgendaService
         // Monta o array com as datas para inserir no banco
         foreach ($period as $id => $date) {
             // Verifica se o dia da semana está selecionado
-            if(in_array($date->dayOfWeekIso, $dias_semana)) {
+            if (in_array($date->dayOfWeekIso, $dias_semana)) {
                 // Verifica se a data já está cadastrada
                 $has_data = $has_agenda->first(function ($data) use ($date) {
                     return ($data->data == $date);
                 });
                 // Caso não encontre a data
-                if(is_null($has_data)) {
+                if (is_null($has_data)) {
                     $rows[] = [
                         'agenda_servico_id' => $agenda->id,
                         'data' => $date->format('Y-m-d'),
