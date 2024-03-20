@@ -14,6 +14,10 @@ CANAL_VENDA_ID=
 
 Lista de mudanças, melhorias e correções de bugs.
 
+### *SNAPSHOT (20 de Setembro de 2024)*
+- Adicionado min_pax no model VariacaoServico
+- Adicionando o min_pax no retorno do array do AgendaService
+
 ### *SNAPSHOT (11 de Setembro de 2022)*
 - Adicionado integração com Parque Vila da Monica Gramado.
 - Adicionado integração com o Matria.
