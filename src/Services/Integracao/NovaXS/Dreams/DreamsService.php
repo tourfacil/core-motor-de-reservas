@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace TourFacil\Core\Services\Integracao\NovaXS\Dreams;
 
@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Support\Str;
 use TourFacil\Core\Enum\IntegracaoEnum;
 use TourFacil\Core\Models\ReservaPedido;
-use TourFacil\Core\Models\DreamsReservaPedido; 
+use TourFacil\Core\Models\DreamsReservaPedido;
 use Storage;
 
 /**
@@ -171,7 +171,7 @@ class DreamsService
                 // Percorre os tipos de pessoas disponiveis
                 foreach (self::TIPO_PESSOAS as $tipo_pessoa) {
 
-                    if(strripos($nome_servico, $tipo_pessoa)) {
+                    if (strripos($nome_servico, $tipo_pessoa) !== FALSE) {
                         // Deixa sempre como MELHOR IDADE
                         $tipo_pessoa = ($tipo_pessoa == self::SENIOR) ? self::MELHOR_IDADE : $tipo_pessoa;
                         // Deixa sempre como CRIANCA
@@ -212,7 +212,7 @@ class DreamsService
             // Variacao adquirida
             $nome_variacao = preg_replace("/(ç|Ç)/", "c", mb_strtolower($quantidade_reserva->variacaoServico->nome));
             $nome_variacao = str_replace('ê', 'e', $nome_variacao);
-            
+
             // Somente pessoas pagantes
             if($quantidade_reserva->valor_net > 0) {
 
@@ -305,7 +305,7 @@ class DreamsService
                         if($adultos->last() != null) {
                             $this->accessList[] = $this->createPeople($viajante, $adultos->last());
                         }
-                        
+
                     // Remove o ultimo item do array
                     $adultos->pop();
                     continue;
