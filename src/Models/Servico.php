@@ -1,4 +1,6 @@
-<?php namespace TourFacil\Core\Models;
+<?php
+
+namespace TourFacil\Core\Models;
 
 use TourFacil\Core\Models\FaqServico;
 use Carbon\Carbon;
@@ -219,11 +221,11 @@ class Servico extends Model
     public function getCategoriaAttribute()
     {
         // Categoria padrao
-        if($this->relationLoaded('categoria'))
+        if ($this->relationLoaded('categoria'))
             return $this->getRelation('categoria')[0];
 
         // Primeira categoria
-        if($this->relationLoaded('categorias'))
+        if ($this->relationLoaded('categorias'))
             return $this->getRelation('categorias')[0];
 
         return null;
@@ -293,7 +295,7 @@ class Servico extends Model
     public function setValorVendaAttribute($valor_venda)
     {
         // Caso esteja no formato BR
-        if(Str::contains($valor_venda, ',')) {
+        if (Str::contains($valor_venda, ',')) {
             $valor_venda = str_replace(",", ".", str_replace(".", "", $valor_venda));
         }
 
@@ -307,7 +309,7 @@ class Servico extends Model
     public function setCorretagemAttribute($corretagem)
     {
         // Caso seja falor fixo
-        if(Str::contains($corretagem, ',')) {
+        if (Str::contains($corretagem, ',')) {
             $corretagem = str_replace(",", ".", str_replace(".", "", $corretagem));
         }
 
@@ -319,12 +321,19 @@ class Servico extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function descontos() {
+    public function descontos()
+    {
         return $this->hasMany(Desconto::class);
     }
 
-    public function avaliacoes() {
+    public function avaliacoes()
+    {
         return $this->hasMany(AvaliacaoServico::class);
+    }
+
+    public function avaliacoesAprovadas()
+    {
+        return $this->hasMany(AvaliacaoServico::class)->where('status', 'APROVADO');
     }
 
     /**
@@ -333,28 +342,29 @@ class Servico extends Model
      *
      * @return mixed|null
      */
-    public function getDescontoAtivoAttribute() {
+    public function getDescontoAtivoAttribute()
+    {
 
         // Busca o dia de hoje
         $hoje = Carbon::now();
 
         // Busca todos os descontos ativos do serviço
         $descontos = $this->descontos()
-                          ->where('status', StatusDesconto::ATIVO)
-                          ->get();
+            ->where('status', StatusDesconto::ATIVO)
+            ->get();
 
         // Lista para guardar todos os descontos ativos para hoje
         $descontos_validos = [];
 
         // Percorre todos os descontos do produto
         foreach ($descontos as $desconto) {
-            if($hoje->between(Carbon::parse($desconto->inicio), Carbon::parse($desconto->final))) {
+            if ($hoje->between(Carbon::parse($desconto->inicio), Carbon::parse($desconto->final))) {
                 $descontos_validos[] = $desconto;
             }
         }
 
         // Caso não haja desconto ativado, retorna NULL
-        if(count($descontos_validos) == 0) {
+        if (count($descontos_validos) == 0) {
             return null;
         }
 
