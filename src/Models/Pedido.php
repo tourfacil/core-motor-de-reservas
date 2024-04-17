@@ -20,6 +20,7 @@ class Pedido extends Model
      */
     protected $fillable = [
         'cliente_id',
+        'cliente_email',
         'codigo',
         'canal_venda_id',
         'valor_total',

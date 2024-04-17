@@ -308,6 +308,7 @@ class PedidoService
         // Cria o pedido
         $pedido = Pedido::create([
             "cliente_id" => $cliente->id,
+            "cliente_email" => $cliente->email,
             "codigo" => $pedido_array['codigo_pedido'],
             "valor_total" => $pedido_array['valor_total'],
             "canal_venda_id" => $canal_venda_id,
@@ -443,6 +444,7 @@ class PedidoService
         // Cria o pedido
         $pedido = Pedido::create([
             "cliente_id" => $cliente->id,
+            "cliente_email" => $cliente->email,
             "codigo" => $pedido_array['codigo_pedido'],
             "valor_total" => DescontoPIXService::calcularValorPixDescontoSeAtivo($pedido_array['valor_total']),
             "canal_venda_id" => $canal_venda_id,
@@ -564,6 +566,7 @@ class PedidoService
         // Cria o pedido
         $pedido = Pedido::create([
             "cliente_id" => $cliente->id,
+            "cliente_email" => $cliente->email,
             "codigo" => $pedido_array['codigo_pedido'],
             "valor_total" => $pedido_array['valor_total'],
             "canal_venda_id" => $canal_venda_id,
