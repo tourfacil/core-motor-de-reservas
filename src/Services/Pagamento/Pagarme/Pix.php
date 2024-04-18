@@ -162,9 +162,9 @@ class Pix
         $codigo_auth_pagarme = '';
 
         if(env('APP_ENV') == 'production') {
-            $codigo_auth_pagarme = 'Basic c2tfYjJlMmJjNzNmMjFlNDEzNzk3YTgwOGM1MGIzNjc5MGY=';
+            $codigo_auth_pagarme = 'Basic c2tfYjJlMmJjNzNmMjFlNDEzNzk3YTgwOGM1MGIzNjc5MGY6';
         } else {
-            $codigo_auth_pagarme = 'Basic c2tfdGVzdF9mOGQwNGU4OTQ2MDA0MzRjYmM2OTY3NmI2MmQ3ZDBmOA==';
+            $codigo_auth_pagarme = 'Basic c2tfdGVzdF9mOGQwNGU4OTQ2MDA0MzRjYmM2OTY3NmI2MmQ3ZDBmODo=';
         }
 
         try {
@@ -219,9 +219,9 @@ class Pix
         $codigo_auth_pagarme = '';
 
         if(env('APP_ENV') == 'production') {
-            $codigo_auth_pagarme = 'Basic c2tfYjJlMmJjNzNmMjFlNDEzNzk3YTgwOGM1MGIzNjc5MGY=';
+            $codigo_auth_pagarme = 'Basic c2tfYjJlMmJjNzNmMjFlNDEzNzk3YTgwOGM1MGIzNjc5MGY6';
         } else {
-            $codigo_auth_pagarme = 'Basic c2tfdGVzdF9mOGQwNGU4OTQ2MDA0MzRjYmM2OTY3NmI2MmQ3ZDBmOA==';
+            $codigo_auth_pagarme = 'Basic c2tfdGVzdF9mOGQwNGU4OTQ2MDA0MzRjYmM2OTY3NmI2MmQ3ZDBmODo=';
         }
 
         try {
