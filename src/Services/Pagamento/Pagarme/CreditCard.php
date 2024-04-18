@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace TourFacil\Core\Services\Pagamento\Pagarme;
 
@@ -94,7 +94,7 @@ class CreditCard
                 'amount'      => $this->toCent($reserva['valor_total']),
                 'description' => $reserva['servico'],
                 'quantity'    => 1,
-                'code'        => $reserva['servico_id'], 
+                'code'        => $reserva['servico_id'],
             ];
         }
 
@@ -103,7 +103,7 @@ class CreditCard
                 'amount'      => $this->toCent($juros),
                 'description' => 'Juros',
                 'quantity'    => 1,
-                'code'        => 0, 
+                'code'        => 0,
             ];
         }
     }
@@ -166,7 +166,7 @@ class CreditCard
      */
     public function setBillingAdress(String $rua, String $numero, String $bairro, String $cidade, String $estado, String $cep) {
 
-        $billing_address = [ 
+        $billing_address = [
             'line_1' => "$numero, $rua, $bairro",
             'line_2' => "$numero, $rua, $bairro, $estado",
             'zip_code' => $this->onlyNumbers($cep),
@@ -267,9 +267,9 @@ class CreditCard
         $codigo_auth_pagarme = '';
 
         if(env('APP_ENV') == 'production') {
-            $codigo_auth_pagarme = 'Basic c2tfTnhaVkVNMlZ1amg0OU1QWTo=';
+            $codigo_auth_pagarme = 'Basic c2tfYjJlMmJjNzNmMjFlNDEzNzk3YTgwOGM1MGIzNjc5MGY6';
         } else {
-            $codigo_auth_pagarme = 'Basic c2tfdGVzdF83WExnWkc5SWdobGtWckpROg==';
+            $codigo_auth_pagarme = 'Basic c2tfdGVzdF9mOGQwNGU4OTQ2MDA0MzRjYmM2OTY3NmI2MmQ3ZDBmODo=';
         }
 
         try {
