@@ -115,7 +115,7 @@ class PedidoService
                 }
 
                 // Calcula o valor de venda da variacao
-                $valor_venda_variacao = ( $valor_net_variacao * $variacao_servico->markup);
+                $valor_venda_variacao = ($valor_net_variacao * $variacao_servico->markup);
 
                 // Verifica se o servico possui corretagem de valor
                 if ($servico->tipo_corretagem != ServicoEnum::SEM_CORRETAGEM && ($valor_venda_variacao > 0)) {
@@ -170,19 +170,19 @@ class PedidoService
             $cupom = null;
 
             // Caso tenha um cupom ativo. Aplica-o
-            if(session()->exists('cupom_desconto')) {
+            if (session()->exists('cupom_desconto')) {
 
                 // Busca o cupom atualizado pelo banco de dados
                 $cupom = CupomDesconto::find(session()->get('cupom_desconto')->id);
 
                 // Caso o cupom seja diferente de NULL, aplica o desconto
-                if($cupom != null) {
+                if ($cupom != null) {
 
                     // Caso seja cupom de serviço especifico. Verifica se é o serviço de fato
-                    if($cupom->servico_id == null || $cupom->servico_id == $servico->id) {
+                    if ($cupom->servico_id == null || $cupom->servico_id == $servico->id) {
 
                         $servicos_count = 0;
-                        if(is_array($servicos)) {
+                        if (is_array($servicos)) {
                             $servicos_count = count($servicos);
                         } else {
                             $servicos_count = $servicos->count();
@@ -192,15 +192,17 @@ class PedidoService
                         $total_net_reserva = CupomDescontoService::aplicarDescontoValorNet($cupom, $total_net_reserva, $servicos_count);
                         self::$pedido['cupom_desconto_id'] = $cupom->id ?? null;
                         self::$pedido['cupom'] = $cupom;
-
-
-
                     }
                 }
             }
 
             // Soma ao valor total do pedido
             self::$pedido['valor_total'] += (float) number_format($total_reserva, 2, ".", "");
+
+            // Converte data para o formato correto caso for string
+            if (is_string($data_servico->data)) {
+                $data_servico->data = Carbon::parse($data_servico->data);
+            }
 
             // Dados da reserva
             self::$pedido['reservas'][] = [
@@ -324,7 +326,7 @@ class PedidoService
         ]);
 
         // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
-        if(array_key_exists('cupom', $pedido_array) && $aprovado == true) {
+        if (array_key_exists('cupom', $pedido_array) && $aprovado == true) {
             $pedido_array['cupom']->vezes_utilizado++;
             $pedido_array['cupom']->save();
 
@@ -344,7 +346,7 @@ class PedidoService
             $afiliado_session = session()->get('afiliado');
             $afiliado_reserva = null;
 
-            if($afiliado_session != null) {
+            if ($afiliado_session != null) {
                 $afiliado_reserva = $afiliado_session->id;
             }
 
@@ -377,7 +379,7 @@ class PedidoService
                 ]);
             }
 
-            if($aprovado) {
+            if ($aprovado) {
                 // Diminui a quantidade da disponibilidade na agenda
                 $agenda_servico = AgendaDataServico::find($reserva_carrinho["agenda_data_servico_id"]);
 
@@ -428,7 +430,7 @@ class PedidoService
         return $pedido;
     }
 
-     /**
+    /**
      * Gera um pedido pelo PIX
      *
      * @param $pedido_array
@@ -461,7 +463,7 @@ class PedidoService
         ]);
 
         // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
-        if(array_key_exists('cupom', $pedido_array)) {
+        if (array_key_exists('cupom', $pedido_array)) {
             $pedido_array['cupom']->vezes_utilizado++;
             $pedido_array['cupom']->save();
 
@@ -481,7 +483,7 @@ class PedidoService
             $afiliado_session = session()->get('afiliado');
             $afiliado_reserva = null;
 
-            if($afiliado_session != null) {
+            if ($afiliado_session != null) {
                 $afiliado_reserva = $afiliado_session->id;
             }
 
@@ -562,7 +564,8 @@ class PedidoService
         return $pedido;
     }
 
-    public static function gerarPedidoInterno($pedido_array, $cliente, $canal_venda_id, $origem, $metodo_pagamento, $pagamento) {
+    public static function gerarPedidoInterno($pedido_array, $cliente, $canal_venda_id, $origem, $metodo_pagamento, $pagamento)
+    {
         // Cria o pedido
         $pedido = Pedido::create([
             "cliente_id" => $cliente->id,
@@ -582,7 +585,7 @@ class PedidoService
         ]);
 
         // Caso for utilizado um CUPOM de desconto. Aumenta o número de vezes utilizado.
-        if(array_key_exists('cupom', $pedido_array)) {
+        if (array_key_exists('cupom', $pedido_array)) {
             $pedido_array['cupom']->vezes_utilizado++;
             $pedido_array['cupom']->save();
 
@@ -681,7 +684,8 @@ class PedidoService
      * A conferencia deve ser feita anteriormente, pois o método assume que ja tenha sido feita verificação anterior
      *
      */
-    public static function setStatusPedidoPago(Pedido $pedido) {
+    public static function setStatusPedidoPago(Pedido $pedido)
+    {
 
         // Cria um array com os novos status que o pedido irá receber
         $novo_status_pedido = [
@@ -696,7 +700,7 @@ class PedidoService
         $reservas = $pedido->reservas;
 
         // Roda todos as reservas do pedido
-        foreach($reservas as $reserva) {
+        foreach ($reservas as $reserva) {
 
             // Seta a reserva atual como ativa
             $reserva->update(['status' => StatusReservaEnum::ATIVA]);
@@ -706,7 +710,7 @@ class PedidoService
         // Caso não esteja, ele não envia os e-mails
         // Caso esteja, ele envia os e-mails para cliente e fornecedor
         // Caso for encontrada uma reserva não finalizada ele marca ela com uma FLAG
-        if(FinalizacaoService::isPedidoFinalizado($pedido)) {
+        if (FinalizacaoService::isPedidoFinalizado($pedido)) {
             // Dispara o job de nova compra
             NovaVendaJob::dispatch($pedido);
         }
@@ -717,7 +721,8 @@ class PedidoService
      * Também pega todas as reservas do pedido e coloca o status como Expirado
      * Também libera toda a disponibilidade que estava alocada nas reservas deste pedido
      */
-    public static function setStatusPedidoExpirado(Pedido $pedido) {
+    public static function setStatusPedidoExpirado(Pedido $pedido)
+    {
 
         // Cria um array com os novos status que o pedido irá receber
         $novo_status_pedido = [
@@ -732,7 +737,7 @@ class PedidoService
         $reservas = $pedido->reservas;
 
         // Roda todos as reservas do pedido
-        foreach($reservas as $reserva) {
+        foreach ($reservas as $reserva) {
 
             // Seta a reserva atual como Expirado
             $reserva->update(['status' => StatusReservaEnum::EXPIRADO]);
