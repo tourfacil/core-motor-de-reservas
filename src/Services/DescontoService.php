@@ -19,21 +19,21 @@ abstract class DescontoService
      * @param $valor_original
      * @return float|int|mixed
      */
-    public static function aplicarDescontoValor($desconto, $valor_original, $data, $net = false) {
+    public static function aplicarDescontoValor($desconto, $valor_original, $data, $net = false)
+    {
 
         // Caso não tenha desconto ativo ele retorna o mesmo valor
-        if($desconto == null || self::isDataEntreUtilizacaoValida($desconto, $data) == false) {
+        if ($desconto == null || self::isDataEntreUtilizacaoValida($desconto, $data) == false) {
 
             return $valor_original;
-
         } else {
 
             // Caso o desconto seja aplicado de forma percentual
-            if($desconto->tipo_desconto_valor == TipoDescontoValor::PERCENTUAL) {
+            if ($desconto->tipo_desconto_valor == TipoDescontoValor::PERCENTUAL) {
 
                 $desconto_valor = 0;
 
-                if($net == false) {
+                if ($net == false) {
                     $desconto_valor = $desconto->desconto;
                 } else {
                     $desconto_valor = $desconto->desconto_net;
@@ -44,18 +44,18 @@ abstract class DescontoService
 
                 $valor_final = $valor_original - $valor_desconto;
 
-                if($valor_final < 0) {
+                if ($valor_final < 0) {
                     $valor_final = 0;
                 }
 
                 return $valor_final;
 
-            // Caso o desconto seja aplciado de forma fixa. Exemplo (Desconto de R$10,00)
+                // Caso o desconto seja aplciado de forma fixa. Exemplo (Desconto de R$10,00)
             } else if ($desconto->tipo_desconto_valor == TipoDescontoValor::FIXO) {
 
                 $desconto_valor = 0;
 
-                if($net == false) {
+                if ($net == false) {
                     $desconto_valor = $desconto->desconto;
                 } else {
                     $desconto_valor = $desconto->desconto_net;
@@ -63,13 +63,12 @@ abstract class DescontoService
 
                 $valor_final = $valor_original - $desconto_valor;
 
-                if($valor_final < 0) {
+                if ($valor_final < 0) {
                     $valor_final = 0;
                 }
 
                 // Retorna o novo valor já com o desconto fixo aplicado
                 return $valor_final;
-
             } else {
                 // Para evitar BUGS, caso o valor do TipoDescontoValor for inválido... Ele retorna o valor original
                 return $valor_original;
@@ -82,20 +81,21 @@ abstract class DescontoService
      * @param $valor
      * @return float|int|mixed|void
      */
-    public static function aplicarDescontoValorNet($desconto, $valor, $data) {
+    public static function aplicarDescontoValorNet($desconto, $valor, $data)
+    {
 
         // Caso não tenha desconto ativo ele retorna o mesmo valor
-        if($desconto == null) {
+        if ($desconto == null) {
             return $valor;
         }
 
         // Caso o desconto seja também para o fornecedor ele calcula o desconto e retorna
-        if($desconto->tipo_desconto_fornecedor == TipoDesconto::NET) {
+        if ($desconto->tipo_desconto_fornecedor == TipoDesconto::NET) {
 
             return self::aplicarDescontoValor($desconto, $valor, $data, true);
 
-        // Caso o desconto seja somente no venda ele retorna o net original
-        } else if($desconto->tipo_desconto_fornecedor == TipoDesconto::VENDA) {
+            // Caso o desconto seja somente no venda ele retorna o net original
+        } else if ($desconto->tipo_desconto_fornecedor == TipoDesconto::VENDA) {
 
             return $valor;
         }
@@ -107,7 +107,7 @@ abstract class DescontoService
         $inicio_utilizacao = $desconto->inicio_utilizacao;
         $final_utilizacao = $desconto->final_utilizacao;
 
-        if($data->data->between($inicio_utilizacao, $final_utilizacao)) {
+        if ($data->data->between($inicio_utilizacao, $final_utilizacao)) {
             return true;
         }
 
@@ -120,7 +120,7 @@ abstract class DescontoService
         $inicio = $desconto->inicio;
         $final = $desconto->final;
 
-        if($data->data->between($inicio, $final)) {
+        if ($data->data->between($inicio, $final)) {
             return true;
         }
 
@@ -131,25 +131,30 @@ abstract class DescontoService
     {
         $carrinho = carrinho()->all();
 
-        if($carrinho->count() == 0) {
+        if ($carrinho->count() == 0) {
             return false;
         }
 
         $servicos_com_desconto = [];
 
-        foreach($carrinho as $servico_carrinho) {
+        foreach ($carrinho as $servico_carrinho) {
 
             $servico = Servico::find($servico_carrinho['gtin']);
 
             $desconto = $servico->descontoAtivo;
 
-            if($desconto == null) {
+            if ($desconto == null) {
                 continue;
             }
 
             $agenda = AgendaDataServico::find($servico_carrinho['agenda_selecionada']['data_servico_id']);
 
-            if(DescontoService::isDataEntreUtilizacaoValida($desconto, $agenda)){
+            // Verificar se a data é uma string e convertê-la para um objeto Carbon
+            if (is_string($agenda->data)) {
+                $agenda->data = Carbon::parse($agenda->data);
+            }
+
+            if (DescontoService::isDataEntreUtilizacaoValida($desconto, $agenda)) {
                 $servicos_com_desconto[] = [
                     'id' => $servico->id,
                     'nome' => $servico->nome,
@@ -157,7 +162,7 @@ abstract class DescontoService
             }
         }
 
-        if(count($servicos_com_desconto) == 0) {
+        if (count($servicos_com_desconto) == 0) {
             return false;
         }
 
@@ -166,7 +171,7 @@ abstract class DescontoService
 
     public static function getStatusAtual($desconto)
     {
-        if($desconto->status == StatusDesconto::INATIVO) {
+        if ($desconto->status == StatusDesconto::INATIVO) {
             return [
                 'texto' => 'Inativo',
                 'cor' => 'danger',
@@ -176,14 +181,14 @@ abstract class DescontoService
         $data = new AgendaDataServico();
         $data->data = Carbon::now();
 
-        if(self::isDataEntreUtilizacaoValida($desconto, $data) && self::isDataEntreVendaValida($desconto, $data)) {
+        if (self::isDataEntreUtilizacaoValida($desconto, $data) && self::isDataEntreVendaValida($desconto, $data)) {
             return [
                 'texto' => 'Ativo agora',
                 'cor' => 'success',
             ];
         }
 
-        if($data->data->isAfter($desconto->final)) {
+        if ($data->data->isAfter($desconto->final)) {
             return [
                 'texto' => 'Expirado',
                 'cor' => 'info',
