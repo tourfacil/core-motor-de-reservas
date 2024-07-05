@@ -29,10 +29,11 @@ class ValorExcecaoDiaService
      * @param $valor_atual
      * @return int|mixed
      */
-    public static function aplicarValorRegraAntecedencia($regra, $data_utilizacao, $valor_atual) {
+    public static function aplicarValorRegraAntecedencia($regra, $data_utilizacao, $valor_atual)
+    {
 
         // Retorna o valor original caso a regra seja null
-        if($regra == null) {
+        if ($regra == null) {
             return $valor_atual;
         }
 
@@ -40,17 +41,20 @@ class ValorExcecaoDiaService
         $regras = $regra->regras;
         $data_hoje = Carbon::today();
 
-        // Caso o dia esteja dentro da antecedencia. Faz o calculo e retorna, se não, retorna o valor original
-        if($data_hoje->addDays($regras['antecedencia'])->isAfter($data_utilizacao)) {
+        // Verifica se 'antecedencia' é numérico
+        if (isset($regras['antecedencia']) && is_numeric($regras['antecedencia'])) {
+            $antecedencia = (int) $regras['antecedencia']; // Converte para int
 
-            return self::calcularValor($regra, $valor_atual);
-
-        } else {
-
-            return $valor_atual;
-
+            // Caso o dia esteja dentro da antecedencia. Faz o calculo e retorna, se não, retorna o valor original
+            if ($data_hoje->addDays($antecedencia)->isAfter($data_utilizacao)) {
+                return self::calcularValor($regra, $valor_atual);
+            }
         }
+
+        // Retorna o valor original se 'antecedencia' não for numérico ou se a condição acima não for atendida
+        return $valor_atual;
     }
+
 
     /**
      * Método que calcula as antecedencias de forma automatica para os dados `events` método disponibilidadeSite() da agenda
@@ -61,10 +65,11 @@ class ValorExcecaoDiaService
      * @param array $datas
      * @return array
      */
-    public static function aplicarValorRegraAntecedenciaArrayEvents($regra, Array $datas) {
+    public static function aplicarValorRegraAntecedenciaArrayEvents($regra, array $datas)
+    {
 
         // Caso a regra seja null, só retorna o array
-        if($regra == null) {
+        if ($regra == null) {
             return $datas;
         }
 
@@ -72,7 +77,7 @@ class ValorExcecaoDiaService
         $regras = $regra->regras;
 
         // Faz um loop no número de dias de antecedencia que a regra preve e não em toda a agenda, por otimização...
-        for($i = 0; $i < $regras['antecedencia']; $i++) {
+        for ($i = 0; $i < $regras['antecedencia']; $i++) {
 
             // Atualiza os valores da agenda
             $data_utilizacao = Carbon::parse($datas[$i]['date']);
@@ -93,10 +98,11 @@ class ValorExcecaoDiaService
      * @param array $datas
      * @return array
      */
-    public static function aplicarValorRegraAntecedenciaArrayDisponibilidade($regra, Array $datas) {
+    public static function aplicarValorRegraAntecedenciaArrayDisponibilidade($regra, array $datas)
+    {
 
         // Caso a regra seja null, retorna o array original
-        if($regra == null) {
+        if ($regra == null) {
             return $datas;
         }
 
@@ -104,7 +110,7 @@ class ValorExcecaoDiaService
         $regras = $regra->regras;
 
         // Roda os primeiros itens da agenda de acordo com a regra. Por otimização, não roda toda a agenda, só o necessário
-        for($i = 0; $i < $regras['antecedencia']; $i++) {
+        for ($i = 0; $i < $regras['antecedencia']; $i++) {
 
             // Calcula os valores
             $data_utilizacao = Carbon::parse($datas[$i]['data']);
@@ -113,7 +119,7 @@ class ValorExcecaoDiaService
 
             // Calcula os valores das variações
             $variacoes = $datas[$i]['variacoes'];
-            foreach($variacoes as $key => $variacao) {
+            foreach ($variacoes as $key => $variacao) {
 
                 $variacao['valor_venda'] = self::aplicarValorRegraAntecedencia($regra, $data_utilizacao, $variacao['valor_venda']);
                 $variacao['valor_venda_brl'] = formataValor(self::aplicarValorRegraAntecedencia($regra, $data_utilizacao, floatVal($variacao['valor_venda_brl'])));
@@ -132,13 +138,14 @@ class ValorExcecaoDiaService
      * @param $valor
      * @return int|mixed
      */
-    private static function calcularValor($regra, $valor) {
+    private static function calcularValor($regra, $valor)
+    {
 
-        if($regra->regras['tipo_valor_servico'] == self::$VALOR_FIXO) {
+        if ($regra->regras['tipo_valor_servico'] == self::$VALOR_FIXO) {
 
             return self::evitarValorMenorQueUm($valor + $regra->regras['valor']);
 
-        } else if($regra->regras['tipo_valor_servico'] == self::$VALOR_PERCENTUAL) {
+        } else if ($regra->regras['tipo_valor_servico'] == self::$VALOR_PERCENTUAL) {
 
             return self::evitarValorMenorQueUm($valor + $regra->regras['valor']);
 
@@ -153,13 +160,14 @@ class ValorExcecaoDiaService
      * @param Servico $servico
      * @return mixed
      */
-    public static function getRegraAtecedenciaServicoAtiva(Servico $servico) {
+    public static function getRegraAtecedenciaServicoAtiva(Servico $servico)
+    {
         return RegraServico::where('tipo_regra', RegraServicoEnum::VALOR_EXCECAO_DIA)
-                     ->where('servico_id', $servico->id)
-                     ->where('status', StatusEnum::ATIVA)
-                     ->orderBy('prioridade')
-                     ->get()
-                     ->first();
+            ->where('servico_id', $servico->id)
+            ->where('status', StatusEnum::ATIVA)
+            ->orderBy('prioridade')
+            ->get()
+            ->first();
     }
 
     /**
@@ -168,9 +176,10 @@ class ValorExcecaoDiaService
      * @param $valor
      * @return int|mixed
      */
-    private static function evitarValorMenorQueUm($valor) {
+    private static function evitarValorMenorQueUm($valor)
+    {
 
-        if($valor > 1) {
+        if ($valor > 1) {
             return $valor;
         } else {
             return 1;
