@@ -125,7 +125,7 @@ class Cliente extends Authenticatable
             // Recupera a ano informado
             $year = (string) $birthdate->year;
             // Coloca 19 e concatena os ultimos dois anos
-            $birthdate->year('19' . $year{2} . $year{3});
+            $birthdate->year('19' . $year[2] . $year[3]);
         }
 
         return $this->attributes['nascimento'] = $birthdate->format('Y-m-d');
@@ -140,7 +140,7 @@ class Cliente extends Authenticatable
     {
         return ($this->attributes['deleted_at'] == null);
     }
-    
+
     public function endereco() {
         return $this->hasOne(EnderecoCliente::class);
     }
